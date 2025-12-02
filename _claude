@@ -2,277 +2,126 @@
 
 # Zsh completion script for Claude Code CLI
 # https://github.com/anthropics/claude-code
-#
-# This script provides tab completion for the claude command.
-# Minimal and focused - no aliases, no wrapper functions.
 
-# Model name completions
-_claude_models() {
-  local models=(
-    'sonnet:Claude Sonnet (latest)'
-    'opus:Claude Opus (latest)'
-    'haiku:Claude Haiku (latest)'
-    'claude-sonnet-4-5-20250929:Claude Sonnet 4.5'
-    'claude-opus-4-5-20251101:Claude Opus 4.5'
-  )
-  _describe -t models 'model' models
-}
+local curcontext="$curcontext" state line
+typeset -A opt_args
 
-# Output format completions
-_claude_output_formats() {
-  local formats=(
-    'text:Plain text output (default)'
-    'json:JSON output (single result)'
-    'stream-json:Streaming JSON output'
-  )
-  _describe -t formats 'output format' formats
-}
+local -a commands
+commands=(
+  'mcp:Configure and manage MCP servers'
+  'plugin:Manage Claude Code plugins'
+  'migrate-installer:Migrate from npm to local installation'
+  'setup-token:Set up authentication token'
+  'doctor:Check auto-updater health'
+  'update:Check for and install updates'
+  'install:Install Claude Code native build'
+)
 
-# Input format completions
-_claude_input_formats() {
-  local formats=(
-    'text:Plain text input (default)'
-    'stream-json:Streaming JSON input'
-  )
-  _describe -t formats 'input format' formats
-}
+local -a mcp_commands
+mcp_commands=(
+  'serve:Start the Claude Code MCP server'
+  'add:Add an MCP server'
+  'remove:Remove an MCP server'
+  'list:List configured MCP servers'
+  'get:Get details about an MCP server'
+  'add-json:Add an MCP server with JSON config'
+  'add-from-claude-desktop:Import MCP servers from Claude Desktop'
+  'reset-project-choices:Reset approved/rejected project servers'
+)
 
-# Permission mode completions
-_claude_permission_modes() {
-  local modes=(
-    'default:Default permission mode'
-    'acceptEdits:Accept all edits'
-    'bypassPermissions:Bypass all permissions'
-    'dontAsk:Do not ask for permissions'
-    'plan:Plan mode'
-  )
-  _describe -t modes 'permission mode' modes
-}
+local -a plugin_commands
+plugin_commands=(
+  'validate:Validate a plugin or manifest'
+  'marketplace:Manage marketplaces'
+  'install:Install a plugin'
+  'uninstall:Uninstall a plugin'
+  'enable:Enable a disabled plugin'
+  'disable:Disable an enabled plugin'
+)
 
-# Tool name completions
-_claude_tools() {
-  local tools=(
-    'Bash:Execute shell commands'
-    'Read:Read files'
-    'Write:Write files'
-    'Edit:Edit files'
-    'Grep:Search file contents'
-    'Glob:Find files by pattern'
-    'WebSearch:Search the web'
-    'WebFetch:Fetch web content'
-    'Task:Launch subagents'
-    'TodoWrite:Manage todo list'
-    'NotebookEdit:Edit Jupyter notebooks'
-  )
-  _describe -t tools 'tool' tools
-}
-
-# MCP transport types
-_claude_mcp_transports() {
-  local transports=(
-    'stdio:Standard I/O transport'
-    'http:HTTP transport'
-    'sse:Server-Sent Events transport'
-  )
-  _describe -t transports 'transport' transports
-}
-
-# MCP subcommand completions
-_claude_mcp() {
-  local -a mcp_commands
-  mcp_commands=(
-    'serve:Start the Claude Code MCP server'
-    'add:Add an MCP server'
-    'remove:Remove an MCP server'
-    'list:List configured MCP servers'
-    'get:Get details about an MCP server'
-    'add-json:Add an MCP server with JSON config'
-    'add-from-claude-desktop:Import MCP servers from Claude Desktop'
-    'reset-project-choices:Reset approved/rejected project servers'
-  )
-
-  local curcontext="$curcontext" state line
-  _arguments -C \
-    '1: :->command' \
-    '*:: :->args'
-
-  case $state in
-    command)
-      _describe -t commands 'mcp command' mcp_commands
-      ;;
-    args)
-      case $line[1] in
-        serve)
-          _arguments \
-            '(-h --help)'{-h,--help}'[Display help]'
-          ;;
+case $words[1] in
+  mcp)
+    if (( CURRENT == 2 )); then
+      _describe 'mcp command' mcp_commands
+    else
+      case $words[2] in
         add)
           _arguments \
-            '(-s --scope)'{-s,--scope}'[Scope (user or project)]:scope:(user project)' \
-            '(-t --transport)'{-t,--transport}'[Transport type]:transport:_claude_mcp_transports' \
+            '(-s --scope)'{-s,--scope}'[Scope]:scope:(user project)' \
+            '(-t --transport)'{-t,--transport}'[Transport]:(stdio http sse)' \
             '(-e --env)'{-e,--env}'[Environment variables]:env:' \
-            '(-h --help)'{-h,--help}'[Display help]' \
-            '1:name:' \
-            '2:command or URL:_files' \
-            '*:args:'
+            '*:args:_files'
           ;;
         remove)
           _arguments \
-            '(-s --scope)'{-s,--scope}'[Scope (user or project)]:scope:(user project)' \
-            '(-h --help)'{-h,--help}'[Display help]' \
-            '1:name:'
+            '(-s --scope)'{-s,--scope}'[Scope]:scope:(user project)' \
+            '*:name:'
           ;;
-        get)
-          _arguments \
-            '1:name:'
-          ;;
-        add-json)
-          _arguments \
-            '(-s --scope)'{-s,--scope}'[Scope (user or project)]:scope:(user project)' \
-            '(-h --help)'{-h,--help}'[Display help]' \
-            '1:name:' \
-            '2:json:'
-          ;;
-        add-from-claude-desktop)
-          _arguments \
-            '(-s --scope)'{-s,--scope}'[Scope (user or project)]:scope:(user project)' \
-            '(-h --help)'{-h,--help}'[Display help]'
-          ;;
-        list|reset-project-choices)
-          _arguments \
-            '(-h --help)'{-h,--help}'[Display help]'
+        *)
+          _message 'no more arguments'
           ;;
       esac
-      ;;
-  esac
-}
-
-# Plugin subcommand completions
-_claude_plugin() {
-  local -a plugin_commands
-  plugin_commands=(
-    'validate:Validate a plugin or manifest'
-    'marketplace:Manage marketplaces'
-    'install:Install a plugin'
-    'uninstall:Uninstall a plugin'
-    'enable:Enable a disabled plugin'
-    'disable:Disable an enabled plugin'
-  )
-
-  local curcontext="$curcontext" state line
-  _arguments -C \
-    '1: :->command' \
-    '*:: :->args'
-
-  case $state in
-    command)
-      _describe -t commands 'plugin command' plugin_commands
-      ;;
-    args)
-      case $line[1] in
+    fi
+    return
+    ;;
+  plugin)
+    if (( CURRENT == 2 )); then
+      _describe 'plugin command' plugin_commands
+    else
+      case $words[2] in
         validate)
-          _arguments \
-            '1:path:_files'
+          _files
           ;;
-        install|uninstall|enable|disable)
-          _arguments \
-            '1:plugin:'
-          ;;
-        marketplace)
-          _arguments \
-            '(-h --help)'{-h,--help}'[Display help]'
+        *)
+          _message 'plugin name'
           ;;
       esac
-      ;;
-  esac
-}
+    fi
+    return
+    ;;
+  install)
+    _arguments \
+      '--force[Force installation]' \
+      '1:target:(stable latest)'
+    return
+    ;;
+  migrate-installer|setup-token|doctor|update)
+    _message 'no arguments'
+    return
+    ;;
+esac
 
-# Install subcommand completions
-_claude_install() {
-  _arguments \
-    '--force[Force installation even if already installed]' \
-    '(-h --help)'{-h,--help}'[Display help]' \
-    '1:target:(stable latest)'
-}
+_arguments -s \
+  '(-d --debug)'{-d,--debug}'[Enable debug mode]' \
+  '--verbose[Verbose mode]' \
+  '(-p --print)'{-p,--print}'[Print and exit]' \
+  '--output-format[Output format]:(text json stream-json)' \
+  '--input-format[Input format]:(text stream-json)' \
+  '--model[Model]:(sonnet opus haiku)' \
+  '--fallback-model[Fallback model]:(sonnet opus haiku)' \
+  '--permission-mode[Permission mode]:(default acceptEdits bypassPermissions dontAsk plan)' \
+  '(-c --continue)'{-c,--continue}'[Continue conversation]' \
+  '(-r --resume)'{-r,--resume}'[Resume conversation]' \
+  '--fork-session[Fork session]' \
+  '--settings[Settings file]:file:_files' \
+  '*--add-dir[Add directory]:dir:_files -/' \
+  '*--mcp-config[MCP config]:file:_files' \
+  '--system-prompt[System prompt]:prompt:' \
+  '--append-system-prompt[Append system prompt]:prompt:' \
+  '--allowed-tools[Allowed tools]:(Bash Read Write Edit Grep Glob WebSearch WebFetch Task)' \
+  '--disallowed-tools[Disallowed tools]:(Bash Read Write Edit Grep Glob WebSearch WebFetch Task)' \
+  '--tools[Tools]:(Bash Read Write Edit Grep Glob WebSearch WebFetch Task)' \
+  '*--plugin-dir[Plugin directory]:dir:_files -/' \
+  '--dangerously-skip-permissions[Skip permissions]' \
+  '--ide[Connect to IDE]' \
+  '--session-id[Session ID]:uuid:' \
+  '--agents[Agents JSON]:json:' \
+  '--json-schema[JSON schema]:schema:' \
+  '(-v --version)'{-v,--version}'[Show version]' \
+  '(-h --help)'{-h,--help}'[Show help]' \
+  '1:command:->cmd' \
+  '*:prompt:'
 
-# Main completion function
-_claude() {
-  local curcontext="$curcontext" state line
-  typeset -A opt_args
-
-  local -a commands
-  commands=(
-    'mcp:Configure and manage MCP servers'
-    'plugin:Manage Claude Code plugins'
-    'migrate-installer:Migrate from npm to local installation'
-    'setup-token:Set up authentication token'
-    'doctor:Check auto-updater health'
-    'update:Check for and install updates'
-    'install:Install Claude Code native build'
-  )
-
-  _arguments -C \
-    '(-d --debug)'{-d,--debug}'[Enable debug mode with optional filter]:filter:' \
-    '--verbose[Override verbose mode setting]' \
-    '(-p --print)'{-p,--print}'[Print response and exit]' \
-    '--output-format[Output format (with --print)]:format:_claude_output_formats' \
-    '--json-schema[JSON Schema for validation]:schema:' \
-    '--include-partial-messages[Include partial messages (with stream-json)]' \
-    '--input-format[Input format (with --print)]:format:_claude_input_formats' \
-    '--dangerously-skip-permissions[Bypass all permission checks]' \
-    '--allow-dangerously-skip-permissions[Enable bypass option]' \
-    '--replay-user-messages[Re-emit user messages on stdout]' \
-    '--allowedTools[Tools to allow]:tools:_claude_tools' \
-    '--allowed-tools[Tools to allow]:tools:_claude_tools' \
-    '--tools[Available tools]:tools:_claude_tools' \
-    '--disallowedTools[Tools to deny]:tools:_claude_tools' \
-    '--disallowed-tools[Tools to deny]:tools:_claude_tools' \
-    '--mcp-config[Load MCP servers from files]:config:_files' \
-    '--system-prompt[System prompt]:prompt:' \
-    '--append-system-prompt[Append to system prompt]:prompt:' \
-    '--permission-mode[Permission mode]:mode:_claude_permission_modes' \
-    '(-c --continue)'{-c,--continue}'[Continue most recent conversation]' \
-    '(-r --resume)'{-r,--resume}'[Resume a conversation]:session:' \
-    '--fork-session[Create new session ID when resuming]' \
-    '--model[Model for session]:model:_claude_models' \
-    '--fallback-model[Fallback model]:model:_claude_models' \
-    '--settings[Settings file or JSON]:settings:_files' \
-    '--add-dir[Additional directories]:dir:_files -/' \
-    '--ide[Connect to IDE on startup]' \
-    '--strict-mcp-config[Only use MCP from --mcp-config]' \
-    '--session-id[Specific session ID]:uuid:' \
-    '--agents[Custom agents JSON]:json:' \
-    '--setting-sources[Setting sources]:sources:(user project local)' \
-    '--plugin-dir[Plugin directories]:dir:_files -/' \
-    '(-v --version)'{-v,--version}'[Output version number]' \
-    '(-h --help)'{-h,--help}'[Display help]' \
-    '1: :->cmd_or_prompt' \
-    '*:: :->args'
-
-  case $state in
-    cmd_or_prompt)
-      _alternative \
-        'commands:command:_describe -t commands command commands' \
-        'prompts:prompt:'
-      ;;
-    args)
-      case $line[1] in
-        mcp)
-          _claude_mcp
-          ;;
-        plugin)
-          _claude_plugin
-          ;;
-        install)
-          _claude_install
-          ;;
-        migrate-installer|setup-token|doctor|update)
-          _arguments \
-            '(-h --help)'{-h,--help}'[Display help]'
-          ;;
-      esac
-      ;;
-  esac
-}
-
-_claude "$@"
+if [[ $state == cmd ]]; then
+  _describe 'command' commands
+fi
