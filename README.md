@@ -21,7 +21,7 @@ Minimal zsh completion plugin for [Claude Code CLI](https://github.com/anthropic
 ### Oh My Zsh
 
 ```bash
-git clone https://github.com/anthropics/zsh-claudecode-completion.git \
+git clone https://github.com/wbingli/zsh-claudecode-completion.git \
   ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-claudecode-completion
 ```
 
@@ -42,7 +42,7 @@ exec zsh
 Clone the repository:
 
 ```bash
-git clone https://github.com/anthropics/zsh-claudecode-completion.git
+git clone https://github.com/wbingli/zsh-claudecode-completion.git
 ```
 
 Add the directory to your `fpath` in `~/.zshrc`:
