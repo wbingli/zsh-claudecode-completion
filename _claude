@@ -27,6 +27,7 @@ mcp_commands=(
   'add-json:Add an MCP server with JSON config'
   'add-from-claude-desktop:Import MCP servers from Claude Desktop'
   'reset-project-choices:Reset approved/rejected project servers'
+  'help:Display help for command'
 )
 
 local -a plugin_commands
@@ -37,6 +38,16 @@ plugin_commands=(
   'uninstall:Uninstall a plugin'
   'enable:Enable a disabled plugin'
   'disable:Disable an enabled plugin'
+  'help:Display help for command'
+)
+
+local -a marketplace_commands
+marketplace_commands=(
+  'add:Add a marketplace from URL, path, or GitHub repo'
+  'list:List all configured marketplaces'
+  'remove:Remove a configured marketplace'
+  'update:Update marketplace(s) from their source'
+  'help:Display help for command'
 )
 
 case $words[2] in
@@ -45,17 +56,43 @@ case $words[2] in
       _describe 'mcp command' mcp_commands
     else
       case $words[3] in
+        serve)
+          _arguments \
+            '(-d --debug)'{-d,--debug}'[Enable debug mode]' \
+            '--verbose[Override verbose mode setting from config]' \
+            '(-h --help)'{-h,--help}'[Display help]'
+          ;;
         add)
           _arguments \
-            '(-s --scope)'{-s,--scope}'[Scope]:scope:(user project)' \
-            '(-t --transport)'{-t,--transport}'[Transport]:(stdio http sse)' \
-            '(-e --env)'{-e,--env}'[Environment variables]:env:' \
+            '(-s --scope)'{-s,--scope}'[Configuration scope]:scope:(local user project)' \
+            '(-t --transport)'{-t,--transport}'[Transport type]:transport:(stdio sse http)' \
+            '*'{-e,--env}'[Set environment variables]:env:' \
+            '*'{-H,--header}'[Set WebSocket headers]:header:' \
+            '(-h --help)'{-h,--help}'[Display help]' \
+            ':name:' \
+            ':commandOrUrl:_files' \
             '*:args:_files'
           ;;
         remove)
           _arguments \
-            '(-s --scope)'{-s,--scope}'[Scope]:scope:(user project)' \
-            '*:name:'
+            '(-s --scope)'{-s,--scope}'[Configuration scope]:scope:(local user project)' \
+            '(-h --help)'{-h,--help}'[Display help]' \
+            ':name:'
+          ;;
+        add-json)
+          _arguments \
+            '(-s --scope)'{-s,--scope}'[Configuration scope]:scope:(local user project)' \
+            '(-h --help)'{-h,--help}'[Display help]' \
+            ':name:' \
+            ':json:'
+          ;;
+        add-from-claude-desktop)
+          _arguments \
+            '(-s --scope)'{-s,--scope}'[Configuration scope]:scope:(local user project)' \
+            '(-h --help)'{-h,--help}'[Display help]'
+          ;;
+        get)
+          _message 'server name'
           ;;
         *)
           _message 'no more arguments'
@@ -70,10 +107,41 @@ case $words[2] in
     else
       case $words[3] in
         validate)
-          _files
+          _arguments \
+            '(-h --help)'{-h,--help}'[Display help]' \
+            ':path:_files'
+          ;;
+        marketplace)
+          if (( CURRENT == 4 )); then
+            _describe 'marketplace command' marketplace_commands
+          else
+            case $words[4] in
+              add)
+                _arguments ':source:_files'
+                ;;
+              remove|rm)
+                _message 'marketplace name'
+                ;;
+              update)
+                _message 'marketplace name (optional)'
+                ;;
+              *)
+                _message 'no more arguments'
+                ;;
+            esac
+          fi
+          ;;
+        install|i)
+          _message 'plugin name'
+          ;;
+        uninstall|remove)
+          _message 'plugin name'
+          ;;
+        enable|disable)
+          _message 'plugin name'
           ;;
         *)
-          _message 'plugin name'
+          _message 'no more arguments'
           ;;
       esac
     fi
@@ -81,8 +149,9 @@ case $words[2] in
     ;;
   install)
     _arguments \
-      '--force[Force installation]' \
-      '1:target:(stable latest)'
+      '--force[Force installation even if already installed]' \
+      '(-h --help)'{-h,--help}'[Display help]' \
+      ':target:(stable latest)'
     return
     ;;
   migrate-installer|setup-token|doctor|update)
@@ -92,33 +161,41 @@ case $words[2] in
 esac
 
 _arguments -s \
-  '(-d --debug)'{-d,--debug}'[Enable debug mode]' \
-  '--verbose[Verbose mode]' \
-  '(-p --print)'{-p,--print}'[Print and exit]' \
-  '--output-format[Output format]:(text json stream-json)' \
-  '--input-format[Input format]:(text stream-json)' \
-  '--model[Model]:(sonnet opus haiku)' \
-  '--fallback-model[Fallback model]:(sonnet opus haiku)' \
-  '--permission-mode[Permission mode]:(default acceptEdits bypassPermissions dontAsk plan)' \
-  '(-c --continue)'{-c,--continue}'[Continue conversation]' \
-  '(-r --resume)'{-r,--resume}'[Resume conversation]' \
-  '--fork-session[Fork session]' \
-  '--settings[Settings file]:file:_files' \
-  '*--add-dir[Add directory]:dir:_files -/' \
-  '*--mcp-config[MCP config]:file:_files' \
-  '--system-prompt[System prompt]:prompt:' \
-  '--append-system-prompt[Append system prompt]:prompt:' \
-  '--allowed-tools[Allowed tools]:(Bash Read Write Edit Grep Glob WebSearch WebFetch Task)' \
-  '--disallowed-tools[Disallowed tools]:(Bash Read Write Edit Grep Glob WebSearch WebFetch Task)' \
-  '--tools[Tools]:(Bash Read Write Edit Grep Glob WebSearch WebFetch Task)' \
-  '*--plugin-dir[Plugin directory]:dir:_files -/' \
-  '--dangerously-skip-permissions[Skip permissions]' \
-  '--ide[Connect to IDE]' \
-  '--session-id[Session ID]:uuid:' \
-  '--agents[Agents JSON]:json:' \
-  '--json-schema[JSON schema]:schema:' \
-  '(-v --version)'{-v,--version}'[Show version]' \
-  '(-h --help)'{-h,--help}'[Show help]' \
+  '(-d --debug)'{-d,--debug}'[Enable debug mode with optional filter]:filter:' \
+  '--verbose[Override verbose mode setting from config]' \
+  '(-p --print)'{-p,--print}'[Print response and exit]' \
+  '--output-format[Output format]:format:(text json stream-json)' \
+  '--json-schema[JSON Schema for structured output]:schema:' \
+  '--include-partial-messages[Include partial message chunks as they arrive]' \
+  '--input-format[Input format]:format:(text stream-json)' \
+  '--mcp-debug[DEPRECATED: Enable MCP debug mode]' \
+  '--dangerously-skip-permissions[Bypass all permission checks]' \
+  '--allow-dangerously-skip-permissions[Enable bypassing permissions as an option]' \
+  '--replay-user-messages[Re-emit user messages from stdin to stdout]' \
+  '*--allowedTools[Allowed tools]:tools:' \
+  '*--allowed-tools[Allowed tools]:tools:' \
+  '*--tools[Specify available tools from built-in set]:tools:' \
+  '*--disallowedTools[Disallowed tools]:tools:' \
+  '*--disallowed-tools[Disallowed tools]:tools:' \
+  '*--mcp-config[Load MCP servers from JSON files or strings]:config:_files' \
+  '--system-prompt[System prompt for the session]:prompt:' \
+  '--append-system-prompt[Append to default system prompt]:prompt:' \
+  '--permission-mode[Permission mode]:mode:(acceptEdits bypassPermissions default dontAsk plan)' \
+  '(-c --continue)'{-c,--continue}'[Continue the most recent conversation]' \
+  '(-r --resume)'{-r,--resume}'[Resume a conversation]:sessionId:' \
+  '--fork-session[Create new session ID when resuming]' \
+  '--model[Model for the session]:model:(sonnet opus haiku)' \
+  '--fallback-model[Fallback model when default is overloaded]:model:(sonnet opus haiku)' \
+  '--settings[Path to settings JSON file or JSON string]:file:_files' \
+  '*--add-dir[Additional directories to allow tool access]:dir:_files -/' \
+  '--ide[Connect to IDE on startup]' \
+  '--strict-mcp-config[Only use MCP servers from --mcp-config]' \
+  '--session-id[Use specific session ID]:uuid:' \
+  '--agents[JSON object defining custom agents]:json:' \
+  '--setting-sources[Comma-separated list of setting sources]:sources:(user project local)' \
+  '*--plugin-dir[Load plugins from directories]:dir:_files -/' \
+  '(-v --version)'{-v,--version}'[Output the version number]' \
+  '(-h --help)'{-h,--help}'[Display help for command]' \
   '1:command:->cmd' \
   '*:prompt:'
 
