@@ -6,9 +6,15 @@ allowed-arguments:
 
 You are updating the zsh completion script for Claude Code CLI. Follow these steps:
 
-## Step 1: Update Claude CLI
+## Step 1: Update Claude CLI (Optional)
 
-Run `claude update` to ensure we have the latest version.
+Run `claude update` with a short timeout (5 seconds) to try updating the CLI. If the command hangs or reports that another Claude instance is running, skip this step and proceed immediately. Do not wait for the update to complete if it's blocked.
+
+```bash
+timeout 5 claude update 2>&1 || true
+```
+
+If the output mentions "another Claude is running" or similar, just proceed to Step 2.
 
 ## Step 2: Check for Force Flag and Compare Versions
 
