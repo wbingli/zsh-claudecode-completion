@@ -39,9 +39,10 @@ jobs:
             exit 0
           fi
 
-          # Get the new version
+          # Get the new version and generate unique branch name
           VERSION=$(cat claude-version)
-          BRANCH="auto-update/claude-completions-v${VERSION}"
+          SUFFIX=$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 6)
+          BRANCH="auto-update/claude-completions-v${VERSION}-${SUFFIX}"
 
           # Configure git
           git config user.name "github-actions[bot]"
