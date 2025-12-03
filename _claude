@@ -39,12 +39,12 @@ plugin_commands=(
   'disable:Disable an enabled plugin'
 )
 
-case $words[1] in
+case $words[2] in
   mcp)
-    if (( CURRENT == 2 )); then
+    if (( CURRENT == 3 )); then
       _describe 'mcp command' mcp_commands
     else
-      case $words[2] in
+      case $words[3] in
         add)
           _arguments \
             '(-s --scope)'{-s,--scope}'[Scope]:scope:(user project)' \
@@ -65,10 +65,10 @@ case $words[1] in
     return
     ;;
   plugin)
-    if (( CURRENT == 2 )); then
+    if (( CURRENT == 3 )); then
       _describe 'plugin command' plugin_commands
     else
-      case $words[2] in
+      case $words[3] in
         validate)
           _files
           ;;
