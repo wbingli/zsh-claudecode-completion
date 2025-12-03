@@ -10,10 +10,10 @@ local -a commands
 commands=(
   'mcp:Configure and manage MCP servers'
   'plugin:Manage Claude Code plugins'
-  'migrate-installer:Migrate from npm to local installation'
-  'setup-token:Set up authentication token'
-  'doctor:Check auto-updater health'
-  'update:Check for and install updates'
+  'migrate-installer:Migrate from global npm installation to local installation'
+  'setup-token:Set up a long-lived authentication token'
+  'doctor:Check the health of your Claude Code auto-updater'
+  'update:Check for updates and install if available'
   'install:Install Claude Code native build'
 )
 
@@ -32,10 +32,12 @@ mcp_commands=(
 
 local -a plugin_commands
 plugin_commands=(
-  'validate:Validate a plugin or manifest'
-  'marketplace:Manage marketplaces'
-  'install:Install a plugin'
-  'uninstall:Uninstall a plugin'
+  'validate:Validate a plugin or marketplace manifest'
+  'marketplace:Manage Claude Code marketplaces'
+  'install:Install a plugin from available marketplaces'
+  'i:Install a plugin from available marketplaces'
+  'uninstall:Uninstall an installed plugin'
+  'remove:Uninstall an installed plugin'
   'enable:Enable a disabled plugin'
   'disable:Disable an enabled plugin'
   'help:Display help for command'
@@ -43,9 +45,10 @@ plugin_commands=(
 
 local -a marketplace_commands
 marketplace_commands=(
-  'add:Add a marketplace from URL, path, or GitHub repo'
+  'add:Add a marketplace from a URL, path, or GitHub repo'
   'list:List all configured marketplaces'
   'remove:Remove a configured marketplace'
+  'rm:Remove a configured marketplace'
   'update:Update marketplace(s) from their source'
   'help:Display help for command'
 )
@@ -117,13 +120,19 @@ case $words[2] in
           else
             case $words[4] in
               add)
-                _arguments ':source:_files'
+                _arguments \
+                  '(-h --help)'{-h,--help}'[Display help]' \
+                  ':source:_files'
                 ;;
               remove|rm)
-                _message 'marketplace name'
+                _arguments \
+                  '(-h --help)'{-h,--help}'[Display help]' \
+                  ':name:'
                 ;;
               update)
-                _message 'marketplace name (optional)'
+                _arguments \
+                  '(-h --help)'{-h,--help}'[Display help]' \
+                  ':name:'
                 ;;
               *)
                 _message 'no more arguments'
@@ -132,13 +141,24 @@ case $words[2] in
           fi
           ;;
         install|i)
-          _message 'plugin name'
+          _arguments \
+            '(-h --help)'{-h,--help}'[Display help]' \
+            ':plugin:'
           ;;
         uninstall|remove)
-          _message 'plugin name'
+          _arguments \
+            '(-h --help)'{-h,--help}'[Display help]' \
+            ':plugin:'
           ;;
-        enable|disable)
-          _message 'plugin name'
+        enable)
+          _arguments \
+            '(-h --help)'{-h,--help}'[Display help]' \
+            ':plugin:'
+          ;;
+        disable)
+          _arguments \
+            '(-h --help)'{-h,--help}'[Display help]' \
+            ':plugin:'
           ;;
         *)
           _message 'no more arguments'
@@ -155,7 +175,7 @@ case $words[2] in
     return
     ;;
   migrate-installer|setup-token|doctor|update)
-    _message 'no arguments'
+    _arguments '(-h --help)'{-h,--help}'[Display help]'
     return
     ;;
 esac
@@ -181,20 +201,20 @@ _arguments -s \
   '*--mcp-config[Load MCP servers from JSON files or strings]:config:_files' \
   '--system-prompt[System prompt for the session]:prompt:' \
   '--append-system-prompt[Append to default system prompt]:prompt:' \
-  '--permission-mode[Permission mode]:mode:(acceptEdits bypassPermissions default dontAsk plan)' \
+  '--permission-mode[Permission mode to use for the session]:mode:(acceptEdits bypassPermissions default dontAsk plan)' \
   '(-c --continue)'{-c,--continue}'[Continue the most recent conversation]' \
   '(-r --resume)'{-r,--resume}'[Resume a conversation]:sessionId:' \
-  '--fork-session[Create new session ID when resuming]' \
-  '--model[Model for the session]:model:(sonnet opus haiku)' \
-  '--fallback-model[Fallback model when default is overloaded]:model:(sonnet opus haiku)' \
+  '--fork-session[When resuming, create a new session ID instead of reusing the original]' \
+  '--model[Model for the current session]:model:(sonnet opus haiku)' \
+  '--fallback-model[Enable automatic fallback to specified model]:model:(sonnet opus haiku)' \
   '--settings[Path to settings JSON file or JSON string]:file:_files' \
   '*--add-dir[Additional directories to allow tool access]:dir:_files -/' \
-  '--ide[Connect to IDE on startup]' \
-  '--strict-mcp-config[Only use MCP servers from --mcp-config]' \
-  '--session-id[Use specific session ID]:uuid:' \
+  '--ide[Automatically connect to IDE on startup if exactly one valid IDE is available]' \
+  '--strict-mcp-config[Only use MCP servers from --mcp-config, ignoring all other MCP configurations]' \
+  '--session-id[Use a specific session ID for the conversation]:uuid:' \
   '--agents[JSON object defining custom agents]:json:' \
-  '--setting-sources[Comma-separated list of setting sources]:sources:(user project local)' \
-  '*--plugin-dir[Load plugins from directories]:dir:_files -/' \
+  '--setting-sources[Comma-separated list of setting sources to load]:sources:(user project local)' \
+  '*--plugin-dir[Load plugins from directories for this session only]:dir:_files -/' \
   '(-v --version)'{-v,--version}'[Output the version number]' \
   '(-h --help)'{-h,--help}'[Display help for command]' \
   '1:command:(mcp plugin migrate-installer setup-token doctor update install)' \
