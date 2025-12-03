@@ -6,17 +6,7 @@ allowed-arguments:
 
 You are updating the zsh completion script for Claude Code CLI. Follow these steps:
 
-## Step 1: Update Claude CLI (Optional)
-
-Run `claude update` with a short timeout (5 seconds) to try updating the CLI. If the command hangs or reports that another Claude instance is running, skip this step and proceed immediately. Do not wait for the update to complete if it's blocked.
-
-```bash
-timeout 5 claude update 2>&1 || true
-```
-
-If the output mentions "another Claude is running" or similar, just proceed to Step 2.
-
-## Step 2: Check for Force Flag and Compare Versions
+## Step 1: Check for Force Flag and Compare Versions
 
 1. Check if `--force` was passed as an argument to this command (check $ARGUMENTS).
 
@@ -28,9 +18,9 @@ If the output mentions "another Claude is running" or similar, just proceed to S
 3. If `--force` IS present:
    - Skip version comparison
    - Report "Force flag detected, regenerating completions regardless of version"
-   - Continue to Step 3
+   - Continue to Step 2
 
-## Step 3: Gather Help Output (if versions differ)
+## Step 2: Gather Help Output (if versions differ)
 
 Run these commands to get the current CLI structure:
 - `claude --help`
@@ -46,7 +36,7 @@ It may have multiple sub commands. For example, `claude plugin` will have its ow
 
 You need to iterate through every subcommand to get their help output as well. For example, start with `claude --help`. You will have all the top level commands and options. For each top level command, you will need to run `claude <top-level-command> --help` to get its subcommands and options. If any of those subcommands have their own subcommands, you will need to run `claude <top-level-command> <subcommand> --help` as well, and so on, until you have captured the full hierarchy of commands and options.
 
-## Step 4: Regenerate Completion Script
+## Step 3: Regenerate Completion Script
 
 Read the existing `_claude` file and regenerate it based on the help output. Preserve the zsh completion structure:
 
@@ -65,11 +55,11 @@ Key patterns to follow:
 - File completion: `:file:_files`
 - Directory completion: `:directory:_files -/`
 
-## Step 5: Update Version File
+## Step 4: Update Version File
 
 Write the new version number to the `claude-version` file.
 
-## Step 6: Commit Changes
+## Step 5: Commit Changes
 
 Stage and commit the changes:
 ```bash
