@@ -160,6 +160,7 @@ case $words[2] in
     ;;
 esac
 
+# Only show global flags and commands if no subcommand matched
 _arguments -s \
   '(-d --debug)'{-d,--debug}'[Enable debug mode with optional filter]:filter:' \
   '--verbose[Override verbose mode setting from config]' \
@@ -196,9 +197,5 @@ _arguments -s \
   '*--plugin-dir[Load plugins from directories]:dir:_files -/' \
   '(-v --version)'{-v,--version}'[Output the version number]' \
   '(-h --help)'{-h,--help}'[Display help for command]' \
-  '1:command:->cmd' \
+  '1:command:(mcp plugin migrate-installer setup-token doctor update install)' \
   '*:prompt:'
-
-if [[ $state == cmd ]]; then
-  _describe 'command' commands
-fi

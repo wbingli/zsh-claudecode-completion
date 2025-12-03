@@ -9,8 +9,9 @@ A minimal zsh completion plugin for the Claude Code CLI. Provides tab completion
 ## Key Files
 
 - **`_claude`** - Main completion script using zsh's `#compdef` system. Contains all completion logic for commands, subcommands, and flags.
-- **`zsh-claudecode-completion.plugin.zsh`** - Oh My Zsh plugin entry point. Adds the plugin directory to `fpath`.
+- **`zsh-claudecode-completion.plugin.zsh`** - Oh My Zsh plugin entry point. Copies `_claude` to `$ZSH_CACHE_DIR/completions/` to avoid fpath duplication issues.
 - **`claude-version`** - Tracks which Claude CLI version the completions are based on.
+- **`.claude/commands/`** - Slash commands for Claude Code (e.g., `/update-completions`).
 
 ## Architecture
 
@@ -35,6 +36,14 @@ To test changes:
 
 - Avoid nested helper functions in `_claude`—they caused duplicate completions (see commit ff451fe)
 - Use flat structure with explicit `return` statements after each case block
+- Plugin copies `_claude` to cache directory instead of adding to fpath—prevents duplicates when plugin dir is symlinked
+
+## Git Notes
+
+The `.claude/` folder may be in the global `.gitignore`. Always use `-f` flag when adding `.claude/` changes:
+```bash
+git add -f .claude/
+```
 
 ## Slash Commands
 

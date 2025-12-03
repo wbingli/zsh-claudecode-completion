@@ -77,3 +77,39 @@ If `--force` was used and the version hasn't changed, use this commit message in
 ```bash
 git commit -m "Regenerate completions for Claude vX.X.X (forced)"
 ```
+
+## IMPORTANT: Duplicate Completions Warning
+
+After regenerating completions, you MUST verify the script doesn't cause duplicate entries.
+
+### How the Plugin Avoids Duplicates
+The plugin copies `_claude` to `$ZSH_CACHE_DIR/completions/` instead of adding to fpath directly.
+This prevents duplicates when the plugin directory is symlinked (e.g., from oh-my-zsh custom/plugins).
+
+### Verification Steps
+1. Open a new terminal (or `source ~/.zshrc`)
+2. Test: `claude --<TAB>`
+   - EXPECTED: ~35-40 options listed normally
+   - PROBLEM: "do you wish to see all X possibilities" where X > 100 indicates duplicate completions
+
+3. If duplicates occur, clear the cache:
+   ```bash
+   rm -f ~/.zcompdump*
+   rm -f ~/.oh-my-zsh/cache/completions/_claude
+   source ~/.zshrc
+   ```
+
+### Known Anti-Patterns (AVOID)
+These patterns cause duplicate completions and must NOT be used:
+- Nested helper functions (e.g., `_claude_mcp()` called from main completion)
+- `_arguments -C` with complex state machines (use `-s` instead)
+- Missing `return` statement after case blocks
+- `_claude() { }` wrapper function with `_claude "$@"` at end
+- Adding plugin directory directly to fpath when it may be symlinked
+
+### Required Structure
+The completion script must use this flat structure:
+- `case $words[2] in` for subcommand detection (not `$words[1]` which is always "claude")
+- Early `return` after each case block to prevent fallthrough
+- Simple `_arguments -s` (not `-C`) for main flags
+- Simple command list: `'1:command:(cmd1 cmd2 cmd3)'`
