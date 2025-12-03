@@ -1,0 +1,29 @@
+name: Update Claude CLI Completions
+
+on:
+  schedule:
+    - cron: "0 9 * * 1"  # Every Monday at 9 AM UTC
+  workflow_dispatch:      # Allow manual trigger
+
+jobs:
+  update-completions:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            Follow the instructions in .claude/commands/update-completions.md to update the zsh completions.
+
+            After completing the update:
+            - If changes were made, push directly to main branch
+            - Report what version the completions were updated to (or that they were already up to date)
