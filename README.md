@@ -63,6 +63,22 @@ claude --model <TAB>      # Show model names
 claude --output-format <TAB>  # Show output formats
 ```
 
+## Developer Guide
+
+### Updating Completions
+
+When a new Claude CLI version is released, update the completion script by running:
+
+```bash
+claude /update-completions
+```
+
+This command will:
+1. Upgrade Claude CLI to the latest version
+2. Check if the completion script is outdated
+3. Regenerate `_claude` from the new `--help` output
+4. Commit the changes automatically
+
 ## Troubleshooting
 
 If completions don't work after installation, try:
