@@ -1,5 +1,7 @@
 ---
 description: Update zsh completions to match latest Claude CLI version
+allowed-arguments:
+  - --force
 ---
 
 You are updating the zsh completion script for Claude Code CLI. Follow these steps:
@@ -8,14 +10,19 @@ You are updating the zsh completion script for Claude Code CLI. Follow these ste
 
 Run `claude update` to ensure we have the latest version.
 
-## Step 2: Compare Versions
+## Step 2: Check for Force Flag and Compare Versions
 
-1. Get the installed Claude version:
-!claude --version
+1. Check if `--force` was passed as an argument to this command (check $ARGUMENTS).
 
-2. Read the tracked version from the `claude-version` file in this repository.
+2. If `--force` is NOT present:
+   - Get the installed Claude version: `claude --version`
+   - Read the tracked version from the `claude-version` file in this repository
+   - Compare the versions. If they match, report "Completions are up to date" and stop.
 
-3. Compare the versions. If they match, report "Completions are up to date" and stop.
+3. If `--force` IS present:
+   - Skip version comparison
+   - Report "Force flag detected, regenerating completions regardless of version"
+   - Continue to Step 3
 
 ## Step 3: Gather Help Output (if versions differ)
 
@@ -57,3 +64,8 @@ git commit -m "Update completions for Claude vX.X.X"
 ```
 
 Replace X.X.X with the actual new version number.
+
+If `--force` was used and the version hasn't changed, use this commit message instead:
+```bash
+git commit -m "Regenerate completions for Claude vX.X.X (forced)"
+```
