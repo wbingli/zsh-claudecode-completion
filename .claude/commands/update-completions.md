@@ -2,6 +2,7 @@
 description: Update zsh completions to match latest Claude CLI version
 allowed-arguments:
   - --force
+  - --create-pr
 ---
 
 You are updating the zsh completion script for Claude Code CLI. Follow these steps:
@@ -59,20 +60,55 @@ Key patterns to follow:
 
 Write the new version number to the `claude-version` file.
 
-## Step 5: Commit Changes
+## Step 5: Create Pull Request (CI only)
 
-Stage and commit the changes:
-```bash
-git add claude-version _claude
-git commit -m "Update completions for Claude vX.X.X"
-```
+**Only execute this step if `--create-pr` was passed as an argument.**
 
-Replace X.X.X with the actual new version number.
+If `--create-pr` is NOT present, skip this step entirely and report that the files have been updated.
 
-If `--force` was used and the version hasn't changed, use this commit message instead:
-```bash
-git commit -m "Regenerate completions for Claude vX.X.X (forced)"
-```
+If `--create-pr` IS present, create a pull request:
+
+1. **Get version info:**
+   - Read the new version from `claude-version`
+   - Generate a random 6-character suffix for branch uniqueness
+
+2. **Configure git and create branch:**
+   ```bash
+   git config user.name "github-actions[bot]"
+   git config user.email "github-actions[bot]@users.noreply.github.com"
+   git checkout -b "auto-update/claude-completions-v${VERSION}-${SUFFIX}"
+   ```
+
+3. **Review changes and commit:**
+   - Run `git diff` to see what changed in `_claude`
+   - Analyze the diff to identify: new commands, removed commands, new flags, removed flags, description changes
+   - Stage and commit: `git add claude-version _claude && git commit -m "Update completions for Claude v${VERSION}"`
+   - Push: `git push -u origin "auto-update/claude-completions-v${VERSION}-${SUFFIX}"`
+
+4. **Create PR with detailed description:**
+   Use `gh pr create` with a body that includes:
+   - **Summary**: Brief description of the update
+   - **Changes**: Bullet list of specific changes (new commands, new flags, removed items, etc.)
+   - **Version**: Old version → New version
+
+   Example:
+   ```bash
+   gh pr create \
+     --title "Update completions for Claude v${VERSION}" \
+     --body "## Summary
+   Automated update of zsh completions to match Claude CLI v${VERSION}.
+
+   ## Changes
+   - Added \`foo\` command with flags: --bar, --baz
+   - Added --new-flag to \`mcp\` command
+   - Removed deprecated \`old-command\`
+
+   ## Version
+   v${OLD_VERSION} → v${NEW_VERSION}" \
+     --base main
+   ```
+
+   **Important**: The changes section should be based on your analysis of the actual diff, not placeholder text.
 
 ## IMPORTANT: Duplicate Completions Warning
 
