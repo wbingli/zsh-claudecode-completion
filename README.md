@@ -8,7 +8,7 @@ Minimal zsh completion plugin for [Claude Code CLI](https://github.com/anthropic
 
 1. **Claude Code** writes completion scripts for Claude Code
 2. **Claude Code** writes slash commands to update Claude Code completions
-3. **Claude Code** creates GitHub workflows to run the slash commands
+3. **Claude Code** creates GitHub workflows to run the slash commands every morning
 4. **Claude Code** opens PRs when updates are needed
 5. **Me:** *sips coffee* → *clicks merge* → *resumes sipping*
 
