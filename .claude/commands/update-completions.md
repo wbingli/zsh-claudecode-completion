@@ -17,7 +17,7 @@ Run `claude update` to ensure we have the latest version.
 2. If `--force` is NOT present:
    - Get the installed Claude version: `claude --version`
    - Read the tracked version from the `claude-version` file in this repository
-   - Compare the versions. If they match, report "Completions are up to date" and stop.
+   - Compare the versions. If they match or the installed Claude version is lower than the tracked version, report "Completions are up to date" and stop.
 
 3. If `--force` IS present:
    - Skip version comparison
@@ -31,6 +31,14 @@ Run these commands to get the current CLI structure:
 - `claude mcp --help`
 - `claude plugin --help`
 - `claude install --help`
+
+### Important: How to gather a comphrehensive help output
+
+Above are just examples, but you should gather help output for all top-level commands and subcommands as needed to fully capture the CLI structure for completions. Store this output for use in the next step.
+
+It may have multiple sub commands. For example, `claude plugin` will have its own set of subcommands. In the meanwhile, `claude plugin marketplace` may also have its own set of subcommands. Make sure to capture all levels of subcommands as needed.
+
+You need to iterate through every subcommand to get their help output as well. For example, start with `claude --help`. You will have all the top level commands and options. For each top level command, you will need to run `claude <top-level-command> --help` to get its subcommands and options. If any of those subcommands have their own subcommands, you will need to run `claude <top-level-command> <subcommand> --help` as well, and so on, until you have captured the full hierarchy of commands and options.
 
 ## Step 4: Regenerate Completion Script
 
