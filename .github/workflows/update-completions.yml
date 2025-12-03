@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      pull-requests: write
 
     steps:
       - uses: actions/checkout@v5
@@ -26,10 +27,34 @@ jobs:
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
         run: |
-          claude -p "Follow the instructions in .claude/commands/update-completions.md to update the zsh completions. After completing, if changes were made, commit and report the new version."
+          claude -p "Follow the instructions in .claude/commands/update-completions.md to update the zsh completions. Do NOT commit the changes - just make the file edits." \
+            --dangerously-skip-permissions
 
-      - name: Push changes
+      - name: Create Pull Request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "No changes detected, skipping PR creation"
+            exit 0
+          fi
+
+          # Get the new version
+          VERSION=$(cat claude-version)
+          BRANCH="auto-update/claude-completions-v${VERSION}"
+
+          # Configure git
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git push || echo "No changes to push"
+
+          # Create branch and commit
+          git checkout -b "$BRANCH"
+          git add claude-version _claude
+          git commit -m "Update completions for Claude v${VERSION}"
+          git push -u origin "$BRANCH"
+
+          # Create PR
+          gh pr create \
+            --title "Update completions for Claude v${VERSION}" \
+            --body "Automated update of zsh completions to match Claude CLI v${VERSION}." \
+            --base main
