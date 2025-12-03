@@ -161,6 +161,8 @@ case $words[2] in
 esac
 
 # Only show global flags and commands if no subcommand matched
+# NOTE: --mcp-debug is DEPRECATED. Users should use -d/--debug instead.
+#       The flag is kept for backward compatibility but will be removed.
 _arguments -s \
   '(-d --debug)'{-d,--debug}'[Enable debug mode with optional filter]:filter:' \
   '--verbose[Override verbose mode setting from config]' \
@@ -169,7 +171,7 @@ _arguments -s \
   '--json-schema[JSON Schema for structured output]:schema:' \
   '--include-partial-messages[Include partial message chunks as they arrive]' \
   '--input-format[Input format]:format:(text stream-json)' \
-  '--mcp-debug[DEPRECATED: Enable MCP debug mode]' \
+  '--mcp-debug[⚠️  DEPRECATED - Use -d/--debug instead. This flag will be removed in a future version]' \
   '--dangerously-skip-permissions[Bypass all permission checks]' \
   '--allow-dangerously-skip-permissions[Enable bypassing permissions as an option]' \
   '--replay-user-messages[Re-emit user messages from stdin to stdout]' \
