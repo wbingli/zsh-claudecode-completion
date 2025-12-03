@@ -7,7 +7,21 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(git push)",
-      "Bash(git check-ignore:*)"
+      "Bash(git check-ignore:*)",
+      "Bash(claude mcp --help:*)",
+      "Bash(claude config --help:*)",
+      "Bash(claude mcp serve --help:*)",
+      "Bash(claude mcp add --help:*)",
+      "Bash(claude mcp remove --help:*)",
+      "Bash(claude mcp list --help:*)",
+      "Bash(claude mcp get --help:*)",
+      "Bash(claude mcp add-json:*)",
+      "Bash(claude mcp add-from-claude-desktop:*)",
+      "Bash(claude mcp reset-project-choices:*)",
+      "Bash(claude install --help:*)",
+      "Bash(claude doctor --help:*)",
+      "Bash(claude setup-token:*)",
+      "Bash(claude migrate-installer:*)"
     ],
     "deny": [],
     "ask": []
