@@ -10,20 +10,26 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      pull-requests: write
-      id-token: write
 
     steps:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
-      - uses: anthropics/claude-code-action@v1
-        with:
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          prompt: |
-            Follow the instructions in .claude/commands/update-completions.md to update the zsh completions.
+      - name: Install Claude CLI
+        run: curl -fsSL https://claude.ai/install.sh | bash
 
-            After completing the update:
-            - If changes were made, push directly to main branch
-            - Report what version the completions were updated to (or that they were already up to date)
+      - name: Add Claude to PATH
+        run: echo "$HOME/.claude/bin" >> $GITHUB_PATH
+
+      - name: Run update-completions
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: |
+          claude -p "Follow the instructions in .claude/commands/update-completions.md to update the zsh completions. After completing, if changes were made, commit and report the new version."
+
+      - name: Push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git push || echo "No changes to push"
