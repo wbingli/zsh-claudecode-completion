@@ -35,6 +35,7 @@ plugin_commands=(
   'validate:Validate a plugin or manifest'
   'marketplace:Manage marketplaces'
   'install:Install a plugin'
+  'i:Install a plugin'
   'uninstall:Uninstall a plugin'
   'enable:Enable a disabled plugin'
   'disable:Disable an enabled plugin'
@@ -46,6 +47,7 @@ marketplace_commands=(
   'add:Add a marketplace from URL, path, or GitHub repo'
   'list:List all configured marketplaces'
   'remove:Remove a configured marketplace'
+  'rm:Remove a configured marketplace'
   'update:Update marketplace(s) from their source'
   'help:Display help for command'
 )
@@ -91,8 +93,14 @@ case $words[2] in
             '(-s --scope)'{-s,--scope}'[Configuration scope]:scope:(local user project)' \
             '(-h --help)'{-h,--help}'[Display help]'
           ;;
+        list|reset-project-choices)
+          _arguments \
+            '(-h --help)'{-h,--help}'[Display help]'
+          ;;
         get)
-          _message 'server name'
+          _arguments \
+            '(-h --help)'{-h,--help}'[Display help]' \
+            ':name:'
           ;;
         *)
           _message 'no more arguments'
@@ -117,13 +125,23 @@ case $words[2] in
           else
             case $words[4] in
               add)
-                _arguments ':source:_files'
+                _arguments \
+                  '(-h --help)'{-h,--help}'[Display help]' \
+                  ':source:_files'
+                ;;
+              list)
+                _arguments \
+                  '(-h --help)'{-h,--help}'[Display help]'
                 ;;
               remove|rm)
-                _message 'marketplace name'
+                _arguments \
+                  '(-h --help)'{-h,--help}'[Display help]' \
+                  ':name:'
                 ;;
               update)
-                _message 'marketplace name (optional)'
+                _arguments \
+                  '(-h --help)'{-h,--help}'[Display help]' \
+                  '::name:'
                 ;;
               *)
                 _message 'no more arguments'
@@ -132,13 +150,19 @@ case $words[2] in
           fi
           ;;
         install|i)
-          _message 'plugin name'
+          _arguments \
+            '(-h --help)'{-h,--help}'[Display help]' \
+            ':plugin:'
           ;;
         uninstall|remove)
-          _message 'plugin name'
+          _arguments \
+            '(-h --help)'{-h,--help}'[Display help]' \
+            ':plugin:'
           ;;
         enable|disable)
-          _message 'plugin name'
+          _arguments \
+            '(-h --help)'{-h,--help}'[Display help]' \
+            ':plugin:'
           ;;
         *)
           _message 'no more arguments'
@@ -151,18 +175,19 @@ case $words[2] in
     _arguments \
       '--force[Force installation even if already installed]' \
       '(-h --help)'{-h,--help}'[Display help]' \
-      ':target:(stable latest)'
+      '::target:(stable latest)'
     return
     ;;
   migrate-installer|setup-token|doctor|update)
-    _message 'no arguments'
+    _arguments \
+      '(-h --help)'{-h,--help}'[Display help]'
     return
     ;;
 esac
 
 # Only show global flags and commands if no subcommand matched
 _arguments -s \
-  '(-d --debug)'{-d,--debug}'[Enable debug mode with optional filter]:filter:' \
+  '(-d --debug)'{-d,--debug}'[Enable debug mode with optional filter]::filter:' \
   '--verbose[Override verbose mode setting from config]' \
   '(-p --print)'{-p,--print}'[Print response and exit]' \
   '--output-format[Output format]:format:(text json stream-json)' \
@@ -183,19 +208,19 @@ _arguments -s \
   '--append-system-prompt[Append to default system prompt]:prompt:' \
   '--permission-mode[Permission mode]:mode:(acceptEdits bypassPermissions default dontAsk plan)' \
   '(-c --continue)'{-c,--continue}'[Continue the most recent conversation]' \
-  '(-r --resume)'{-r,--resume}'[Resume a conversation]:sessionId:' \
+  '(-r --resume)'{-r,--resume}'[Resume a conversation]::sessionId:' \
   '--fork-session[Create new session ID when resuming]' \
-  '--model[Model for the session]:model:(sonnet opus haiku)' \
-  '--fallback-model[Fallback model when default is overloaded]:model:(sonnet opus haiku)' \
+  '--model[Model for the session]:model:' \
+  '--fallback-model[Fallback model when default is overloaded]:model:' \
   '--settings[Path to settings JSON file or JSON string]:file:_files' \
   '*--add-dir[Additional directories to allow tool access]:dir:_files -/' \
   '--ide[Connect to IDE on startup]' \
   '--strict-mcp-config[Only use MCP servers from --mcp-config]' \
   '--session-id[Use specific session ID]:uuid:' \
   '--agents[JSON object defining custom agents]:json:' \
-  '--setting-sources[Comma-separated list of setting sources]:sources:(user project local)' \
+  '--setting-sources[Comma-separated list of setting sources]:sources:' \
   '*--plugin-dir[Load plugins from directories]:dir:_files -/' \
   '(-v --version)'{-v,--version}'[Output the version number]' \
   '(-h --help)'{-h,--help}'[Display help for command]' \
   '1:command:(mcp plugin migrate-installer setup-token doctor update install)' \
-  '*:prompt:'
+  '*::prompt:'
