@@ -185,15 +185,16 @@ _arguments -s \
   '(-c --continue)'{-c,--continue}'[Continue the most recent conversation]' \
   '(-r --resume)'{-r,--resume}'[Resume a conversation]:sessionId:' \
   '--fork-session[Create new session ID when resuming]' \
-  '--model[Model for the session]:model:(sonnet opus haiku)' \
-  '--fallback-model[Fallback model when default is overloaded]:model:(sonnet opus haiku)' \
+  '--model[Model for the session]:model:' \
+  '*--betas[Beta headers to include in API requests]:betas:' \
+  '--fallback-model[Fallback model when default is overloaded]:model:' \
   '--settings[Path to settings JSON file or JSON string]:file:_files' \
   '*--add-dir[Additional directories to allow tool access]:dir:_files -/' \
   '--ide[Connect to IDE on startup]' \
   '--strict-mcp-config[Only use MCP servers from --mcp-config]' \
   '--session-id[Use specific session ID]:uuid:' \
   '--agents[JSON object defining custom agents]:json:' \
-  '--setting-sources[Comma-separated list of setting sources]:sources:(user project local)' \
+  '--setting-sources[Comma-separated list of setting sources]:sources:' \
   '*--plugin-dir[Load plugins from directories]:dir:_files -/' \
   '(-v --version)'{-v,--version}'[Output the version number]' \
   '(-h --help)'{-h,--help}'[Display help for command]' \
