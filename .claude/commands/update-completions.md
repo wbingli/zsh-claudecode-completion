@@ -60,7 +60,80 @@ Key patterns to follow:
 
 Write the new version number to the `claude-version` file.
 
-## Step 5: Create Pull Request (CI only)
+## Step 5: Update Changelog
+
+Maintain a `CHANGELOG.md` file in the repository root that tracks all completion updates.
+
+### Changelog Format
+
+The changelog should use this structure:
+
+```markdown
+# Changelog
+
+All notable changes to the zsh-claudecode-completion plugin are documented here.
+
+## [2.0.57] - 2024-01-15
+
+### Added
+- New `foo` command with flags: `--bar`, `--baz`
+- New `--new-flag` option for `mcp` command
+- New subcommand `plugin marketplace search`
+
+### Changed
+- Updated description for `--verbose` flag
+- Modified `install` command options
+
+### Removed
+- Deprecated `old-command` command
+- Removed `--legacy` flag from `config` command
+```
+
+### How to Generate Changelog Entry
+
+1. **Capture the old version** before updating (from `claude-version` file)
+2. **Analyze the diff** between the old and new `_claude` file to identify:
+   - **Added**: New commands, subcommands, or flags that didn't exist before
+   - **Changed**: Modified descriptions, renamed options, or updated argument types
+   - **Removed**: Commands, subcommands, or flags that were deleted
+3. **Create or append to `CHANGELOG.md`**:
+   - If the file doesn't exist, create it with the header
+   - Add a new version section at the top (below the header)
+   - Include today's date in YYYY-MM-DD format
+   - List all changes under appropriate categories (Added/Changed/Removed)
+   - Only include categories that have changes (skip empty sections)
+
+### Example Diff Analysis
+
+If the diff shows:
+```diff
++ '--new-option[Enable new feature]'
+- '--old-option[Deprecated feature]'
+  '--existing[Updated description here]'
+```
+
+The changelog entry would be:
+```markdown
+## [2.0.57] - 2024-01-15
+
+### Added
+- New `--new-option` flag: Enable new feature
+
+### Changed
+- Updated description for `--existing` flag
+
+### Removed
+- Removed `--old-option` flag (deprecated feature)
+```
+
+### Important Notes
+
+- Be specific about what changed—include the actual flag/command names
+- For new commands with multiple flags, list them together
+- Group related changes logically
+- If no changes were detected in a category, omit that category entirely
+
+## Step 6: Create Pull Request (CI only)
 
 **Only execute this step if `--create-pr` was passed as an argument.**
 
@@ -82,7 +155,7 @@ If `--create-pr` IS present, create a pull request:
 3. **Review changes and commit:**
    - Run `git diff` to see what changed in `_claude`
    - Analyze the diff to identify: new commands, removed commands, new flags, removed flags, description changes
-   - Stage and commit: `git add claude-version _claude && git commit -m "Update completions for Claude v${VERSION}"`
+   - Stage and commit: `git add claude-version _claude CHANGELOG.md && git commit -m "Update completions for Claude v${VERSION}"`
    - Push: `git push -u origin "auto-update/claude-completions-v${VERSION}-${SUFFIX}"`
 
 4. **Create PR with detailed description:**
