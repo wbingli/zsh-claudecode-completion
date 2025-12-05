@@ -1,6 +1,6 @@
 # zsh-claudecode-completion
 
-Minimal zsh completion plugin for [Claude Code CLI](https://github.com/anthropics/claude-code).
+Minimal and always up-to-date zsh completion plugin for [Claude Code CLI](https://github.com/anthropics/claude-code).
 
 **Pure tab completion only** - no aliases, no wrapper functions, no opinionated workflows.
 
