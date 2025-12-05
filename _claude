@@ -10,10 +10,9 @@ local -a commands
 commands=(
   'mcp:Configure and manage MCP servers'
   'plugin:Manage Claude Code plugins'
-  'migrate-installer:Migrate from npm to local installation'
-  'setup-token:Set up authentication token'
-  'doctor:Check auto-updater health'
-  'update:Check for and install updates'
+  'setup-token:Set up a long-lived authentication token (requires Claude subscription)'
+  'doctor:Check the health of your Claude Code auto-updater'
+  'update:Check for updates and install if available'
   'install:Install Claude Code native build'
 )
 
@@ -154,7 +153,7 @@ case $words[2] in
       ':target:(stable latest)'
     return
     ;;
-  migrate-installer|setup-token|doctor|update)
+  setup-token|doctor|update)
     _message 'no arguments'
     return
     ;;
@@ -186,6 +185,7 @@ _arguments -s \
   '(-r --resume)'{-r,--resume}'[Resume a conversation]:sessionId:' \
   '--fork-session[Create new session ID when resuming]' \
   '--model[Model for the session]:model:' \
+  '--agent[Agent for the current session]:agent:' \
   '*--betas[Beta headers to include in API requests]:betas:' \
   '--fallback-model[Fallback model when default is overloaded]:model:' \
   '--settings[Path to settings JSON file or JSON string]:file:_files' \
@@ -198,5 +198,5 @@ _arguments -s \
   '*--plugin-dir[Load plugins from directories]:dir:_files -/' \
   '(-v --version)'{-v,--version}'[Output the version number]' \
   '(-h --help)'{-h,--help}'[Display help for command]' \
-  '1:command:(mcp plugin migrate-installer setup-token doctor update install)' \
+  '1:command:(mcp plugin setup-token doctor update install)' \
   '*:prompt:'
