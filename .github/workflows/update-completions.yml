@@ -2,7 +2,7 @@ name: Update Claude CLI Completions
 
 on:
   schedule:
-    - cron: "0 9 * * *"  # Every day at 9 AM UTC
+    - cron: "0 12 * * *"  # Every day at 12:00 PM UTC (4:00 AM Pacific)
   workflow_dispatch:      # Allow manual trigger
 
 jobs:
