@@ -196,6 +196,7 @@ _arguments -s \
   '--agents[JSON object defining custom agents]:json:' \
   '--setting-sources[Comma-separated list of setting sources]:sources:' \
   '*--plugin-dir[Load plugins from directories]:dir:_files -/' \
+  '--disable-slash-commands[Disable all slash commands]' \
   '(-v --version)'{-v,--version}'[Output the version number]' \
   '(-h --help)'{-h,--help}'[Display help for command]' \
   '1:command:(mcp plugin setup-token doctor update install)' \
