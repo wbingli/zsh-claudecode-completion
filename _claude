@@ -131,10 +131,16 @@ case $words[2] in
           fi
           ;;
         install|i)
-          _message 'plugin name'
+          _arguments \
+            '(-s --scope)'{-s,--scope}'[Installation scope]:scope:(user project local)' \
+            '(-h --help)'{-h,--help}'[Display help]' \
+            ':plugin:'
           ;;
         uninstall|remove)
-          _message 'plugin name'
+          _arguments \
+            '(-s --scope)'{-s,--scope}'[Uninstall from scope]:scope:(user project local)' \
+            '(-h --help)'{-h,--help}'[Display help]' \
+            ':plugin:'
           ;;
         enable|disable)
           _message 'plugin name'
