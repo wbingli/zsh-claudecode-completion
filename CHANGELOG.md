@@ -2,6 +2,43 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.0.64] - 2025-12-10
+
+### Added
+- New `--no-session-persistence` flag: Disable session persistence
+
+### Changed
+- Updated description for `--debug` flag: Now mentions "optional category filtering"
+- Updated description for `--print` flag: Now includes "(useful for pipes)"
+- Updated description for `--json-schema` flag: Added "validation" to description
+- Updated description for `--allow-dangerously-skip-permissions` flag: Clarified "all permission checks"
+- Updated description for `--replay-user-messages` flag: Changed "to stdout" to "back on stdout"
+- Updated description for `--allowedTools` and `--allowed-tools` flags: Now includes "Comma or space-separated list"
+- Updated description for `--tools` flag: Now includes "from the built-in set"
+- Updated description for `--disallowedTools` and `--disallowed-tools` flags: Now includes "Comma or space-separated list"
+- Updated description for `--system-prompt` flag: Added "to use" for clarity
+- Updated description for `--append-system-prompt` flag: Added "a" for clarity
+- Updated description for `--permission-mode` flag: Added "to use" for clarity
+- Updated description for `--resume` flag: Changed parameter name from "sessionId" to "value"
+- Updated description for `--fork-session` flag: Expanded description for clarity
+- Updated description for `--model` flag: Changed "for the session" to "for the current session"
+- Updated description for `--fallback-model` flag: Now mentions "Enable automatic fallback"
+- Updated description for `--settings` flag: Added "a" before "settings JSON file"
+- Updated description for `--add-dir` flag: Added "to" at the end
+- Updated description for `--ide` flag: Now includes "Automatically"
+- Updated description for `--session-id` flag: Expanded with "for the conversation"
+- Updated description for `--setting-sources` flag: Added "to load" at the end
+- Updated description for `--plugin-dir` flag: Added "for this session only"
+- Updated description for `mcp add` command: Now includes "to Claude Code"
+- Updated description for `mcp add-json` command: Clarified "(stdio or SSE) with a JSON string"
+- Updated description for `mcp add-from-claude-desktop` command: Added platform note "(Mac and WSL only)"
+- Updated description for `mcp reset-project-choices` command: Expanded to "Reset all approved and rejected project-scoped servers"
+- Updated description for `plugin validate` command: Changed to "Validate a plugin or marketplace manifest"
+- Updated description for `plugin marketplace` command: Changed to "Manage Claude Code marketplaces"
+- Updated description for `plugin install` command: Expanded to "Install a plugin from available marketplaces"
+- Updated description for `plugin uninstall` command: Changed to "Uninstall an installed plugin"
+- Updated description for `plugin marketplace add` command: Added "a" before "URL"
+
 ## [2.0.62] - 2025-12-09
 
 ### Added
