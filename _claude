@@ -37,6 +37,7 @@ plugin_commands=(
   'uninstall:Uninstall an installed plugin'
   'enable:Enable a disabled plugin'
   'disable:Disable an enabled plugin'
+  'update:Update a plugin to the latest version'
   'help:Display help for command'
 )
 
@@ -116,13 +117,19 @@ case $words[2] in
           else
             case $words[4] in
               add)
-                _arguments ':source:_files'
+                _arguments \
+                  '(-h --help)'{-h,--help}'[Display help]' \
+                  ':source:_files'
                 ;;
               remove|rm)
-                _message 'marketplace name'
+                _arguments \
+                  '(-h --help)'{-h,--help}'[Display help]' \
+                  ':name:'
                 ;;
               update)
-                _message 'marketplace name (optional)'
+                _arguments \
+                  '(-h --help)'{-h,--help}'[Display help]' \
+                  ':name:'
                 ;;
               *)
                 _message 'no more arguments'
@@ -142,8 +149,23 @@ case $words[2] in
             '(-h --help)'{-h,--help}'[Display help]' \
             ':plugin:'
           ;;
-        enable|disable)
-          _message 'plugin name'
+        enable)
+          _arguments \
+            '(-s --scope)'{-s,--scope}'[Installation scope]:scope:(user project local)' \
+            '(-h --help)'{-h,--help}'[Display help]' \
+            ':plugin:'
+          ;;
+        disable)
+          _arguments \
+            '(-s --scope)'{-s,--scope}'[Installation scope]:scope:(user project local)' \
+            '(-h --help)'{-h,--help}'[Display help]' \
+            ':plugin:'
+          ;;
+        update)
+          _arguments \
+            '(-s --scope)'{-s,--scope}'[Installation scope]:scope:(user project local managed)' \
+            '(-h --help)'{-h,--help}'[Display help]' \
+            ':plugin:'
           ;;
         *)
           _message 'no more arguments'
@@ -177,6 +199,7 @@ _arguments -s \
   '--mcp-debug[DEPRECATED - Enable MCP debug mode]' \
   '--dangerously-skip-permissions[Bypass all permission checks]' \
   '--allow-dangerously-skip-permissions[Enable bypassing all permission checks as an option]' \
+  '--max-budget-usd[Maximum dollar amount to spend on API calls]:amount:' \
   '--replay-user-messages[Re-emit user messages from stdin back on stdout]' \
   '*--allowedTools[Comma or space-separated list of tool names to allow]:tools:' \
   '*--allowed-tools[Comma or space-separated list of tool names to allow]:tools:' \

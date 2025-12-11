@@ -2,6 +2,26 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.0.65] - 2025-12-11
+
+### Added
+- New `--max-budget-usd` flag: Maximum dollar amount to spend on API calls (only works with --print)
+- New `update` subcommand for `plugin` command: Update a plugin to the latest version
+- Added `--scope` flag to `plugin enable` command with options: user, project, local
+- Added `--scope` flag to `plugin disable` command with options: user, project, local
+- Added `--help` flag completion for `plugin enable` command
+- Added `--help` flag completion for `plugin disable` command
+- Added `--help` flag completion for `plugin marketplace add` command
+- Added `--help` flag completion for `plugin marketplace remove` command
+- Added `--help` flag completion for `plugin marketplace update` command
+
+### Changed
+- Improved argument completion for `plugin enable` - now uses `_arguments` instead of `_message`
+- Improved argument completion for `plugin disable` - now uses `_arguments` instead of `_message`
+- Improved argument completion for `plugin marketplace remove` - now uses `_arguments` instead of `_message`
+- Improved argument completion for `plugin marketplace update` - now uses `_arguments` instead of `_message`
+- Updated `plugin update` subcommand to include `managed` scope option in addition to user, project, local
+
 ## [2.0.64] - 2025-12-10
 
 ### Added
