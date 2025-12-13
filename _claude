@@ -34,7 +34,9 @@ plugin_commands=(
   'validate:Validate a plugin or marketplace manifest'
   'marketplace:Manage Claude Code marketplaces'
   'install:Install a plugin from available marketplaces'
+  'i:Install a plugin from available marketplaces'
   'uninstall:Uninstall an installed plugin'
+  'remove:Uninstall an installed plugin'
   'enable:Enable a disabled plugin'
   'disable:Disable an enabled plugin'
   'update:Update a plugin to the latest version'
@@ -46,6 +48,7 @@ marketplace_commands=(
   'add:Add a marketplace from a URL, path, or GitHub repo'
   'list:List all configured marketplaces'
   'remove:Remove a configured marketplace'
+  'rm:Remove a configured marketplace'
   'update:Update marketplace(s) from their source'
   'help:Display help for command'
 )

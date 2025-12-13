@@ -2,6 +2,13 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.0.69] - 2025-12-13
+
+### Added
+- Added `i` alias for `plugin install` subcommand
+- Added `remove` alias for `plugin uninstall` subcommand
+- Added `rm` alias for `plugin marketplace remove` subcommand
+
 ## [2.0.67] - 2025-12-12
 
 No changes to completions. CLI structure remains the same as 2.0.65.
