@@ -1,8 +1,9 @@
 # zsh-claudecode-completion
 
-Minimal and always up-to-date zsh completion plugin for [Claude Code CLI](https://github.com/anthropics/claude-code).
+Minimal and always up-to-date zsh completions for [Claude Code CLI](https://github.com/anthropics/claude-code) 
 
-**Pure tab completion only** - no aliases, no wrapper functions, no opinionated workflows.
+**Pure tab completion only** — no aliases, no wrapper functions, no opinionated workflows.
+**Always up-to-date within 24 hours** - scheduled github action run daily, Claude Code automatically regenerates completions when the CLI changes. No manual maintenance required.
 
 ## How It Works
 
