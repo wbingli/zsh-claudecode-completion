@@ -212,7 +212,7 @@ _arguments -s \
   '*--mcp-config[Load MCP servers from JSON files or strings]:config:_files' \
   '--system-prompt[System prompt to use for the session]:prompt:' \
   '--append-system-prompt[Append a system prompt to the default system prompt]:prompt:' \
-  '--permission-mode[Permission mode to use for the session]:mode:(acceptEdits bypassPermissions default dontAsk plan)' \
+  '--permission-mode[Permission mode to use for the session]:mode:(acceptEdits bypassPermissions default delegate dontAsk plan)' \
   '(-c --continue)'{-c,--continue}'[Continue the most recent conversation]' \
   '(-r --resume)'{-r,--resume}'[Resume a conversation by session ID]:value:' \
   '--fork-session[When resuming, create a new session ID instead of reusing]' \

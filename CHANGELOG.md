@@ -2,6 +2,11 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.0.70] - 2025-12-16
+
+### Added
+- Added `delegate` option to `--permission-mode` flag
+
 ## [2.0.69] - 2025-12-13
 
 ### Added
