@@ -230,6 +230,8 @@ _arguments -s \
   '--setting-sources[Comma-separated list of setting sources to load]:sources:' \
   '*--plugin-dir[Load plugins from directories for this session only]:dir:_files -/' \
   '--disable-slash-commands[Disable all slash commands]' \
+  '--chrome[Enable Claude in Chrome integration]' \
+  '--no-chrome[Disable Claude in Chrome integration]' \
   '(-v --version)'{-v,--version}'[Output the version number]' \
   '(-h --help)'{-h,--help}'[Display help for command]' \
   '1:command:(mcp plugin setup-token doctor update install)' \
