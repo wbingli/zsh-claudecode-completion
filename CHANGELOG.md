@@ -2,6 +2,12 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.0.71] - 2025-12-17
+
+### Added
+- New `--chrome` flag: Enable Claude in Chrome integration
+- New `--no-chrome` flag: Disable Claude in Chrome integration
+
 ## [2.0.70] - 2025-12-16
 
 ### Added
