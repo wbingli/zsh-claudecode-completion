@@ -1,6 +1,6 @@
 #compdef claude
 
-# Zsh completion script for Claude Code CLI
+# Zsh completion script for Claude Code CLI (v2.0.76)
 # https://github.com/anthropics/claude-code
 
 local curcontext="$curcontext" state line
