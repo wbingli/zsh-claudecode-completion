@@ -2,7 +2,7 @@
 
 # Zsh completion script for Claude Code CLI
 # https://github.com/anthropics/claude-code
-# Auto-generated for Claude v2.1.1
+# Auto-generated for Claude v2.1.2
 
 local curcontext="$curcontext" state line
 typeset -A opt_args
@@ -26,7 +26,7 @@ mcp_commands=(
   'help:Display help for command'
   'list:List configured MCP servers'
   'remove:Remove an MCP server'
-  'reset-project-choices:Reset all approved and rejected project-scoped servers'
+  'reset-project-choices:Reset all approved and rejected project-scoped (.mcp.json) servers within this project'
   'serve:Start the Claude Code MCP server'
 )
 

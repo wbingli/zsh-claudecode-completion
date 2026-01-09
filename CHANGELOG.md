@@ -2,6 +2,11 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.2] - 2026-01-09
+
+### Changed
+- Updated description for `mcp reset-project-choices` command: Now includes "(.mcp.json) servers within this project" for clarity
+
 ## [2.1.1] - 2026-01-08
 
 ### Added
