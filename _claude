@@ -2,7 +2,7 @@
 
 # Zsh completion script for Claude Code CLI
 # https://github.com/anthropics/claude-code
-# Auto-generated for Claude v2.1.1
+# Auto-generated for Claude v2.1.3
 
 local curcontext="$curcontext" state line
 typeset -A opt_args
@@ -216,7 +216,7 @@ _arguments -s \
   '(-c --continue)'{-c,--continue}'[Continue the most recent conversation]' \
   '--dangerously-skip-permissions[Bypass all permission checks]' \
   '(-d --debug)'{-d,--debug}'[Enable debug mode with optional category filtering]:filter:' \
-  '--disable-slash-commands[Disable all slash commands]' \
+  '--disable-slash-commands[Disable all skills]' \
   '*--disallowedTools[Comma or space-separated list of tool names to deny]:tools:' \
   '*--disallowed-tools[Comma or space-separated list of tool names to deny]:tools:' \
   '--fallback-model[Enable automatic fallback to specified model]:model:' \
