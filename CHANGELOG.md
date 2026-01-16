@@ -2,6 +2,13 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.9] - 2026-01-16
+
+### Added
+- New `--file` flag: File resources to download at startup with format `file_id:relative_path` (e.g., `--file file_abc:doc.txt file_def:img.png`)
+- Added `plugin list` command with `--available` and `--json` flags for listing installed plugins
+- Added `--json` flag to `plugin marketplace list` command for JSON output
+
 ## [2.1.7] - 2026-01-14
 
 ### Changed

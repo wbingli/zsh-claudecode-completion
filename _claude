@@ -2,7 +2,7 @@
 
 # Zsh completion script for Claude Code CLI
 # https://github.com/anthropics/claude-code
-# Auto-generated for Claude v2.1.7
+# Auto-generated for Claude v2.1.9
 
 local curcontext="$curcontext" state line
 typeset -A opt_args
@@ -37,6 +37,7 @@ plugin_commands=(
   'help:Display help for command'
   'install:Install a plugin from available marketplaces'
   'i:Install a plugin from available marketplaces'
+  'list:List installed plugins'
   'marketplace:Manage Claude Code marketplaces'
   'uninstall:Uninstall an installed plugin'
   'remove:Uninstall an installed plugin'
@@ -116,6 +117,12 @@ case $words[2] in
       _describe 'plugin command' plugin_commands
     else
       case $words[3] in
+        list)
+          _arguments \
+            '--available[Include available plugins from marketplaces (requires --json)]' \
+            '(-h --help)'{-h,--help}'[Display help]' \
+            '--json[Output as JSON]'
+          ;;
         validate)
           _arguments \
             '(-h --help)'{-h,--help}'[Display help]' \
@@ -143,7 +150,8 @@ case $words[2] in
                 ;;
               list)
                 _arguments \
-                  '(-h --help)'{-h,--help}'[Display help]'
+                  '(-h --help)'{-h,--help}'[Display help]' \
+                  '--json[Output as JSON]'
                 ;;
               *)
                 _message 'no more arguments'
@@ -220,6 +228,7 @@ _arguments -s \
   '*--disallowedTools[Comma or space-separated list of tool names to deny (e.g. "Bash(git:*) Edit")]:tools:' \
   '*--disallowed-tools[Comma or space-separated list of tool names to deny (e.g. "Bash(git:*) Edit")]:tools:' \
   '--fallback-model[Enable automatic fallback to specified model when default model is overloaded (only works with --print)]:model:' \
+  '*--file[File resources to download at startup. Format: file_id:relative_path (e.g., --file file_abc:doc.txt file_def:img.png)]:spec:' \
   '--fork-session[When resuming, create a new session ID instead of reusing the original (use with --resume or --continue)]' \
   '(-h --help)'{-h,--help}'[Display help for command]' \
   '--ide[Automatically connect to IDE on startup if exactly one valid IDE is available]' \
