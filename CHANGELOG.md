@@ -2,6 +2,11 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.38] - 2026-02-10
+
+### Added
+- New `--effort` flag: Effort level for the current session (low, medium, high)
+
 ## [2.1.37] - 2026-02-09
 
 ### Added
