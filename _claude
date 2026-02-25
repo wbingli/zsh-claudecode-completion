@@ -2,7 +2,7 @@
 
 # Zsh completion script for Claude Code CLI
 # https://github.com/anthropics/claude-code
-# Auto-generated for Claude v2.1.50
+# Auto-generated for Claude v2.1.55
 
 local curcontext="$curcontext" state line
 typeset -A opt_args
