@@ -2,7 +2,7 @@
 
 # Zsh completion script for Claude Code CLI
 # https://github.com/anthropics/claude-code
-# Auto-generated for Claude v2.1.92
+# Auto-generated for Claude v2.1.96
 
 local curcontext="$curcontext" state line
 typeset -A opt_args
@@ -16,6 +16,7 @@ commands=(
   'install:Install Claude Code native build. Use [target] to specify version (stable, latest, or specific version)'
   'mcp:Configure and manage MCP servers'
   'plugin:Manage Claude Code plugins'
+  'plugins:Manage Claude Code plugins'
   'setup-token:Set up a long-lived authentication token (requires Claude subscription)'
   'remote-control:Connect your local environment to claude.ai/code'
   'update:Check for updates and install if available'
@@ -72,7 +73,7 @@ marketplace_commands=(
 # This handles cases where flags appear before the subcommand (e.g., alias claude='claude --flag').
 local subcmd_pos=0
 local subcmd=""
-local -a known_commands=(agents auth auto-mode doctor install mcp plugin remote-control setup-token update upgrade)
+local -a known_commands=(agents auth auto-mode doctor install mcp plugin plugins remote-control setup-token update upgrade)
 local i
 for (( i=2; i <= ${#words}; i++ )); do
   # Skip flags and their values
@@ -187,7 +188,7 @@ case $subcmd in
     fi
     return
     ;;
-  plugin)
+  plugin|plugins)
     if (( CURRENT == sub1 )); then
       _describe 'plugin command' plugin_commands
     else
@@ -382,5 +383,5 @@ _arguments -s \
   '--verbose[Override verbose mode setting from config]' \
   '(-v --version)'{-v,--version}'[Output the version number]' \
   '(-w --worktree)'{-w,--worktree}'[Create a new git worktree for this session (optionally specify a name)]::name:' \
-  '1:command:(agents auth auto-mode doctor install mcp plugin remote-control setup-token update upgrade)' \
+  '1:command:(agents auth auto-mode doctor install mcp plugin plugins remote-control setup-token update upgrade)' \
   '*:prompt:'

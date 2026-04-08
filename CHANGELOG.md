@@ -2,6 +2,11 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.96] - 2026-04-08
+
+### Added
+- Added `plugins` as an alias for the `plugin` command (CLI now shows `plugin|plugins`)
+
 ## [2.1.92] - 2026-04-04
 
 ### Added
