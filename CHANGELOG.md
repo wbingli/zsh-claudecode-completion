@@ -2,6 +2,11 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.100] - 2026-04-10
+
+### Added
+- New `--exclude-dynamic-system-prompt-sections` flag: Move per-machine sections (cwd, env info, memory paths, git status) from the system prompt into the first user message. Improves cross-user prompt-cache reuse. Only applies with the default system prompt.
+
 ## [2.1.92] - 2026-04-04
 
 ### Added

@@ -2,7 +2,7 @@
 
 # Zsh completion script for Claude Code CLI
 # https://github.com/anthropics/claude-code
-# Auto-generated for Claude v2.1.92
+# Auto-generated for Claude v2.1.100
 
 local curcontext="$curcontext" state line
 typeset -A opt_args
@@ -348,6 +348,7 @@ _arguments -s \
   '*--disallowedTools[Comma or space-separated list of tool names to deny (e.g. "Bash(git:*) Edit")]:tools:' \
   '*--disallowed-tools[Comma or space-separated list of tool names to deny (e.g. "Bash(git:*) Edit")]:tools:' \
   '--effort[Effort level for the current session (low, medium, high, max)]:level:(low medium high max)' \
+  '--exclude-dynamic-system-prompt-sections[Move per-machine sections from the system prompt into the first user message. Improves cross-user prompt-cache reuse. Only applies with the default system prompt]' \
   '--fallback-model[Enable automatic fallback to specified model when default model is overloaded (only works with --print)]:model:' \
   '*--file[File resources to download at startup. Format: file_id:relative_path (e.g., --file file_abc:doc.txt file_def:img.png)]:file:' \
   '--fork-session[When resuming, create a new session ID instead of reusing the original (use with --resume or --continue)]' \
