@@ -4,6 +4,87 @@
 # https://github.com/anthropics/claude-code
 # Auto-generated for Claude v2.1.112
 
+_claude_session_ids() {
+  # Claude stores each project under ~/.claude/projects/ with a mangled
+  # folder name: both `/` and `.` are replaced with `-`. The prior version
+  # only handled `/`, so any hidden-directory path (e.g. `/Users/x/.fabro/y`)
+  # silently returned no completions.
+  local mangled="${PWD//\//-}"
+  mangled="${mangled//./-}"
+  local project_dir="$HOME/.claude/projects/$mangled"
+
+  # Fallback: if the mangled folder isn't found (e.g. unknown future naming
+  # scheme, or the session was created from a different canonical path such
+  # as a resolved symlink), locate the project by matching the authoritative
+  # `originalPath` recorded in each sessions-index.json.
+  if [[ ! -d "$project_dir" ]]; then
+    project_dir=""
+    local f
+    for f in "$HOME/.claude/projects"/*/sessions-index.json(N); do
+      if [[ "$(jq -r '.originalPath // ""' "$f" 2>/dev/null)" == "$PWD" ]]; then
+        project_dir="${f:h}"
+        break
+      fi
+    done
+    [[ -z "$project_dir" ]] && return 1
+  fi
+
+  local index_file="$project_dir/sessions-index.json"
+  local -a ids labels
+
+  # Collect indexed session UUIDs
+  local -A indexed
+  if [[ -f "$index_file" ]]; then
+    while IFS= read -r uuid; do indexed[$uuid]=1; done \
+      < <(jq -r '.entries[].sessionId' "$index_file" 2>/dev/null)
+  fi
+
+  # Unindexed JSONL files: sorted ascending by mtime (newest shown first by compadd -V)
+  local -a unindexed_lines
+  for f in "$project_dir"/*.jsonl(N); do
+    local uuid=$(basename "$f" .jsonl)
+    [[ -n "${indexed[$uuid]}" ]] && continue
+    local mtime=$(stat -f "%m" "$f" 2>/dev/null | tr -d '[:space:]')
+    local datestr=$(stat -f "%Sm" -t "%Y-%m-%d" "$f" 2>/dev/null)
+    # Extract branch + first real user prompt in one jq call.
+    # Skip isMeta wrappers and <command-*> / <local-command-*> messages.
+    local info=$(head -50 "$f" | jq -rs '
+      [.[] | select(.type=="user")] as $users |
+      ($users[0].gitBranch // "?") as $branch |
+      ([
+        $users[]
+        | select((.isMeta // false) != true and .message.content != null)
+        | .message.content
+        | if type=="array" then .[0].text else . end
+        | select(. != null)
+        | select(test("^\\s*<(command|local-command)") | not)
+      ] | first // "?") as $msg |
+      "\($branch)\t\($msg | gsub("\n"; " ") | .[0:60])"
+    ' 2>/dev/null)
+    local branch="${info%%$'\t'*}"
+    local msg="${info#*$'\t'}"
+    unindexed_lines+=("${mtime}"$'\t'"${uuid}"$'\t'"${datestr}"$'\t'"${branch}"$'\t'"${msg:-?}")
+  done
+  while IFS=$'\t' read -r mtime uuid datestr branch msg; do
+    ids+=("$uuid")
+    labels+=("${datestr} ${uuid:0:8}- [${branch}] ${msg}")
+  done < <(printf '%s\n' "${unindexed_lines[@]}" | sort -n)
+
+  # Indexed sessions sorted ascending by modified (--tac puts newest last → shown first)
+  if [[ -f "$index_file" ]]; then
+    while IFS=$'\t' read -r id branch summary modified; do
+      ids+=("$id")
+      labels+=("${modified:0:10} ${id:0:8}- [${branch}] ${summary}")
+    done < <(jq -rs '[.[].entries[]] | sort_by(.modified) | .[] | [.sessionId, (.gitBranch // "?"), (.summary // .firstPrompt[:60] // ""), .modified] | @tsv' "$index_file" 2>/dev/null)
+  fi
+
+  [[ ${#ids} -eq 0 ]] && return 1
+  local expl
+  _wanted session-ids expl 'session' compadd -V sessions -d labels -a ids
+}
+
+# Offer a freshly-generated UUID for --session-id, which expects a NEW,
+# user-assigned session identifier (not an existing session to resume).
 local curcontext="$curcontext" state line
 typeset -A opt_args
 
@@ -372,7 +453,7 @@ _arguments -s \
   '(-p --print)'{-p,--print}'[Print response and exit (useful for pipes). Note: The workspace trust dialog is skipped when Claude is run with the -p mode. Only use this flag in directories you trust]' \
   '--remote-control-session-name-prefix[Prefix for auto-generated Remote Control session names (default: hostname)]:prefix:' \
   '--replay-user-messages[Re-emit user messages from stdin back on stdout for acknowledgment (only works with --input-format=stream-json and --output-format=stream-json)]' \
-  '(-r --resume)'{-r,--resume}'[Resume a conversation by session ID, or open interactive picker with optional search term]:value:' \
+  '(-r --resume)'{-r,--resume}'[Resume a conversation by session ID, or open interactive picker with optional search term]:session:_claude_session_ids' \
   '--session-id[Use a specific session ID for the conversation (must be a valid UUID)]:uuid:' \
   '--setting-sources[Comma-separated list of setting sources to load (user, project, local)]:sources:' \
   '--settings[Path to a settings JSON file or a JSON string to load additional settings from]:file:_files' \
