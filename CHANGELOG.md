@@ -2,6 +2,11 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.114] - 2026-04-18
+
+### Changed
+- Updated `--name` flag description: now mentions the prompt box and /resume picker — "(shown in the prompt box, /resume picker, and terminal title)"
+
 ## [2.1.112] - 2026-04-17
 
 ### Changed
