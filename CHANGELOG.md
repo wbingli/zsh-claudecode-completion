@@ -2,7 +2,10 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
-## [2.1.114] - 2026-04-18
+## [2.1.114] - 2026-04-19
+
+### Added
+- New `--client-secret` flag for `mcp add-from-claude-desktop`: Prompt for OAuth client secret (or set MCP_CLIENT_SECRET env var)
 
 ### Changed
 - Updated `--name` flag description: now mentions the prompt box and /resume picker — "(shown in the prompt box, /resume picker, and terminal title)"

@@ -249,6 +249,7 @@ case $subcmd in
           ;;
         add-from-claude-desktop)
           _arguments \
+            '--client-secret[Prompt for OAuth client secret (or set MCP_CLIENT_SECRET env var)]' \
             '(-h --help)'{-h,--help}'[Display help]' \
             '(-s --scope)'{-s,--scope}'[Configuration scope (local, user, or project) (default: local)]:scope:(local user project)'
           ;;
