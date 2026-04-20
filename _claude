@@ -39,18 +39,34 @@ _claude_session_ids() {
       < <(jq -r '.entries[].sessionId' "$index_file" 2>/dev/null)
   fi
 
-  # Unindexed JSONL files: sorted ascending by mtime (newest shown first by compadd -V)
-  local -a unindexed_lines
+  # Merge indexed and unindexed sessions into one list keyed by an ISO-ish
+  # timestamp, then sort descending so the newest session appears first.
+  # Each entry format: "<sortkey>\t<uuid>\t<datestr>\t<branch>\t<msg>"
+  local -a session_lines
+
+  # Indexed sessions — use `.modified` (ISO-8601) directly as the sort key.
+  if [[ -f "$index_file" ]]; then
+    while IFS=$'\t' read -r modified id branch summary; do
+      [[ -z "$id" ]] && continue
+      session_lines+=("${modified}"$'\t'"${id}"$'\t'"${modified:0:10}"$'\t'"${branch}"$'\t'"${summary}")
+    done < <(jq -rs '[.[].entries[]] | .[] | [.modified, .sessionId, (.gitBranch // "?"), (.summary // .firstPrompt[:60] // "")] | @tsv' "$index_file" 2>/dev/null)
+  fi
+
+  # Unindexed JSONL files — use file mtime as the sort key (ISO format so it
+  # sorts correctly alongside `.modified` from the index).
   for f in "$project_dir"/*.jsonl(N); do
     local uuid=$(basename "$f" .jsonl)
     [[ -n "${indexed[$uuid]}" ]] && continue
-    local mtime=$(stat -f "%m" "$f" 2>/dev/null | tr -d '[:space:]')
-    local datestr=$(stat -f "%Sm" -t "%Y-%m-%d" "$f" 2>/dev/null)
+    local iso_mtime=$(stat -f "%Sm" -t "%Y-%m-%dT%H:%M:%S" "$f" 2>/dev/null)
+    local datestr="${iso_mtime:0:10}"
     # Extract branch + first real user prompt in one jq call.
     # Skip isMeta wrappers and <command-*> / <local-command-*> messages.
-    local info=$(head -50 "$f" | jq -rs '
+    # Emits nothing when no resumable user prompt exists, so files
+    # containing only file-history-snapshots, hook progress, or
+    # <command-*>/meta entries are filtered out — `claude --resume`
+    # rejects those with "No conversation found".
+    local info=$(head -100 "$f" | jq -rs '
       [.[] | select(.type=="user")] as $users |
-      ($users[0].gitBranch // "?") as $branch |
       ([
         $users[]
         | select((.isMeta // false) != true and .message.content != null)
@@ -58,29 +74,36 @@ _claude_session_ids() {
         | if type=="array" then .[0].text else . end
         | select(. != null)
         | select(test("^\\s*<(command|local-command)") | not)
-      ] | first // "?") as $msg |
-      "\($branch)\t\($msg | gsub("\n"; " ") | .[0:60])"
+      ] | first) as $msg |
+      if $msg == null then empty else
+        ($users[0].gitBranch // "?") as $branch |
+        "\($branch)\t\($msg | gsub("\n"; " ") | .[0:60])"
+      end
     ' 2>/dev/null)
+    [[ -z "$info" ]] && continue
     local branch="${info%%$'\t'*}"
     local msg="${info#*$'\t'}"
-    unindexed_lines+=("${mtime}"$'\t'"${uuid}"$'\t'"${datestr}"$'\t'"${branch}"$'\t'"${msg:-?}")
+    session_lines+=("${iso_mtime}"$'\t'"${uuid}"$'\t'"${datestr}"$'\t'"${branch}"$'\t'"${msg}")
   done
-  while IFS=$'\t' read -r mtime uuid datestr branch msg; do
+
+  # Newest first: sort descending on the ISO timestamp sort key. The
+  # insertion order here is the order the user will see — see the compadd
+  # call below, which uses `-o nosort` to preserve it. (Plain `-V` alone
+  # isn't enough in some zsh setups; `-o nosort` reliably disables the
+  # alphabetical re-sort that would otherwise flip the list to oldest-first.)
+  while IFS=$'\t' read -r sortkey uuid datestr branch msg; do
     ids+=("$uuid")
     labels+=("${datestr} ${uuid:0:8}- [${branch}] ${msg}")
-  done < <(printf '%s\n' "${unindexed_lines[@]}" | sort -n)
-
-  # Indexed sessions sorted ascending by modified (--tac puts newest last → shown first)
-  if [[ -f "$index_file" ]]; then
-    while IFS=$'\t' read -r id branch summary modified; do
-      ids+=("$id")
-      labels+=("${modified:0:10} ${id:0:8}- [${branch}] ${summary}")
-    done < <(jq -rs '[.[].entries[]] | sort_by(.modified) | .[] | [.sessionId, (.gitBranch // "?"), (.summary // .firstPrompt[:60] // ""), .modified] | @tsv' "$index_file" 2>/dev/null)
-  fi
+  done < <(printf '%s\n' "${session_lines[@]}" | sort -r)
 
   [[ ${#ids} -eq 0 ]] && return 1
   local expl
-  _wanted session-ids expl 'session' compadd -V sessions -d labels -a ids
+  # `-V sessions` names the group (for zstyle targeting). `-o nosort` is
+  # what actually disables alphabetical re-sorting — `-V` alone is
+  # sometimes overridden by the display layer. `-o nosort` is the canonical
+  # zsh API (used throughout core completion functions) and is stable in
+  # zsh 5.0.1+, so this is safe for any modern zsh.
+  _wanted session-ids expl 'session' compadd -V sessions -o nosort -d labels -a ids
 }
 
 # Offer a freshly-generated UUID for --session-id, which expects a NEW,
