@@ -2,7 +2,7 @@
 
 # Zsh completion script for Claude Code CLI
 # https://github.com/anthropics/claude-code
-# Auto-generated for Claude v2.1.114
+# Auto-generated for Claude v2.1.116
 
 _claude_session_ids() {
   # Claude stores each project under ~/.claude/projects/ with a mangled
@@ -120,6 +120,7 @@ commands=(
   'install:Install Claude Code native build. Use [target] to specify version (stable, latest, or specific version)'
   'mcp:Configure and manage MCP servers'
   'plugin:Manage Claude Code plugins'
+  'plugins:Manage Claude Code plugins'
   'setup-token:Set up a long-lived authentication token (requires Claude subscription)'
   'remote-control:Connect your local environment to claude.ai/code'
   'update:Check for updates and install if available'
@@ -176,7 +177,7 @@ marketplace_commands=(
 # This handles cases where flags appear before the subcommand (e.g., alias claude='claude --flag').
 local subcmd_pos=0
 local subcmd=""
-local -a known_commands=(agents auth auto-mode doctor install mcp plugin remote-control setup-token update upgrade)
+local -a known_commands=(agents auth auto-mode doctor install mcp plugin plugins remote-control setup-token update upgrade)
 local i
 for (( i=2; i <= ${#words}; i++ )); do
   # Skip flags and their values
@@ -292,7 +293,7 @@ case $subcmd in
     fi
     return
     ;;
-  plugin)
+  plugin|plugins)
     if (( CURRENT == sub1 )); then
       _describe 'plugin command' plugin_commands
     else
@@ -441,6 +442,7 @@ _arguments -s \
   '*--allowedTools[Comma or space-separated list of tool names to allow (e.g. "Bash(git:*) Edit")]:tools:' \
   '*--allowed-tools[Comma or space-separated list of tool names to allow (e.g. "Bash(git:*) Edit")]:tools:' \
   '--append-system-prompt[Append a system prompt to the default system prompt]:prompt:' \
+  '--append-system-prompt-file[Append a system prompt from a file to the default system prompt]:file:_files' \
   '--bare[Minimal mode: skip hooks, LSP, plugin sync, attribution, auto-memory, background prefetches, keychain reads, and CLAUDE.md auto-discovery. Sets CLAUDE_CODE_SIMPLE=1]' \
   '*--betas[Beta headers to include in API requests (API key users only)]:betas:' \
   '--brief[Enable SendUserMessage tool for agent-to-user communication]' \
@@ -483,10 +485,11 @@ _arguments -s \
   '--settings[Path to a settings JSON file or a JSON string to load additional settings from]:file:_files' \
   '--strict-mcp-config[Only use MCP servers from --mcp-config, ignoring all other MCP configurations]' \
   '--system-prompt[System prompt to use for the session]:prompt:' \
+  '--system-prompt-file[Read system prompt from a file]:file:_files' \
   '--tmux[Create a tmux session for the worktree (requires --worktree). Uses iTerm2 native panes when available; use --tmux=classic for traditional tmux]::style:(classic)' \
   '*--tools[Specify the list of available tools from the built-in set. Use "" to disable all tools, "default" to use all tools, or specify tool names (e.g. "Bash,Edit,Read")]:tools:' \
   '--verbose[Override verbose mode setting from config]' \
   '(-v --version)'{-v,--version}'[Output the version number]' \
   '(-w --worktree)'{-w,--worktree}'[Create a new git worktree for this session (optionally specify a name)]::name:' \
-  '1:command:(agents auth auto-mode doctor install mcp plugin remote-control setup-token update upgrade)' \
+  '1:command:(agents auth auto-mode doctor install mcp plugin plugins remote-control setup-token update upgrade)' \
   '*:prompt:'
