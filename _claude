@@ -32,69 +32,110 @@ _claude_session_ids() {
   local index_file="$project_dir/sessions-index.json"
   local -a ids labels
 
-  # Collect indexed session UUIDs
+  # Cap the number of sessions offered by completion. Projects with a long
+  # history can accumulate hundreds of session files — enumerating them all
+  # triggers zsh's "show all N possibilities?" pager prompt and (worse)
+  # forces the expensive JSONL parse below to run once per file on every
+  # TAB press. Default to the 20 most recent; override via
+  # CLAUDE_COMPLETION_SESSION_LIMIT, where 0 (or any non-positive int)
+  # disables the cap for users who want the old behavior.
+  local max_sessions=${CLAUDE_COMPLETION_SESSION_LIMIT:-20}
+
+  # Two-pass enumeration. Pass 1 collects cheap candidates keyed by an
+  # ISO-ish timestamp; pass 2 resolves branch/message only for the top N.
+  # Candidate line format:
+  #   "<sortkey>\t<uuid>\tindex\t<branch>\t<summary>"  (already resolved)
+  #   "<sortkey>\t<uuid>\tjsonl"                      (resolve in pass 2)
+  local -a candidates
   local -A indexed
-  if [[ -f "$index_file" ]]; then
-    while IFS= read -r uuid; do indexed[$uuid]=1; done \
-      < <(jq -r '.entries[].sessionId' "$index_file" 2>/dev/null)
-  fi
 
-  # Merge indexed and unindexed sessions into one list keyed by an ISO-ish
-  # timestamp, then sort descending so the newest session appears first.
-  # Each entry format: "<sortkey>\t<uuid>\t<datestr>\t<branch>\t<msg>"
-  local -a session_lines
-
-  # Indexed sessions — use `.modified` (ISO-8601) directly as the sort key.
+  # Indexed sessions — one jq call gives us everything cheaply, so keep
+  # branch/summary inline and skip pass 2 for these.
   if [[ -f "$index_file" ]]; then
     while IFS=$'\t' read -r modified id branch summary; do
       [[ -z "$id" ]] && continue
-      session_lines+=("${modified}"$'\t'"${id}"$'\t'"${modified:0:10}"$'\t'"${branch}"$'\t'"${summary}")
+      indexed[$id]=1
+      candidates+=("${modified}"$'\t'"${id}"$'\tindex\t'"${branch}"$'\t'"${summary}")
     done < <(jq -rs '[.[].entries[]] | .[] | [.modified, .sessionId, (.gitBranch // "?"), (.summary // .firstPrompt[:60] // "")] | @tsv' "$index_file" 2>/dev/null)
   fi
 
-  # Unindexed JSONL files — use file mtime as the sort key (ISO format so it
-  # sorts correctly alongside `.modified` from the index).
-  for f in "$project_dir"/*.jsonl(N); do
-    local uuid=$(basename "$f" .jsonl)
-    [[ -n "${indexed[$uuid]}" ]] && continue
-    local iso_mtime=$(stat -f "%Sm" -t "%Y-%m-%dT%H:%M:%S" "$f" 2>/dev/null)
-    local datestr="${iso_mtime:0:10}"
-    # Extract branch + first real user prompt in one jq call.
-    # Skip isMeta wrappers and <command-*> / <local-command-*> messages.
-    # Emits nothing when no resumable user prompt exists, so files
-    # containing only file-history-snapshots, hook progress, or
-    # <command-*>/meta entries are filtered out — `claude --resume`
-    # rejects those with "No conversation found".
-    local info=$(head -100 "$f" | jq -rs '
-      [.[] | select(.type=="user")] as $users |
-      ([
-        $users[]
-        | select((.isMeta // false) != true and .message.content != null)
-        | .message.content
-        | if type=="array" then .[0].text else . end
-        | select(. != null)
-        | select(test("^\\s*<(command|local-command)") | not)
-      ] | first) as $msg |
-      if $msg == null then empty else
-        ($users[0].gitBranch // "?") as $branch |
-        "\($branch)\t\($msg | gsub("\n"; " ") | .[0:60])"
-      end
-    ' 2>/dev/null)
-    [[ -z "$info" ]] && continue
-    local branch="${info%%$'\t'*}"
-    local msg="${info#*$'\t'}"
-    session_lines+=("${iso_mtime}"$'\t'"${uuid}"$'\t'"${datestr}"$'\t'"${branch}"$'\t'"${msg}")
-  done
+  # Unindexed JSONL files — just mtime+uuid here; the expensive head|jq
+  # parse is deferred until we know the candidate survived the cap. Use
+  # zsh parameter expansion (`${f:t:r}`) and a single batched `stat` call
+  # to avoid forking a subshell per file: projects with thousands of
+  # sessions would otherwise spend many seconds just naming the files.
+  #
+  # Note: all locals used below are declared once here, up-front. zsh
+  # prints the current value of a variable when `local`/`typeset` is
+  # applied to it a second time in the same scope (treats it like
+  # `typeset -p`), so pass 2 must *not* redeclare these.
+  local -a jsonl_files mtime_lines top
+  local line iso_mtime filepath uuid sortkey src branch msg datestr info
+  local count=0 headroom
 
-  # Newest first: sort descending on the ISO timestamp sort key. The
-  # insertion order here is the order the user will see — see the compadd
-  # call below, which uses `-o nosort` to preserve it. (Plain `-V` alone
-  # isn't enough in some zsh setups; `-o nosort` reliably disables the
-  # alphabetical re-sort that would otherwise flip the list to oldest-first.)
-  while IFS=$'\t' read -r sortkey uuid datestr branch msg; do
+  jsonl_files=( "$project_dir"/*.jsonl(N) )
+  if (( ${#jsonl_files} > 0 )); then
+    mtime_lines=( "${(f)$(stat -f '%Sm %N' -t '%Y-%m-%dT%H:%M:%S' "${jsonl_files[@]}" 2>/dev/null)}" )
+    for line in "${mtime_lines[@]}"; do
+      iso_mtime="${line% *}"
+      filepath="${line#* }"
+      uuid="${filepath:t:r}"
+      [[ -n "${indexed[$uuid]}" ]] && continue
+      candidates+=("${iso_mtime}"$'\t'"${uuid}"$'\tjsonl')
+    done
+  fi
+
+  # Sort descending by sortkey, then cap. Use a small headroom so JSONL
+  # files that get filtered out in pass 2 (only meta / <command-*>
+  # entries) don't leave the list short.
+  if (( max_sessions > 0 )); then
+    headroom=$(( max_sessions * 2 + 5 ))
+    while IFS= read -r line; do top+=("$line"); done \
+      < <(printf '%s\n' "${candidates[@]}" | sort -r | head -n $headroom)
+  else
+    while IFS= read -r line; do top+=("$line"); done \
+      < <(printf '%s\n' "${candidates[@]}" | sort -r)
+  fi
+
+  # Pass 2: for each surviving candidate, resolve branch/message if needed
+  # and build the display rows. Newest-first order is preserved by sort -r
+  # above and by `-o nosort` on the compadd call below. (Plain `-V` alone
+  # isn't enough in some zsh setups; `-o nosort` is the canonical zsh API
+  # that reliably disables the alphabetical re-sort.)
+  for line in "${top[@]}"; do
+    (( max_sessions > 0 && count >= max_sessions )) && break
+    IFS=$'\t' read -r sortkey uuid src branch msg <<< "$line"
+    datestr="${sortkey:0:10}"
+    if [[ "$src" == "jsonl" ]]; then
+      # Extract branch + first real user prompt in one jq call.
+      # Skip isMeta wrappers and <command-*> / <local-command-*> messages.
+      # Emits nothing when no resumable user prompt exists, so files
+      # containing only file-history-snapshots, hook progress, or
+      # <command-*>/meta entries are filtered out — `claude --resume`
+      # rejects those with "No conversation found".
+      info=$(head -100 "$project_dir/$uuid.jsonl" | jq -rs '
+        [.[] | select(.type=="user")] as $users |
+        ([
+          $users[]
+          | select((.isMeta // false) != true and .message.content != null)
+          | .message.content
+          | if type=="array" then .[0].text else . end
+          | select(. != null)
+          | select(test("^\\s*<(command|local-command)") | not)
+        ] | first) as $msg |
+        if $msg == null then empty else
+          ($users[0].gitBranch // "?") as $branch |
+          "\($branch)\t\($msg | gsub("\n"; " ") | .[0:60])"
+        end
+      ' 2>/dev/null)
+      [[ -z "$info" ]] && continue
+      branch="${info%%$'\t'*}"
+      msg="${info#*$'\t'}"
+    fi
     ids+=("$uuid")
     labels+=("${datestr} ${uuid:0:8}- [${branch}] ${msg}")
-  done < <(printf '%s\n' "${session_lines[@]}" | sort -r)
+    (( count++ ))
+  done
 
   [[ ${#ids} -eq 0 ]] && return 1
   local expl

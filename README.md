@@ -72,7 +72,23 @@ claude <TAB>              # Show commands and options
 claude mcp <TAB>          # Show MCP subcommands
 claude --model <TAB>      # Show model names
 claude --output-format <TAB>  # Show output formats
+claude --resume <TAB>     # Show recent sessions (newest first)
 ```
+
+## Configuration
+
+### `--resume` session cap
+
+`claude --resume <TAB>` shows the **20 most recent sessions by default**, newest first. In projects with a long history (hundreds of session files) this avoids zsh's *"do you wish to see all N possibilities?"* pager and keeps completion near-instant.
+
+Override via the `CLAUDE_COMPLETION_SESSION_LIMIT` environment variable in `~/.zshrc`:
+
+```bash
+export CLAUDE_COMPLETION_SESSION_LIMIT=50   # show top 50 instead of 20
+export CLAUDE_COMPLETION_SESSION_LIMIT=0    # no cap — show every session
+```
+
+`0` (or any non-positive value) disables the cap entirely.
 
 ## Developer Guide
 
