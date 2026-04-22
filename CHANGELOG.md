@@ -2,6 +2,13 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.116] - 2026-04-21
+
+### Added
+- New `--system-prompt-file` flag: Read system prompt from a file (hidden flag referenced in `--bare` help text)
+- New `--append-system-prompt-file` flag: Append a system prompt from a file to the default system prompt (hidden flag)
+- Added `plugins` as an alias command for `plugin` (matches CLI's `plugin|plugins` display)
+
 ## [2.1.114] - 2026-04-19
 
 ### Added
