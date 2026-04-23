@@ -2,6 +2,11 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.118] - 2026-04-23
+
+### Added
+- New `plugin tag` subcommand: Create a `{name}--v{version}` git tag for a plugin release, with flags `--dry-run`, `--force`, `--message`, `--push`, `--remote`
+
 ## [2.1.116] - 2026-04-21
 
 ### Added
