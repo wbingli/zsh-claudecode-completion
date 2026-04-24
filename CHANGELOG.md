@@ -2,6 +2,14 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.119] - 2026-04-24
+
+### Added
+- New `plugin tag` subcommand: Create a `{name}--v{version}` git tag for a plugin release, with flags: `--dry-run`, `--force`, `--message`, `--push`, `--remote`
+
+### Changed
+- Updated `agents` command description: "Manage background and configured agents" (was "List configured agents")
+
 ## [2.1.116] - 2026-04-21
 
 ### Added
