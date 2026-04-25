@@ -2,7 +2,7 @@
 
 # Zsh completion script for Claude Code CLI
 # https://github.com/anthropics/claude-code
-# Auto-generated for Claude v2.1.116
+# Auto-generated for Claude v2.1.119
 
 _claude_session_ids() {
   # Claude stores each project under ~/.claude/projects/ with a mangled
@@ -154,7 +154,7 @@ typeset -A opt_args
 
 local -a commands
 commands=(
-  'agents:List configured agents'
+  'agents:Manage background and configured agents'
   'auth:Manage authentication'
   'auto-mode:Inspect auto mode classifier configuration'
   'doctor:Check the health of your Claude Code auto-updater'
@@ -200,6 +200,7 @@ plugin_commands=(
   'marketplace:Manage Claude Code marketplaces'
   'uninstall:Uninstall an installed plugin'
   'remove:Uninstall an installed plugin'
+  'tag:Create a {name}--v{version} git tag for a plugin release'
   'update:Update a plugin to the latest version (restart required to apply)'
   'validate:Validate a plugin or marketplace manifest'
 )
@@ -339,6 +340,16 @@ case $subcmd in
       _describe 'plugin command' plugin_commands
     else
       case $words[$sub1] in
+        tag)
+          _arguments \
+            '--dry-run[Print what would be tagged without creating it]' \
+            '(-f --force)'{-f,--force}'[Skip the dirty-working-tree and tag-already-exists checks]' \
+            '(-h --help)'{-h,--help}'[Display help]' \
+            '(-m --message)'{-m,--message}'[Tag annotation message (use %s for the version)]:msg:' \
+            '--push[Push the tag to --remote after creating it]' \
+            '--remote[Remote to push to with --push (default: origin)]:name:' \
+            '::path:_files'
+          ;;
         validate)
           _arguments \
             '(-h --help)'{-h,--help}'[Display help]' \
