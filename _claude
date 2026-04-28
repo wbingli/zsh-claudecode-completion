@@ -2,7 +2,7 @@
 
 # Zsh completion script for Claude Code CLI
 # https://github.com/anthropics/claude-code
-# Auto-generated for Claude v2.1.119
+# Auto-generated for Claude v2.1.121
 
 _claude_session_ids() {
   # Claude stores each project under ~/.claude/projects/ with a mangled
@@ -164,6 +164,7 @@ commands=(
   'plugins:Manage Claude Code plugins'
   'setup-token:Set up a long-lived authentication token (requires Claude subscription)'
   'remote-control:Connect your local environment to claude.ai/code'
+  'ultrareview:Run a cloud-hosted multi-agent code review of the current branch (or a PR number / base branch) and print the findings'
   'update:Check for updates and install if available'
   'upgrade:Check for updates and install if available'
 )
@@ -198,6 +199,8 @@ plugin_commands=(
   'i:Install a plugin from available marketplaces (use plugin@marketplace for specific marketplace)'
   'list:List installed plugins'
   'marketplace:Manage Claude Code marketplaces'
+  'prune:Remove auto-installed dependencies that are no longer needed'
+  'autoremove:Remove auto-installed dependencies that are no longer needed'
   'uninstall:Uninstall an installed plugin'
   'remove:Uninstall an installed plugin'
   'tag:Create a {name}--v{version} git tag for a plugin release'
@@ -219,7 +222,7 @@ marketplace_commands=(
 # This handles cases where flags appear before the subcommand (e.g., alias claude='claude --flag').
 local subcmd_pos=0
 local subcmd=""
-local -a known_commands=(agents auth auto-mode doctor install mcp plugin plugins remote-control setup-token update upgrade)
+local -a known_commands=(agents auth auto-mode doctor install mcp plugin plugins remote-control setup-token ultrareview update upgrade)
 local i
 for (( i=2; i <= ${#words}; i++ )); do
   # Skip flags and their values
@@ -395,11 +398,20 @@ case $subcmd in
             '(-s --scope)'{-s,--scope}'[Installation scope: user, project, or local (default: user)]:scope:(user project local)' \
             ':plugin:'
           ;;
+        prune|autoremove)
+          _arguments \
+            '--dry-run[List what would be removed without removing]' \
+            '(-h --help)'{-h,--help}'[Display help]' \
+            '(-s --scope)'{-s,--scope}'[Prune at scope: user, project, or local (default: user)]:scope:(user project local)' \
+            '(-y --yes)'{-y,--yes}'[Skip the confirmation prompt (required when stdin is not a TTY)]'
+          ;;
         uninstall|remove)
           _arguments \
             '(-h --help)'{-h,--help}'[Display help]' \
             '--keep-data[Preserve the plugin'\''s persistent data directory (~/.claude/plugins/data/{id}/)]' \
+            '--prune[Also remove auto-installed dependencies that are no longer needed (requires -y in non-interactive contexts)]' \
             '(-s --scope)'{-s,--scope}'[Uninstall from scope: user, project, or local (default: user)]:scope:(user project local)' \
+            '(-y --yes)'{-y,--yes}'[Skip the --prune confirmation prompt (required when stdin is not a TTY)]' \
             ':plugin:'
           ;;
         enable)
@@ -477,6 +489,14 @@ case $subcmd in
       '--verbose[Show detailed connection and session logs]'
     return
     ;;
+  ultrareview)
+    _arguments \
+      '(-h --help)'{-h,--help}'[Display help]' \
+      '--json[Print the raw bugs.json payload instead of formatted findings]' \
+      '--timeout[Maximum minutes to wait for the review to finish (default: 30)]:minutes:' \
+      '::target:'
+    return
+    ;;
   setup-token|doctor|update|upgrade)
     _arguments \
       '(-h --help)'{-h,--help}'[Display help]'
@@ -543,5 +563,5 @@ _arguments -s \
   '--verbose[Override verbose mode setting from config]' \
   '(-v --version)'{-v,--version}'[Output the version number]' \
   '(-w --worktree)'{-w,--worktree}'[Create a new git worktree for this session (optionally specify a name)]::name:' \
-  '1:command:(agents auth auto-mode doctor install mcp plugin plugins remote-control setup-token update upgrade)' \
+  '1:command:(agents auth auto-mode doctor install mcp plugin plugins remote-control setup-token ultrareview update upgrade)' \
   '*:prompt:'

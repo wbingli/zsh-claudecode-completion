@@ -2,6 +2,14 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.121] - 2026-04-28
+
+### Added
+- New `ultrareview` command: Run a cloud-hosted multi-agent code review of the current branch (or a PR number / base branch) and print the findings, with flags: `--json`, `--timeout`
+- New `plugin prune|autoremove` subcommand: Remove auto-installed dependencies that are no longer needed, with flags: `--dry-run`, `--scope`, `--yes`
+- New `--prune` flag for `plugin uninstall`: Also remove auto-installed dependencies that are no longer needed
+- New `--yes/-y` flag for `plugin uninstall`: Skip the `--prune` confirmation prompt
+
 ## [2.1.119] - 2026-04-24
 
 ### Added
