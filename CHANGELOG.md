@@ -2,6 +2,11 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.123] - 2026-04-29
+
+### Removed
+- Removed `--client-secret` flag from `mcp add-from-claude-desktop` (no longer shown in CLI help)
+
 ## [2.1.121] - 2026-04-28
 
 ### Added
