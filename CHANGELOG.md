@@ -2,6 +2,12 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.126] - 2026-05-01
+
+### Added
+- New `project` command: Manage Claude Code project state
+- New `project purge` subcommand: Delete all Claude Code state for a project (transcripts, tasks, file history, config entry), with flags: `--all`, `--dry-run`, `--interactive`, `--yes`
+
 ## [2.1.121] - 2026-04-28
 
 ### Added

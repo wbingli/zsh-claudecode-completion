@@ -2,7 +2,7 @@
 
 # Zsh completion script for Claude Code CLI
 # https://github.com/anthropics/claude-code
-# Auto-generated for Claude v2.1.121
+# Auto-generated for Claude v2.1.126
 
 _claude_session_ids() {
   # Claude stores each project under ~/.claude/projects/ with a mangled
@@ -162,6 +162,7 @@ commands=(
   'mcp:Configure and manage MCP servers'
   'plugin:Manage Claude Code plugins'
   'plugins:Manage Claude Code plugins'
+  'project:Manage Claude Code project state'
   'setup-token:Set up a long-lived authentication token (requires Claude subscription)'
   'remote-control:Connect your local environment to claude.ai/code'
   'ultrareview:Run a cloud-hosted multi-agent code review of the current branch (or a PR number / base branch) and print the findings'
@@ -222,7 +223,7 @@ marketplace_commands=(
 # This handles cases where flags appear before the subcommand (e.g., alias claude='claude --flag').
 local subcmd_pos=0
 local subcmd=""
-local -a known_commands=(agents auth auto-mode doctor install mcp plugin plugins remote-control setup-token ultrareview update upgrade)
+local -a known_commands=(agents auth auto-mode doctor install mcp plugin plugins project remote-control setup-token ultrareview update upgrade)
 local i
 for (( i=2; i <= ${#words}; i++ )); do
   # Skip flags and their values
@@ -446,6 +447,32 @@ case $subcmd in
     fi
     return
     ;;
+  project)
+    if (( CURRENT == sub1 )); then
+      local -a project_commands
+      project_commands=(
+        'help:Display help for command'
+        'purge:Delete all Claude Code state for a project (transcripts, tasks, file history, config entry)'
+      )
+      _describe 'project command' project_commands
+    else
+      case $words[$sub1] in
+        purge)
+          _arguments \
+            '--all[Purge state for every project (mutually exclusive with path)]' \
+            '--dry-run[List what would be deleted without deleting anything]' \
+            '(-h --help)'{-h,--help}'[Display help]' \
+            '(-i --interactive)'{-i,--interactive}'[Prompt for each item before deleting]' \
+            '(-y --yes)'{-y,--yes}'[Skip confirmation prompt]' \
+            '::path:_files -/'
+          ;;
+        *)
+          _message 'no more arguments'
+          ;;
+      esac
+    fi
+    return
+    ;;
   auto-mode)
     if (( CURRENT == sub1 )); then
       local -a auto_mode_commands
@@ -563,5 +590,5 @@ _arguments -s \
   '--verbose[Override verbose mode setting from config]' \
   '(-v --version)'{-v,--version}'[Output the version number]' \
   '(-w --worktree)'{-w,--worktree}'[Create a new git worktree for this session (optionally specify a name)]::name:' \
-  '1:command:(agents auth auto-mode doctor install mcp plugin plugins remote-control setup-token ultrareview update upgrade)' \
+  '1:command:(agents auth auto-mode doctor install mcp plugin plugins project remote-control setup-token ultrareview update upgrade)' \
   '*:prompt:'
