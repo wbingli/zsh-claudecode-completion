@@ -61,26 +61,33 @@ _claude_session_ids() {
 
   # Unindexed JSONL files — just mtime+uuid here; the expensive head|jq
   # parse is deferred until we know the candidate survived the cap. Use
-  # zsh parameter expansion (`${f:t:r}`) and a single batched `stat` call
+  # zsh parameter expansion (`${f:t:r}`) and a single batched `zstat` call
   # to avoid forking a subshell per file: projects with thousands of
   # sessions would otherwise spend many seconds just naming the files.
+  # `zstat` (zsh/stat module) is used instead of the external `stat` because
+  # the GNU and BSD versions disagree on flags — GNU `stat -f` means
+  # filesystem-status, not "format", so the BSD invocation produced garbage
+  # paths on Linux.
   #
   # Note: all locals used below are declared once here, up-front. zsh
   # prints the current value of a variable when `local`/`typeset` is
   # applied to it a second time in the same scope (treats it like
   # `typeset -p`), so pass 2 must *not* redeclare these.
-  local -a jsonl_files mtime_lines top
+  local -a jsonl_files mtimes top
   local line iso_mtime filepath uuid sortkey src branch msg datestr info
-  local count=0 headroom
+  local count=0 headroom idx
 
   jsonl_files=( "$project_dir"/*.jsonl(N) )
   if (( ${#jsonl_files} > 0 )); then
-    mtime_lines=( "${(f)$(stat -f '%Sm %N' -t '%Y-%m-%dT%H:%M:%S' "${jsonl_files[@]}" 2>/dev/null)}" )
-    for line in "${mtime_lines[@]}"; do
-      iso_mtime="${line% *}"
-      filepath="${line#* }"
+    zmodload -F zsh/stat b:zstat 2>/dev/null
+    zstat -A mtimes -F '%Y-%m-%dT%H:%M:%S' +mtime "${jsonl_files[@]}" 2>/dev/null
+    idx=1
+    for filepath in "${jsonl_files[@]}"; do
+      iso_mtime="${mtimes[$idx]}"
+      (( idx++ ))
       uuid="${filepath:t:r}"
       [[ -n "${indexed[$uuid]}" ]] && continue
+      [[ -z "$iso_mtime" ]] && continue
       candidates+=("${iso_mtime}"$'\t'"${uuid}"$'\tjsonl')
     done
   fi
