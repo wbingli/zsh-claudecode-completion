@@ -2,6 +2,15 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.133] - 2026-05-08
+
+### Added
+- New `--remote-control [name]` global flag: Start an interactive session with Remote Control enabled (optionally named)
+- New `--plugin-url <url>` global flag: Fetch a plugin .zip from a URL for this session only (repeatable)
+
+### Changed
+- Updated `--plugin-dir` flag description: now mentions .zip support — "Load a plugin from a directory or .zip for this session only (repeatable)"
+
 ## [2.1.128] - 2026-05-05
 
 No structural CLI changes detected between v2.1.126 and v2.1.128; version bump only.
