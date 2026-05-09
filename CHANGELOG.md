@@ -2,6 +2,19 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.138] - 2026-05-09
+
+### Added
+- New `--plugin-url` flag: Fetch a plugin .zip from a URL for this session only (repeatable)
+- New `--remote-control [name]` flag: Start an interactive session with Remote Control enabled (optionally named)
+
+### Changed
+- Updated `auto-mode defaults` description to include "soft_deny, and hard_deny"
+- Updated `--print` flag description to match current CLI wording
+
+### Removed
+- Removed `--client-secret` flag from `mcp add-from-claude-desktop` (no longer shown in CLI help)
+
 ## [2.1.128] - 2026-05-05
 
 No structural CLI changes detected between v2.1.126 and v2.1.128; version bump only.
