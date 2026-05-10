@@ -64,7 +64,8 @@ JSON
     cat > "$proj_dir/$uuid_jsonl.jsonl" <<JSONL
 {"type":"user","gitBranch":"feature","message":{"content":"jsonl session prompt"}}
 JSONL
-    touch -d "2026-05-08 10:00:00" "$proj_dir/$uuid_jsonl.jsonl"
+    # ISO-8601 with T separator — BSD touch on macOS rejects the space form.
+    touch -d "2026-05-08T10:00:00" "$proj_dir/$uuid_jsonl.jsonl"
 
     # A JSONL session that contains ONLY a <command-*> wrapped prompt — the
     # completer should filter this out (claude --resume rejects it).
@@ -72,7 +73,7 @@ JSONL
     cat > "$proj_dir/$uuid_filtered.jsonl" <<JSONL
 {"type":"user","gitBranch":"main","message":{"content":"<command-stdout>boring</command-stdout>"}}
 JSONL
-    touch -d "2026-05-07 10:00:00" "$proj_dir/$uuid_filtered.jsonl"
+    touch -d "2026-05-07T10:00:00" "$proj_dir/$uuid_filtered.jsonl"
 
     printf '%s\n' "$proj_dir"
 }
