@@ -34,7 +34,12 @@ require_common_deps() {
 #   trap 'rm -rf "$home"' EXIT
 make_test_home() {
     local home
-    home=$(mktemp -d)
+    # Canonicalize the path so it matches what zsh's $PWD will report
+    # after `getcwd(2)` — on macOS /var is a symlink to /private/var, and
+    # `mktemp -d` returns the un-resolved /var/... form. If we used that
+    # raw, the path-mangling in _claude_session_ids would compare strings
+    # built from two different canonicalizations and never match.
+    home=$(cd "$(mktemp -d)" && pwd -P)
     cat > "$home/.zshrc" <<ZSHRC
 fpath=($REPO_ROOT \$fpath)
 autoload -Uz compinit && compinit -u -d /dev/null
