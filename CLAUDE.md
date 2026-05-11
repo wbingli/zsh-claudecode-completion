@@ -25,12 +25,18 @@ The `_claude` script uses a case statement with early returns to route between s
 
 ## Development Notes
 
-No build system, tests, or linting—pure zsh scripts only.
+No build system or linting—pure zsh scripts only.
 
-To test changes:
+To test changes manually:
 1. Source the plugin: `source zsh-claudecode-completion.plugin.zsh`
 2. Reload completions: `autoload -Uz compinit && compinit`
 3. Test with: `claude <TAB>`
+
+Automated tests live under `scripts/tests/` and are driven by
+`scripts/verify-completions.sh`. Each `test-*.sh` covers one feature
+(syntax, global flags, mcp subcommand, `_claude_session_ids`). The runner
+also accepts a single test name: `./scripts/verify-completions.sh
+test-session-ids`. Requires `zsh`, `expect`, and `jq`.
 
 ## Known Patterns
 
