@@ -155,82 +155,41 @@ _claude_session_ids() {
 }
 
 # Background-session ID completer for `claude attach|logs|stop|kill|respawn|rm`.
-# Source of truth is the supervisor's roster at ~/.claude/daemon/roster.json,
-# which lists every live background session. Each id is then enriched with the
-# session's display name from ~/.claude/jobs/<id>/state.json so the completion
-# shows the user which session they're picking (the short id alone is opaque).
-# Honors CLAUDE_CONFIG_DIR per the docs (background sessions are stored there
-# instead of ~/.claude when set).
+# Mirrors how the `claude agents` view itself enumerates sessions: walk
+# ~/.claude/jobs/<id>/state.json. A state.json file is the only authoritative
+# marker — entries that appear only in daemon/roster.json without a state.json
+# are pre-spawn placeholders (no real session) and sessions imported via /bg
+# from an interactive terminal land in jobs/ without ever touching roster.json,
+# so the roster is neither necessary nor sufficient. Honors CLAUDE_CONFIG_DIR
+# per the docs (background sessions are stored there instead of ~/.claude when
+# set).
 _claude_background_session_ids() {
   local config_dir="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
-  local roster="$config_dir/daemon/roster.json"
   local jobs_dir="$config_dir/jobs"
 
+  [[ -d "$jobs_dir" ]] || return 1
+
   local -a ids labels
-  local -a roster_ids
-  local id
+  local d id state_file info name state
 
-  if [[ -r "$roster" ]]; then
-    # roster.json's documented shape is `{ "workers": { "<short-id>": {...} } }`
-    # — the key is the short id used by `claude attach`, not a field inside the
-    # value. The other branches (sessions/jobs/entries arrays, raw array) cover
-    # older / alternate shapes defensively since the format isn't versioned in
-    # any user-facing way beyond the proto field.
-    while IFS= read -r id; do
-      [[ -z "$id" || "$id" == "null" ]] && continue
-      roster_ids+=("$id")
-    done < <(jq -r '
-      def ids:
-        if type=="object" then
-          if (.workers? | type) == "object" then (.workers | keys[])
-          elif (.sessions? | type) == "array" then
-            (.sessions[]? | (.id? // .sessionId? // .shortId? // (if type=="string" then . else empty end)))
-          elif (.jobs? | type) == "array" then
-            (.jobs[]? | (.id? // .sessionId? // .shortId? // empty))
-          elif (.entries? | type) == "array" then
-            (.entries[]? | (.id? // .sessionId? // .shortId? // empty))
-          else empty end
-        elif type=="array" then
-          (.[] | (.id? // .sessionId? // .shortId? // (if type=="string" then . else empty end)))
-        else empty end;
-      [ids] | .[] | select(. != null and . != "")
-    ' "$roster" 2>/dev/null)
-  fi
-
-  # Fallback: if roster is missing or empty (e.g. supervisor not running but
-  # state files still on disk), enumerate ~/.claude/jobs/* directly. Limited to
-  # entries that actually have a state.json so we don't surface stale dirs.
-  if (( ${#roster_ids} == 0 )) && [[ -d "$jobs_dir" ]]; then
-    local d
-    for d in "$jobs_dir"/*(N/); do
-      [[ -f "$d/state.json" ]] || continue
-      roster_ids+=("${d:t}")
-    done
-  fi
-
-  (( ${#roster_ids} == 0 )) && return 1
-
-  local state_file name state info
-  for id in "${roster_ids[@]}"; do
-    state_file="$jobs_dir/$id/state.json"
+  for d in "$jobs_dir"/*(N/); do
+    state_file="$d/state.json"
+    [[ -r "$state_file" ]] || continue
+    id="${d:t}"
     name=""
     state=""
-    if [[ -r "$state_file" ]]; then
-      # Try several plausible field names — the state.json schema isn't pinned
-      # publicly, so we degrade gracefully if any one is missing.
-      # Observed state.json fields (Claude v2.1.139): `name` (auto-generated or
-      # user-set), `intent` (the original prompt seed), `state` ("done", "idle",
-      # etc.). Fall back through other plausible names so a future rename
-      # doesn't blank the menu entirely.
-      info=$(jq -r '
-        [
-          (.name // .displayName // .title // .sessionName // .intent // .summary // .prompt // ""),
-          (.state // .status // .lifecycle // "")
-        ] | @tsv
-      ' "$state_file" 2>/dev/null)
-      name="${info%%$'\t'*}"
-      state="${info#*$'\t'}"
-    fi
+    # Observed state.json fields (Claude v2.1.139): `name` (auto-generated or
+    # user-set), `intent` (the original prompt seed), `state` ("done", "idle",
+    # etc.). Fall back through other plausible names so a future rename
+    # doesn't blank the menu entirely.
+    info=$(jq -r '
+      [
+        (.name // .displayName // .title // .sessionName // .intent // .summary // .prompt // ""),
+        (.state // .status // .lifecycle // "")
+      ] | @tsv
+    ' "$state_file" 2>/dev/null)
+    name="${info%%$'\t'*}"
+    state="${info#*$'\t'}"
     ids+=("$id")
     if [[ -n "$name" && -n "$state" ]]; then
       labels+=("${id} [${state}] ${name}")
@@ -242,6 +201,8 @@ _claude_background_session_ids() {
       labels+=("${id}")
     fi
   done
+
+  (( ${#ids} == 0 )) && return 1
 
   local expl
   _wanted bg-session-ids expl 'background session' compadd -o nosort -d labels -a ids
