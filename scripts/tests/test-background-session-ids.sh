@@ -59,6 +59,14 @@ JSON
     cat > "$jobs_dir/55eab974/state.json" <<'JSON'
 {"name": "imported via /bg", "state": "done"}
 JSON
+
+    # mtime-driven ordering: 7c5dcf5d (oldest) → 9a1b2c3d → 55eab974 (newest).
+    # The completer sorts by state.json mtime DESC to match `claude agents`
+    # ordering (newest first), so 55eab974 should appear before 9a1b2c3d and
+    # 9a1b2c3d before 7c5dcf5d in the offered completions.
+    touch -d "2026-05-01T10:00:00" "$jobs_dir/7c5dcf5d/state.json"
+    touch -d "2026-05-05T10:00:00" "$jobs_dir/9a1b2c3d/state.json"
+    touch -d "2026-05-12T10:00:00" "$jobs_dir/55eab974/state.json"
 }
 
 home=$(make_test_home)
@@ -84,6 +92,24 @@ assert_contains "55eab974" "$output" "imported-via-/bg session id (not in roster
 assert_contains "imported via /bg" "$output" "imported-session label"
 # roster-only placeholder must NOT appear because it has no state.json
 assert_not_contains "6d75c459" "$output" "roster-only placeholder is filtered out"
+
+# Ordering check: state.json mtime drives the sort, so 55eab974 (newest)
+# must appear before 9a1b2c3d (mid) before 7c5dcf5d (oldest). zsh prints
+# matches across multiple lines/columns, so the assertion uses each id's
+# byte offset in the captured output rather than relying on line-wise
+# comparison.
+log "case 1b: completions are ordered newest-first by state.json mtime"
+pos_newest=$(printf '%s' "$output"   | grep -boa '55eab974' | head -1 | cut -d: -f1)
+pos_middle=$(printf '%s' "$output"   | grep -boa '9a1b2c3d' | head -1 | cut -d: -f1)
+pos_oldest=$(printf '%s' "$output"   | grep -boa '7c5dcf5d' | head -1 | cut -d: -f1)
+if [[ -z "$pos_newest" || -z "$pos_middle" || -z "$pos_oldest" ]]; then
+    printf '%s\n' "$output" >&2
+    fail "could not locate all three session ids in the output for ordering check"
+fi
+if ! (( pos_newest < pos_middle && pos_middle < pos_oldest )); then
+    printf '%s\n' "$output" >&2
+    fail "expected newest-first order; got positions: 55eab974=$pos_newest 9a1b2c3d=$pos_middle 7c5dcf5d=$pos_oldest"
+fi
 
 # ---------------------------------------------------------------------------
 # Test 2: each background-session subcommand wires up the completer

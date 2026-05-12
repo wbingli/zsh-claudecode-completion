@@ -169,15 +169,32 @@ _claude_background_session_ids() {
 
   [[ -d "$jobs_dir" ]] || return 1
 
-  local -a ids labels
-  local d id state_file info name state
-
+  # Gather every job dir that has a state.json. The state.json mtime is the
+  # session's last-activity timestamp (the supervisor rewrites it on every
+  # turn), so it's the right key for matching `claude agents`'s newest-first
+  # ordering. zstat (zsh/stat module) gets all mtimes in a single syscall —
+  # avoids forking `stat` per file when the user has many sessions.
+  local -a job_dirs state_files mtimes
+  local d
   for d in "$jobs_dir"/*(N/); do
-    state_file="$d/state.json"
-    [[ -r "$state_file" ]] || continue
+    [[ -r "$d/state.json" ]] || continue
+    job_dirs+=("$d")
+    state_files+=("$d/state.json")
+  done
+  (( ${#job_dirs} == 0 )) && return 1
+
+  zmodload -F zsh/stat b:zstat 2>/dev/null
+  zstat -A mtimes +mtime "${state_files[@]}" 2>/dev/null
+
+  # Build "<mtime>\t<id>\t<label>" rows so a single `sort -nr` orders the
+  # whole list newest-first regardless of how many sessions there are.
+  local -a rows
+  local idx=1 id state_file info name state label mtime
+  for d in "${job_dirs[@]}"; do
+    state_file="${state_files[$idx]}"
+    mtime="${mtimes[$idx]:-0}"
+    (( idx++ ))
     id="${d:t}"
-    name=""
-    state=""
     # Observed state.json fields (Claude v2.1.139): `name` (auto-generated or
     # user-set), `intent` (the original prompt seed), `state` ("done", "idle",
     # etc.). Fall back through other plausible names so a future rename
@@ -190,19 +207,24 @@ _claude_background_session_ids() {
     ' "$state_file" 2>/dev/null)
     name="${info%%$'\t'*}"
     state="${info#*$'\t'}"
-    ids+=("$id")
     if [[ -n "$name" && -n "$state" ]]; then
-      labels+=("${id} [${state}] ${name}")
+      label="${id} [${state}] ${name}"
     elif [[ -n "$name" ]]; then
-      labels+=("${id} ${name}")
+      label="${id} ${name}"
     elif [[ -n "$state" ]]; then
-      labels+=("${id} [${state}]")
+      label="${id} [${state}]"
     else
-      labels+=("${id}")
+      label="${id}"
     fi
+    rows+=("${mtime}"$'\t'"${id}"$'\t'"${label}")
   done
 
-  (( ${#ids} == 0 )) && return 1
+  local -a ids labels
+  local line
+  while IFS=$'\t' read -r mtime id label; do
+    ids+=("$id")
+    labels+=("$label")
+  done < <(printf '%s\n' "${rows[@]}" | sort -nr)
 
   local expl
   _wanted bg-session-ids expl 'background session' compadd -o nosort -d labels -a ids
