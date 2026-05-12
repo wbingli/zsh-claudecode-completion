@@ -171,18 +171,29 @@ _claude_background_session_ids() {
   local id
 
   if [[ -r "$roster" ]]; then
-    # roster.json shape isn't formally documented; be permissive about top-level
-    # array vs. object-with-list and about the id key name.
+    # roster.json's documented shape is `{ "workers": { "<short-id>": {...} } }`
+    # — the key is the short id used by `claude attach`, not a field inside the
+    # value. The other branches (sessions/jobs/entries arrays, raw array) cover
+    # older / alternate shapes defensively since the format isn't versioned in
+    # any user-facing way beyond the proto field.
     while IFS= read -r id; do
       [[ -z "$id" || "$id" == "null" ]] && continue
       roster_ids+=("$id")
     done < <(jq -r '
       def ids:
-        if type=="array" then .[]
-        elif type=="object" then (.sessions? // .jobs? // .entries? // empty) | .[]?
+        if type=="object" then
+          if (.workers? | type) == "object" then (.workers | keys[])
+          elif (.sessions? | type) == "array" then
+            (.sessions[]? | (.id? // .sessionId? // .shortId? // (if type=="string" then . else empty end)))
+          elif (.jobs? | type) == "array" then
+            (.jobs[]? | (.id? // .sessionId? // .shortId? // empty))
+          elif (.entries? | type) == "array" then
+            (.entries[]? | (.id? // .sessionId? // .shortId? // empty))
+          else empty end
+        elif type=="array" then
+          (.[] | (.id? // .sessionId? // .shortId? // (if type=="string" then . else empty end)))
         else empty end;
-      [ids | (.id? // .sessionId? // .shortId? // (if type=="string" then . else empty end))]
-      | .[] | select(. != null and . != "")
+      [ids] | .[] | select(. != null and . != "")
     ' "$roster" 2>/dev/null)
   fi
 
@@ -207,9 +218,13 @@ _claude_background_session_ids() {
     if [[ -r "$state_file" ]]; then
       # Try several plausible field names — the state.json schema isn't pinned
       # publicly, so we degrade gracefully if any one is missing.
+      # Observed state.json fields (Claude v2.1.139): `name` (auto-generated or
+      # user-set), `intent` (the original prompt seed), `state` ("done", "idle",
+      # etc.). Fall back through other plausible names so a future rename
+      # doesn't blank the menu entirely.
       info=$(jq -r '
         [
-          (.name // .displayName // .title // .sessionName // .summary // .prompt // ""),
+          (.name // .displayName // .title // .sessionName // .intent // .summary // .prompt // ""),
           (.state // .status // .lifecycle // "")
         ] | @tsv
       ' "$state_file" 2>/dev/null)

@@ -28,12 +28,15 @@ build_roster_fixture() {
     local jobs_dir="$home/.claude/jobs"
     mkdir -p "$daemon_dir" "$jobs_dir/7c5dcf5d" "$jobs_dir/9a1b2c3d"
 
+    # Real roster.json shape (Claude v2.1.139): `{"workers": {"<short>": {...}}}`
+    # where the OBJECT KEY is the short id. The completer keys off this shape.
     cat > "$daemon_dir/roster.json" <<'JSON'
 {
-  "sessions": [
-    {"id": "7c5dcf5d"},
-    {"id": "9a1b2c3d"}
-  ]
+  "proto": 1,
+  "workers": {
+    "7c5dcf5d": {"sessionId": "7c5dcf5d-aaaa-bbbb-cccc-dddddddddddd", "cliVersion": "2.1.139"},
+    "9a1b2c3d": {"sessionId": "9a1b2c3d-aaaa-bbbb-cccc-eeeeeeeeeeee", "cliVersion": "2.1.139"}
+  }
 }
 JSON
 
