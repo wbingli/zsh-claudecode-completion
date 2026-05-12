@@ -154,6 +154,84 @@ _claude_session_ids() {
   _wanted session-ids expl 'session' compadd -V sessions -o nosort -d labels -a ids
 }
 
+# Background-session ID completer for `claude attach|logs|stop|kill|respawn|rm`.
+# Source of truth is the supervisor's roster at ~/.claude/daemon/roster.json,
+# which lists every live background session. Each id is then enriched with the
+# session's display name from ~/.claude/jobs/<id>/state.json so the completion
+# shows the user which session they're picking (the short id alone is opaque).
+# Honors CLAUDE_CONFIG_DIR per the docs (background sessions are stored there
+# instead of ~/.claude when set).
+_claude_background_session_ids() {
+  local config_dir="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
+  local roster="$config_dir/daemon/roster.json"
+  local jobs_dir="$config_dir/jobs"
+
+  local -a ids labels
+  local -a roster_ids
+  local id
+
+  if [[ -r "$roster" ]]; then
+    # roster.json shape isn't formally documented; be permissive about top-level
+    # array vs. object-with-list and about the id key name.
+    while IFS= read -r id; do
+      [[ -z "$id" || "$id" == "null" ]] && continue
+      roster_ids+=("$id")
+    done < <(jq -r '
+      def ids:
+        if type=="array" then .[]
+        elif type=="object" then (.sessions? // .jobs? // .entries? // empty) | .[]?
+        else empty end;
+      [ids | (.id? // .sessionId? // .shortId? // (if type=="string" then . else empty end))]
+      | .[] | select(. != null and . != "")
+    ' "$roster" 2>/dev/null)
+  fi
+
+  # Fallback: if roster is missing or empty (e.g. supervisor not running but
+  # state files still on disk), enumerate ~/.claude/jobs/* directly. Limited to
+  # entries that actually have a state.json so we don't surface stale dirs.
+  if (( ${#roster_ids} == 0 )) && [[ -d "$jobs_dir" ]]; then
+    local d
+    for d in "$jobs_dir"/*(N/); do
+      [[ -f "$d/state.json" ]] || continue
+      roster_ids+=("${d:t}")
+    done
+  fi
+
+  (( ${#roster_ids} == 0 )) && return 1
+
+  local state_file name state info
+  for id in "${roster_ids[@]}"; do
+    state_file="$jobs_dir/$id/state.json"
+    name=""
+    state=""
+    if [[ -r "$state_file" ]]; then
+      # Try several plausible field names — the state.json schema isn't pinned
+      # publicly, so we degrade gracefully if any one is missing.
+      info=$(jq -r '
+        [
+          (.name // .displayName // .title // .sessionName // .summary // .prompt // ""),
+          (.state // .status // .lifecycle // "")
+        ] | @tsv
+      ' "$state_file" 2>/dev/null)
+      name="${info%%$'\t'*}"
+      state="${info#*$'\t'}"
+    fi
+    ids+=("$id")
+    if [[ -n "$name" && -n "$state" ]]; then
+      labels+=("${id} [${state}] ${name}")
+    elif [[ -n "$name" ]]; then
+      labels+=("${id} ${name}")
+    elif [[ -n "$state" ]]; then
+      labels+=("${id} [${state}]")
+    else
+      labels+=("${id}")
+    fi
+  done
+
+  local expl
+  _wanted bg-session-ids expl 'background session' compadd -o nosort -d labels -a ids
+}
+
 # Offer a freshly-generated UUID for --session-id, which expects a NEW,
 # user-assigned session identifier (not an existing session to resume).
 local curcontext="$curcontext" state line
@@ -161,17 +239,23 @@ typeset -A opt_args
 
 local -a commands
 commands=(
-  'agents:Manage background and configured agents'
+  'agents:Open agent view (manage background sessions)'
+  'attach:Attach to a background session in this terminal'
   'auth:Manage authentication'
   'auto-mode:Inspect auto mode classifier configuration'
   'doctor:Check the health of your Claude Code auto-updater'
   'install:Install Claude Code native build. Use [target] to specify version (stable, latest, or specific version)'
+  'kill:Stop a background session (alias for stop)'
+  'logs:Print a background session'\''s recent output'
   'mcp:Configure and manage MCP servers'
   'plugin:Manage Claude Code plugins'
   'plugins:Manage Claude Code plugins'
   'project:Manage Claude Code project state'
+  'respawn:Restart a stopped background session with its conversation intact'
+  'rm:Remove a background session from the list'
   'setup-token:Set up a long-lived authentication token (requires Claude subscription)'
   'remote-control:Connect your local environment to claude.ai/code'
+  'stop:Stop a background session'
   'ultrareview:Run a cloud-hosted multi-agent code review of the current branch (or a PR number / base branch) and print the findings'
   'update:Check for updates and install if available'
   'upgrade:Check for updates and install if available'
@@ -231,7 +315,7 @@ marketplace_commands=(
 # This handles cases where flags appear before the subcommand (e.g., alias claude='claude --flag').
 local subcmd_pos=0
 local subcmd=""
-local -a known_commands=(agents auth auto-mode doctor install mcp plugin plugins project remote-control setup-token ultrareview update upgrade)
+local -a known_commands=(agents attach auth auto-mode doctor install kill logs mcp plugin plugins project remote-control respawn rm setup-token stop ultrareview update upgrade)
 local i
 for (( i=2; i <= ${#words}; i++ )); do
   # Skip flags and their values
@@ -254,6 +338,25 @@ case $subcmd in
     _arguments \
       '(-h --help)'{-h,--help}'[Display help for command]' \
       '--setting-sources[Comma-separated list of setting sources to load (user, project, local)]:sources:'
+    return
+    ;;
+  attach|logs|stop|kill|rm)
+    # The leading ':cmd:' placeholder accounts for the subcommand word
+    # already in $words — _arguments here is invoked as `claude`'s completer
+    # and counts positionals from $words[2], so position 1 = the subcommand
+    # itself and position 2 is the actual session-id slot.
+    _arguments \
+      '(-h --help)'{-h,--help}'[Display help for command]' \
+      ':cmd:' \
+      ':session:_claude_background_session_ids'
+    return
+    ;;
+  respawn)
+    _arguments \
+      '(--all)--all[Restart every stopped session]' \
+      '(-h --help)'{-h,--help}'[Display help for command]' \
+      ':cmd:' \
+      '(--all):session:_claude_background_session_ids'
     return
     ;;
   auth)
@@ -604,5 +707,5 @@ _arguments -s \
   '--verbose[Override verbose mode setting from config]' \
   '(-v --version)'{-v,--version}'[Output the version number]' \
   '(-w --worktree)'{-w,--worktree}'[Create a new git worktree for this session (optionally specify a name)]::name:' \
-  '1:command:(agents auth auto-mode doctor install mcp plugin plugins project remote-control setup-token ultrareview update upgrade)' \
+  '1:command:(agents attach auth auto-mode doctor install kill logs mcp plugin plugins project remote-control respawn rm setup-token stop ultrareview update upgrade)' \
   '*:prompt:'
