@@ -6,6 +6,11 @@ All notable changes to the zsh-claudecode-completion plugin are documented here.
 
 ### Added
 - New `plugin details` subcommand: Show a plugin's component inventory and projected token cost
+- New top-level commands for managing background sessions (agent view): `attach`, `logs`, `stop`, `kill` (alias for `stop`), `respawn` (with `--all`), and `rm`
+- Background session ID completion for `attach`, `logs`, `stop`, `kill`, `respawn`, and `rm`: enumerates sessions from `~/.claude/jobs/<id>/state.json` (the same source `claude agents` uses) and labels each id with the session's name and state — e.g. `708aab4d [done] Test /bg command for session view`. Sessions are listed newest-first by `state.json` mtime to match `claude agents`'s ordering. Honors `CLAUDE_CONFIG_DIR`.
+
+### Changed
+- Updated `agents` command description to "Open agent view (manage background sessions)"
 
 ## [2.1.138] - 2026-05-09
 
