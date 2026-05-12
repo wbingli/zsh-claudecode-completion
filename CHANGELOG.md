@@ -2,6 +2,11 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.139] - 2026-05-12
+
+### Added
+- New `plugin details` subcommand: Show a plugin's component inventory and projected token cost
+
 ## [2.1.138] - 2026-05-09
 
 ### Added
