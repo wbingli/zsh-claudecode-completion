@@ -2,6 +2,12 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.140] - 2026-05-13
+
+### Removed
+- Removed `--append-system-prompt-file` flag (no longer present in CLI help)
+- Removed `--system-prompt-file` flag (no longer present in CLI help)
+
 ## [2.1.139] - 2026-05-12
 
 ### Added

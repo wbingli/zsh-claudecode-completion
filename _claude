@@ -2,7 +2,7 @@
 
 # Zsh completion script for Claude Code CLI
 # https://github.com/anthropics/claude-code
-# Auto-generated for Claude v2.1.139
+# Auto-generated for Claude v2.1.140
 
 _claude_session_ids() {
   # Claude stores each project under ~/.claude/projects/ with a mangled
@@ -654,7 +654,6 @@ _arguments -s \
   '*--allowedTools[Comma or space-separated list of tool names to allow (e.g. "Bash(git:*) Edit")]:tools:' \
   '*--allowed-tools[Comma or space-separated list of tool names to allow (e.g. "Bash(git:*) Edit")]:tools:' \
   '--append-system-prompt[Append a system prompt to the default system prompt]:prompt:' \
-  '--append-system-prompt-file[Append a system prompt from a file to the default system prompt]:file:_files' \
   '--bare[Minimal mode: skip hooks, LSP, plugin sync, attribution, auto-memory, background prefetches, keychain reads, and CLAUDE.md auto-discovery. Sets CLAUDE_CODE_SIMPLE=1]' \
   '*--betas[Beta headers to include in API requests (API key users only)]:betas:' \
   '--brief[Enable SendUserMessage tool for agent-to-user communication]' \
@@ -699,7 +698,6 @@ _arguments -s \
   '--settings[Path to a settings JSON file or a JSON string to load additional settings from]:file:_files' \
   '--strict-mcp-config[Only use MCP servers from --mcp-config, ignoring all other MCP configurations]' \
   '--system-prompt[System prompt to use for the session]:prompt:' \
-  '--system-prompt-file[Read system prompt from a file]:file:_files' \
   '--tmux[Create a tmux session for the worktree (requires --worktree). Uses iTerm2 native panes when available; use --tmux=classic for traditional tmux]::style:(classic)' \
   '*--tools[Specify the list of available tools from the built-in set. Use "" to disable all tools, "default" to use all tools, or specify tool names (e.g. "Bash,Edit,Read")]:tools:' \
   '--verbose[Override verbose mode setting from config]' \
