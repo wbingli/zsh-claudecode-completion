@@ -53,6 +53,17 @@ For each hidden command:
 
 **Maintaining this list**: When you discover new hidden commands (e.g., a command referenced in docs or changelogs but missing from `--help`), add them to this table so future updates preserve them.
 
+### Hidden Flags
+
+Some flags are accepted by the CLI but not listed as their own row in `claude --help`. They are typically referenced indirectly — for example, inside another flag's description using bracket notation like `--system-prompt[-file]` (meaning both `--system-prompt` and `--system-prompt-file` are real flags). **Do not remove a flag just because it lacks its own line in `--help`.** Before removing any flag, verify it is no longer accepted by invoking it (e.g., `claude --system-prompt-file /tmp/does-not-exist 2>&1`); a "file not found" / argument-shaped error means the flag still exists, only a "Bad option" / "unknown option" error means it is truly gone.
+
+| Flag | How to detect | Verify it still exists |
+|------|---------------|------------------------|
+| `--system-prompt-file <file>` | Mentioned as `--system-prompt[-file]` in the `--bare` flag description | `claude --system-prompt-file /tmp/nope 2>&1` → "System prompt file not found" |
+| `--append-system-prompt-file <file>` | Mentioned as `--append-system-prompt[-file]` in the `--bare` flag description | `claude --append-system-prompt-file /tmp/nope 2>&1` → "Append system prompt file not found" |
+
+**Maintaining this list**: When you find another flag in this category (referenced only inside another flag's description, mentioned in docs but absent from `--help`, etc.), add it to the table so future regenerations preserve it. When in doubt, keep the flag and probe the CLI rather than dropping it.
+
 ## Step 3: Regenerate Completion Script
 
 Read the existing `_claude` file and regenerate it based on the help output. Preserve the zsh completion structure:
