@@ -2,6 +2,13 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.140] - 2026-05-13
+
+### Changed
+- Bumped tracked CLI version to 2.1.140; no flag or command surface changes.
+- `/update-completions` now documents "hidden flags" (e.g. `--system-prompt-file`, `--append-system-prompt-file`) that the CLI accepts but doesn't list as their own row in `claude --help`, and requires probing the CLI before removing any flag. Prevents regressions like the regeneration that proposed dropping `--system-prompt-file` / `--append-system-prompt-file` even though both are still accepted.
+- Added a static test asserting the file-form `system-prompt` flags stay in `_claude`.
+
 ## [2.1.139] - 2026-05-12
 
 ### Added
