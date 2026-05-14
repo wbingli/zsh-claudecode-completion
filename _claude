@@ -41,106 +41,183 @@ _claude_session_ids() {
   # disables the cap for users who want the old behavior.
   local max_sessions=${CLAUDE_COMPLETION_SESSION_LIMIT:-20}
 
-  # Two-pass enumeration. Pass 1 collects cheap candidates keyed by an
-  # ISO-ish timestamp; pass 2 resolves branch/message only for the top N.
-  # Candidate line format:
-  #   "<sortkey>\t<uuid>\tindex\t<branch>\t<summary>"  (already resolved)
-  #   "<sortkey>\t<uuid>\tjsonl"                      (resolve in pass 2)
-  local -a candidates
-  local -A indexed
-
-  # Indexed sessions — one jq call gives us everything cheaply, so keep
-  # branch/summary inline and skip pass 2 for these.
+  # Pull branch + summary from sessions-index.json, keyed by sessionId.
+  # `.summary` here is the same human-readable title `/resume` displays
+  # (e.g. "refactor-auth-flow"); we prefer it over the first
+  # user prompt for indexed sessions, falling back to the JSONL when the
+  # session isn't indexed yet.
+  local -A index_summary index_branch
   if [[ -f "$index_file" ]]; then
-    while IFS=$'\t' read -r modified id branch summary; do
-      [[ -z "$id" ]] && continue
-      indexed[$id]=1
-      candidates+=("${modified}"$'\t'"${id}"$'\tindex\t'"${branch}"$'\t'"${summary}")
-    done < <(jq -rs '[.[].entries[]] | .[] | [.modified, .sessionId, (.gitBranch // "?"), (.summary // .firstPrompt[:60] // "")] | @tsv' "$index_file" 2>/dev/null)
+    local _iid _ibranch _isummary
+    while IFS=$'\t' read -r _iid _ibranch _isummary; do
+      [[ -z "$_iid" ]] && continue
+      index_summary[$_iid]="$_isummary"
+      index_branch[$_iid]="$_ibranch"
+    done < <(jq -rs '[.[].entries[]] | .[] | [.sessionId, (.gitBranch // "?"), (.summary // "")] | @tsv' "$index_file" 2>/dev/null)
   fi
 
-  # Unindexed JSONL files — just mtime+uuid here; the expensive head|jq
-  # parse is deferred until we know the candidate survived the cap. Use
-  # zsh parameter expansion (`${f:t:r}`) and a single batched `zstat` call
-  # to avoid forking a subshell per file: projects with thousands of
-  # sessions would otherwise spend many seconds just naming the files.
-  # `zstat` (zsh/stat module) is used instead of the external `stat` because
-  # the GNU and BSD versions disagree on flags — GNU `stat -f` means
-  # filesystem-status, not "format", so the BSD invocation produced garbage
-  # paths on Linux.
+  # Single batched `zstat` for both mtime (epoch seconds) and size (bytes)
+  # on every jsonl file. Using one stat source for all sessions keeps the
+  # sort key uniform and gives us the size that `/resume` shows alongside
+  # the relative-time label. `zstat` is preferred over external `stat`
+  # because GNU/BSD `stat` flags disagree (GNU `stat -f` means
+  # filesystem-status, not "format"), so the BSD invocation produced
+  # garbage paths on Linux.
   #
   # Note: all locals used below are declared once here, up-front. zsh
   # prints the current value of a variable when `local`/`typeset` is
   # applied to it a second time in the same scope (treats it like
-  # `typeset -p`), so pass 2 must *not* redeclare these.
-  local -a jsonl_files mtimes top
-  local line iso_mtime filepath uuid sortkey src branch msg datestr info
-  local count=0 headroom idx
+  # `typeset -p`), so the second pass must *not* redeclare these.
+  local -a jsonl_files mtimes sizes candidates top
+  local line filepath uuid mtime size title branch info reltime sizestr
+  local _jb _jcustom _jai _jsum _jprompt _jcmd
+  local count=0 headroom idx d h m days weeks months years kb mb gb now
 
   jsonl_files=( "$project_dir"/*.jsonl(N) )
-  if (( ${#jsonl_files} > 0 )); then
-    zmodload -F zsh/stat b:zstat 2>/dev/null
-    zstat -A mtimes -F '%Y-%m-%dT%H:%M:%S' +mtime "${jsonl_files[@]}" 2>/dev/null
-    idx=1
-    for filepath in "${jsonl_files[@]}"; do
-      iso_mtime="${mtimes[$idx]}"
-      (( idx++ ))
-      uuid="${filepath:t:r}"
-      [[ -n "${indexed[$uuid]}" ]] && continue
-      [[ -z "$iso_mtime" ]] && continue
-      candidates+=("${iso_mtime}"$'\t'"${uuid}"$'\tjsonl')
-    done
+  (( ${#jsonl_files} == 0 )) && return 1
+
+  zmodload -F zsh/stat b:zstat 2>/dev/null
+  zstat -A mtimes +mtime "${jsonl_files[@]}" 2>/dev/null
+  zstat -A sizes  +size  "${jsonl_files[@]}" 2>/dev/null
+
+  idx=1
+  for filepath in "${jsonl_files[@]}"; do
+    mtime="${mtimes[$idx]}"
+    size="${sizes[$idx]:-0}"
+    (( idx++ ))
+    uuid="${filepath:t:r}"
+    [[ -z "$mtime" ]] && continue
+    candidates+=("${mtime}"$'\t'"${uuid}"$'\t'"${size}"$'\t'"${filepath}")
+  done
+
+  # Sort newest first (numeric epoch), then cap. Headroom covers JSONL
+  # files filtered out in pass 2 (only meta / <command-*> entries) so the
+  # list doesn't come up short.
+  if (( ${#candidates} > 0 )); then
+    if (( max_sessions > 0 )); then
+      headroom=$(( max_sessions * 2 + 5 ))
+      while IFS= read -r line; do top+=("$line"); done \
+        < <(printf '%s\n' "${candidates[@]}" | sort -nr | head -n $headroom)
+    else
+      while IFS= read -r line; do top+=("$line"); done \
+        < <(printf '%s\n' "${candidates[@]}" | sort -nr)
+    fi
   fi
 
-  # Sort descending by sortkey, then cap. Use a small headroom so JSONL
-  # files that get filtered out in pass 2 (only meta / <command-*>
-  # entries) don't leave the list short.
-  if (( max_sessions > 0 )); then
-    headroom=$(( max_sessions * 2 + 5 ))
-    while IFS= read -r line; do top+=("$line"); done \
-      < <(printf '%s\n' "${candidates[@]}" | sort -r | head -n $headroom)
-  else
-    while IFS= read -r line; do top+=("$line"); done \
-      < <(printf '%s\n' "${candidates[@]}" | sort -r)
-  fi
+  zmodload -F zsh/datetime p:EPOCHSECONDS 2>/dev/null
+  now=${EPOCHSECONDS:-$(date +%s)}
 
-  # Pass 2: for each surviving candidate, resolve branch/message if needed
-  # and build the display rows. Newest-first order is preserved by sort -r
-  # above and by `-o nosort` on the compadd call below. (Plain `-V` alone
-  # isn't enough in some zsh setups; `-o nosort` is the canonical zsh API
-  # that reliably disables the alphabetical re-sort.)
+  # Pass 2: resolve title/branch (from index when possible, else parse the
+  # JSONL), compute the same "1 day ago · main · 2.5MB" trio `/resume`
+  # displays, and build the label. Newest-first order is preserved by
+  # `sort -nr` above and by `-o nosort` on the compadd call below.
   for line in "${top[@]}"; do
     (( max_sessions > 0 && count >= max_sessions )) && break
-    IFS=$'\t' read -r sortkey uuid src branch msg <<< "$line"
-    datestr="${sortkey:0:10}"
-    if [[ "$src" == "jsonl" ]]; then
-      # Extract branch + first real user prompt in one jq call.
-      # Skip isMeta wrappers and <command-*> / <local-command-*> messages.
-      # Emits nothing when no resumable user prompt exists, so files
-      # containing only file-history-snapshots, hook progress, or
-      # <command-*>/meta entries are filtered out — `claude --resume`
-      # rejects those with "No conversation found".
-      info=$(head -100 "$project_dir/$uuid.jsonl" | jq -rs '
-        [.[] | select(.type=="user")] as $users |
-        ([
-          $users[]
-          | select((.isMeta // false) != true and .message.content != null)
-          | .message.content
-          | if type=="array" then .[0].text else . end
-          | select(. != null)
-          | select(test("^\\s*<(command|local-command)") | not)
-        ] | first) as $msg |
-        if $msg == null then empty else
-          ($users[0].gitBranch // "?") as $branch |
-          "\($branch)\t\($msg | gsub("\n"; " ") | .[0:60])"
-        end
-      ' 2>/dev/null)
-      [[ -z "$info" ]] && continue
-      branch="${info%%$'\t'*}"
-      msg="${info#*$'\t'}"
+    IFS=$'\t' read -r mtime uuid size filepath <<< "$line"
+
+    branch="${index_branch[$uuid]:-?}"
+    # Parse the JSONL for live title signals — `/rename`-set custom titles
+    # (type: custom-title) and auto-generated `ai-title` records both live
+    # there and outrank any frozen `summary` recorded in sessions-index.json.
+    # We always check, so renaming a session immediately reflects in the
+    # completer. Both record types get appended throughout the session, so
+    # reading `head -100; tail -50` catches them without parsing multi-MB
+    # files. Fields are emitted one per line (with newlines stripped) so
+    # zsh's `read` doesn't collide with tab-collapsing IFS rules when
+    # intermediate values are empty.
+    _jb=""; _jcustom=""; _jai=""; _jsum=""; _jprompt=""; _jcmd=""
+    {
+      IFS= read -r _jb
+      IFS= read -r _jcustom
+      IFS= read -r _jai
+      IFS= read -r _jsum
+      IFS= read -r _jprompt
+      IFS= read -r _jcmd
+    } < <( { head -100 "$filepath"; tail -50 "$filepath"; } 2>/dev/null | jq -rs '
+      [.[] | select(.type=="user")] as $users |
+      ([.[] | select(.type=="custom-title") | .customTitle] | last // "") as $custom |
+      ([.[] | select(.type=="ai-title")     | .aiTitle]     | last // "") as $ai     |
+      ([.[] | select(.type=="summary")      | .summary]     | first // "") as $sum  |
+      ([
+        $users[]
+        | select((.isMeta // false) != true and .message.content != null)
+        | .message.content
+        | if type=="array" then .[0].text else . end
+        | select(. != null)
+        | select(test("^\\s*<(command|local-command)") | not)
+      ] | first // "") as $prompt |
+      # Command-only sessions (e.g. a quick `/exit`) still show in `/resume`
+      # labelled by the slash command itself; extract that from the
+      # <command-name>...</command-name> tag so they surface here too.
+      ([
+        $users[]
+        | (.message.content | if type=="array" then .[0].text else . end)
+        | select(. != null and test("<command-name>"))
+        | capture("<command-name>(?<c>[^<]+)</command-name>") | .c
+      ] | first // "") as $cmd |
+      ($users[0].gitBranch // "") as $br |
+      [$br, $custom, $ai, $sum, $prompt, $cmd][]
+      | gsub("\n"; " ")
+    ' 2>/dev/null )
+    [[ -n "$_jb" ]] && branch="$_jb"
+    # Priority: /rename customTitle → aiTitle → index summary →
+    # inline summary record → first user prompt → first slash command.
+    if   [[ -n "$_jcustom" ]]; then title="$_jcustom"
+    elif [[ -n "$_jai"     ]]; then title="$_jai"
+    elif [[ -n "${index_summary[$uuid]}" ]]; then title="${index_summary[$uuid]}"
+    elif [[ -n "$_jsum"    ]]; then title="$_jsum"
+    elif [[ -n "$_jprompt" ]]; then title="$_jprompt"
+    elif [[ -n "$_jcmd"    ]]; then title="$_jcmd"
+    else title=""
     fi
+    [[ -z "$title" ]] && continue
+    # Trim/normalize for one-line display.
+    title="${title//$'\n'/ }"
+    (( ${#title} > 80 )) && title="${title:0:80}"
+
+    # Relative time — same buckets `/resume` uses.
+    d=$(( now - mtime ))
+    (( d < 0 )) && d=0
+    if (( d < 60 )); then
+      (( d == 1 )) && reltime="1 second ago" || reltime="${d} seconds ago"
+    elif (( d < 3600 )); then
+      m=$(( d / 60 ))
+      (( m == 1 )) && reltime="1 minute ago" || reltime="${m} minutes ago"
+    elif (( d < 86400 )); then
+      h=$(( d / 3600 ))
+      (( h == 1 )) && reltime="1 hour ago" || reltime="${h} hours ago"
+    elif (( d < 604800 )); then
+      days=$(( d / 86400 ))
+      (( days == 1 )) && reltime="1 day ago" || reltime="${days} days ago"
+    elif (( d < 2592000 )); then
+      weeks=$(( d / 604800 ))
+      (( weeks == 1 )) && reltime="1 week ago" || reltime="${weeks} weeks ago"
+    elif (( d < 31536000 )); then
+      months=$(( d / 2592000 ))
+      (( months == 1 )) && reltime="1 month ago" || reltime="${months} months ago"
+    else
+      years=$(( d / 31536000 ))
+      (( years == 1 )) && reltime="1 year ago" || reltime="${years} years ago"
+    fi
+
+    # Human-readable size, one decimal place. Avoids forking awk/bc; zsh
+    # integer arithmetic keeps the pass-2 loop hot for projects with
+    # hundreds of sessions.
+    if (( size < 1024 )); then
+      sizestr="${size}B"
+    elif (( size < 1048576 )); then
+      kb=$(( size * 10 / 1024 ))
+      (( kb % 10 == 0 )) && sizestr="$((kb/10))KB" || sizestr="$((kb/10)).$((kb%10))KB"
+    elif (( size < 1073741824 )); then
+      mb=$(( size * 10 / 1048576 ))
+      (( mb % 10 == 0 )) && sizestr="$((mb/10))MB" || sizestr="$((mb/10)).$((mb%10))MB"
+    else
+      gb=$(( size * 10 / 1073741824 ))
+      (( gb % 10 == 0 )) && sizestr="$((gb/10))GB" || sizestr="$((gb/10)).$((gb%10))GB"
+    fi
+
     ids+=("$uuid")
-    labels+=("${datestr} ${uuid:0:8}- [${branch}] ${msg}")
+    labels+=("${reltime} · ${branch} · ${sizestr} - ${uuid:0:8}: ${title}")
     (( count++ ))
   done
 

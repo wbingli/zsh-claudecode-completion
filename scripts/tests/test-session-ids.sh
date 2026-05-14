@@ -43,13 +43,22 @@ build_fixture() {
     fi
     mkdir -p "$proj_dir"
 
-    # An indexed session — newest, so it sorts first.
+    # An indexed session — newest, so it sorts first. Real indexed sessions
+    # always have a backing JSONL on disk (the index points at it via
+    # fullPath); make the fixture mirror that so the indexed-summary path
+    # is what gets tested, not a missing-file edge case.
+    local uuid_indexed="aaaaaaaa-1111-2222-3333-aaaaaaaaaaaa"
+    cat > "$proj_dir/$uuid_indexed.jsonl" <<JSONL
+{"type":"user","gitBranch":"main","message":{"content":"indexed jsonl prompt (should be hidden by summary)"}}
+JSONL
+    touch -d "2026-05-09T12:00:00" "$proj_dir/$uuid_indexed.jsonl"
+
     cat > "$proj_dir/sessions-index.json" <<JSON
 {
   "originalPath": "$work_dir",
   "entries": [
     {
-      "sessionId": "aaaaaaaa-1111-2222-3333-aaaaaaaaaaaa",
+      "sessionId": "$uuid_indexed",
       "modified": "2026-05-09T12:00:00",
       "gitBranch": "main",
       "summary": "indexed session label"
@@ -67,8 +76,39 @@ JSONL
     # ISO-8601 with T separator — BSD touch on macOS rejects the space form.
     touch -d "2026-05-08T10:00:00" "$proj_dir/$uuid_jsonl.jsonl"
 
-    # A JSONL session that contains ONLY a <command-*> wrapped prompt — the
-    # completer should filter this out (claude --resume rejects it).
+    # A JSONL session whose label should come from a trailing `ai-title`
+    # record (what `/resume` displays for recent, not-yet-indexed
+    # sessions). The first user prompt is intentionally generic so the
+    # assertion only passes if the ai-title path is actually taken.
+    local uuid_aititle="dddddddd-1111-2222-3333-dddddddddddd"
+    cat > "$proj_dir/$uuid_aititle.jsonl" <<JSONL
+{"type":"user","gitBranch":"main","message":{"content":"hello there"}}
+{"type":"ai-title","aiTitle":"refactor-auth-flow","sessionId":"$uuid_aititle"}
+JSONL
+    touch -d "2026-05-08T11:00:00" "$proj_dir/$uuid_aititle.jsonl"
+
+    # A JSONL session with a `/rename`-set custom title — outranks
+    # ai-title, summary, and the prompt.
+    local uuid_custom="eeeeeeee-1111-2222-3333-eeeeeeeeeeee"
+    cat > "$proj_dir/$uuid_custom.jsonl" <<JSONL
+{"type":"user","gitBranch":"main","message":{"content":"some prompt"}}
+{"type":"ai-title","aiTitle":"auto-generated-title","sessionId":"$uuid_custom"}
+{"type":"custom-title","customTitle":"my-renamed-session","sessionId":"$uuid_custom"}
+JSONL
+    touch -d "2026-05-08T13:00:00" "$proj_dir/$uuid_custom.jsonl"
+
+    # A JSONL session whose only user content is wrapped <command-name> —
+    # the completer should pull "/exit" out of the tag instead of dropping
+    # the session entirely (this mirrors what `/resume` shows).
+    local uuid_cmdname="ffffffff-1111-2222-3333-ffffffffffff"
+    cat > "$proj_dir/$uuid_cmdname.jsonl" <<JSONL
+{"type":"user","gitBranch":"main","message":{"content":"<command-name>/exit</command-name>\n<command-message>exit</command-message>"}}
+JSONL
+    touch -d "2026-05-08T09:00:00" "$proj_dir/$uuid_cmdname.jsonl"
+
+    # A JSONL session that contains ONLY a <command-stdout>/<local-command-*>
+    # wrapper with no <command-name> — the completer should filter this
+    # out (claude --resume rejects it).
     local uuid_filtered="cccccccc-1111-2222-3333-cccccccccccc"
     cat > "$proj_dir/$uuid_filtered.jsonl" <<JSONL
 {"type":"user","gitBranch":"main","message":{"content":"<command-stdout>boring</command-stdout>"}}
@@ -97,8 +137,23 @@ assert_contains "main"     "$output" "indexed session branch"
 assert_contains "bbbbbbbb" "$output" "jsonl session UUID prefix"
 assert_contains "feature"  "$output" "jsonl session branch"
 assert_contains "jsonl session prompt" "$output" "jsonl session summary"
-# Filtered <command-*> session must not show up.
+# ai-title-bearing session uses its aiTitle as the label, not the prompt.
+assert_contains "dddddddd" "$output" "ai-title session UUID prefix"
+assert_contains "refactor-auth-flow" "$output" "ai-title session label"
+assert_not_contains "hello there" "$output" "ai-title outranks first prompt"
+# /rename customTitle outranks aiTitle/summary/prompt.
+assert_contains "eeeeeeee" "$output" "custom-title session UUID prefix"
+assert_contains "my-renamed-session" "$output" "custom-title label"
+assert_not_contains "auto-generated-title" "$output" "customTitle outranks aiTitle"
+# Sessions whose only content is a <command-name> tag still appear,
+# labelled by the slash command (mirrors `/resume`).
+assert_contains "ffffffff" "$output" "command-name session UUID prefix"
+assert_contains "/exit"    "$output" "command-name label"
+# Sessions with only a <command-stdout> wrapper (no <command-name>) must
+# still be filtered out.
 assert_not_contains "cccccccc" "$output" "filtered command-only session"
+# Relative-time formatting (e.g. "1 day ago") replaces the old ISO date.
+assert_contains " ago" "$output" "relative time label present"
 
 # ---------------------------------------------------------------------------
 # Test 2: fallback via sessions-index.json originalPath
