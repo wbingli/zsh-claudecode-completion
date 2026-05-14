@@ -2,6 +2,11 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## Unreleased
+
+### Changed
+- `claude -r <TAB>` / `claude --resume <TAB>` now labels sessions the same way the in-CLI `/resume` picker does: relative time, branch, file size, short id, and the session title — e.g. `1 day ago · main · 2.5MB - 4bd38c17: refactor-auth-flow`. The completer now reads, in priority order: `/rename`-set `customTitle`, auto-generated `aiTitle`, `sessions-index.json` `summary`, inline JSONL summary, the first non-command user prompt, and finally the slash command name (e.g. `/exit`) so command-only sessions still appear instead of being silently dropped.
+
 ## [2.1.141] - 2026-05-14
 
 ### Added
