@@ -2,6 +2,11 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.141] - 2026-05-14
+
+### Added
+- New `--cwd <path>` flag for `agents` subcommand: Show only background sessions started under the given path
+
 ## [2.1.140] - 2026-05-13
 
 ### Changed
