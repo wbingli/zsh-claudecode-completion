@@ -7,6 +7,20 @@ All notable changes to the zsh-claudecode-completion plugin are documented here.
 ### Changed
 - `claude -r <TAB>` / `claude --resume <TAB>` now labels sessions the same way the in-CLI `/resume` picker does: relative time, branch, file size, short id, and the session title — e.g. `1 day ago · main · 2.5MB - 4bd38c17: refactor-auth-flow`. The completer now reads, in priority order: `/rename`-set `customTitle`, auto-generated `aiTitle`, `sessions-index.json` `summary`, inline JSONL summary, the first non-command user prompt, and finally the slash command name (e.g. `/exit`) so command-only sessions still appear instead of being silently dropped.
 
+## [2.1.143] - 2026-05-16
+
+### Added
+- New `--add-dir` flag for `agents` subcommand: Additional directory to allow tool access to in dispatched sessions (repeatable)
+- New `--allow-dangerously-skip-permissions` flag for `agents` subcommand: Make bypass-permissions mode available to dispatched sessions without defaulting to it
+- New `--dangerously-skip-permissions` flag for `agents` subcommand: Alias for --permission-mode bypassPermissions
+- New `--effort` flag for `agents` subcommand: Default effort level for sessions dispatched from agent view (low, medium, high, xhigh, max)
+- New `--mcp-config` flag for `agents` subcommand: MCP server configuration to apply to dispatched sessions (repeatable)
+- New `--model` flag for `agents` subcommand: Default model for sessions dispatched from agent view
+- New `--permission-mode` flag for `agents` subcommand: Default permission mode for sessions dispatched from agent view
+- New `--plugin-dir` flag for `agents` subcommand: Load plugins from specified directory for the agent view and dispatched sessions (repeatable)
+- New `--settings` flag for `agents` subcommand: Settings file or JSON string to apply to the agent view and dispatched sessions
+- New `--strict-mcp-config` flag for `agents` subcommand: Only use MCP servers from --mcp-config in dispatched sessions
+
 ## [2.1.141] - 2026-05-14
 
 ### Added
