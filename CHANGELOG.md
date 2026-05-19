@@ -2,6 +2,11 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.144] - 2026-05-19
+
+### Changed
+- Bumped tracked CLI version to 2.1.144; no flag or command surface changes.
+
 ## Unreleased
 
 ### Changed
