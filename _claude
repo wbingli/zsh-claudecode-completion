@@ -410,7 +410,12 @@ local sub1=$(( subcmd_pos + 1 ))
 
 case $subcmd in
   agents)
+    # `_arguments` here is invoked as `claude`'s completer and counts
+    # positionals from $words[2], so the leading ':cmd:' placeholder is
+    # required to absorb the `agents` subcommand word — without it, the
+    # flag specs never engage and `claude agents <TAB>` produces nothing.
     _arguments -s \
+      ':cmd:' \
       '*--add-dir[Additional directory to allow tool access to in dispatched sessions (repeatable)]:directory:_files -/' \
       '--allow-dangerously-skip-permissions[Make bypass-permissions mode available to dispatched sessions without defaulting to it]' \
       '--cwd[Show only background sessions started under path]:path:_files -/' \
@@ -707,6 +712,7 @@ case $subcmd in
     _arguments \
       '--force[Force installation even if already installed]' \
       '(-h --help)'{-h,--help}'[Display help]' \
+      ':cmd:' \
       ':target:(stable latest)'
     return
     ;;
@@ -715,7 +721,8 @@ case $subcmd in
       '(-h --help)'{-h,--help}'[Display help]' \
       '--sandbox[Enable sandboxing for filesystem and network isolation]' \
       '--no-sandbox[Disable sandboxing]' \
-      '--verbose[Show detailed connection and session logs]'
+      '--verbose[Show detailed connection and session logs]' \
+      ':cmd:'
     return
     ;;
   ultrareview)
@@ -723,12 +730,14 @@ case $subcmd in
       '(-h --help)'{-h,--help}'[Display help]' \
       '--json[Print the raw bugs.json payload instead of formatted findings]' \
       '--timeout[Maximum minutes to wait for the review to finish (default: 30)]:minutes:' \
+      ':cmd:' \
       '::target:'
     return
     ;;
   setup-token|doctor|update|upgrade)
     _arguments \
-      '(-h --help)'{-h,--help}'[Display help]'
+      '(-h --help)'{-h,--help}'[Display help]' \
+      ':cmd:'
     return
     ;;
 esac
