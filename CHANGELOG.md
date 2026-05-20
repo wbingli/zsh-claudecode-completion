@@ -2,6 +2,11 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.145] - 2026-05-20
+
+### Added
+- New `--json` flag for `agents` subcommand: Print live sessions as a JSON array and exit (for scripting; does not require a TTY)
+
 ## [2.1.144] - 2026-05-19
 
 ### Changed
