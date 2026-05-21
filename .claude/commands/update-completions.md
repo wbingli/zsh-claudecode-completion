@@ -44,14 +44,29 @@ Some Claude CLI commands are **hidden** — they work but are not listed in `cla
 | Command | Help command | Description |
 |---------|-------------|-------------|
 | `remote-control` | `claude remote-control --help` | Connect local environment to claude.ai/code |
+| `daemon` | `claude daemon --help` | Manage the background-session supervisor (`run`, `status`, `logs`, `uninstall`, `stop`) |
 
 For each hidden command:
 1. Run its `--help` to get flags and description
 2. Also check the official docs at `https://code.claude.com/docs/en/<command-name>.md` for any flags not shown in `--help` (e.g., `remote-control` has `--sandbox`, `--no-sandbox`, `--verbose` documented but not in `--help`)
 3. Include the command in both the `commands` array and the `case` statement, same as visible commands
 4. Include it in the `'1:command:(...)'` list at the bottom
+5. Also add it to the `known_commands` array used by the subcommand-position scanner; otherwise a hidden parent like `daemon` won't be detected and its subcommands (e.g. `daemon stop`) will route to the wrong top-level case
 
 **Maintaining this list**: When you discover new hidden commands (e.g., a command referenced in docs or changelogs but missing from `--help`), add them to this table so future updates preserve them.
+
+### Do NOT remove a command just because it's missing from `claude --help`
+
+The completion script intentionally lists commands that are not in `claude --help` (see the Hidden Commands table above). Before deleting any command from `_claude` because you can't find it in the help output, **verify it is actually gone** by invoking it:
+
+```bash
+claude <command> --help 2>&1
+```
+
+- If you get a real usage block → the command exists, keep it (and add it to the Hidden Commands table above if it's missing).
+- Only an `unknown command` / `error: unknown command '<name>'` style error means it has truly been removed.
+
+When in doubt, probe the CLI rather than dropping the entry. Treat every command currently in `_claude` as "verify before remove."
 
 ### Hidden Flags
 
