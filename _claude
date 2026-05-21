@@ -318,6 +318,7 @@ commands=(
   'attach:Attach to a background session in this terminal'
   'auth:Manage authentication'
   'auto-mode:Inspect auto mode classifier configuration'
+  'daemon:Manage the background session supervisor'
   'doctor:Check the health of your Claude Code auto-updater'
   'install:Install Claude Code native build. Use [target] to specify version (stable, latest, or specific version)'
   'kill:Stop a background session (alias for stop)'
@@ -390,7 +391,7 @@ marketplace_commands=(
 # This handles cases where flags appear before the subcommand (e.g., alias claude='claude --flag').
 local subcmd_pos=0
 local subcmd=""
-local -a known_commands=(agents attach auth auto-mode doctor install kill logs mcp plugin plugins project remote-control respawn rm setup-token stop ultrareview update upgrade)
+local -a known_commands=(agents attach auth auto-mode daemon doctor install kill logs mcp plugin plugins project remote-control respawn rm setup-token stop ultrareview update upgrade)
 local i
 for (( i=2; i <= ${#words}; i++ )); do
   # Skip flags and their values
@@ -680,6 +681,47 @@ case $subcmd in
     fi
     return
     ;;
+  daemon)
+    if (( CURRENT == sub1 )); then
+      local -a daemon_commands
+      daemon_commands=(
+        'run:Run the supervisor in the foreground (default when piped)'
+        'status:Show daemon pid, version, uptime'
+        'logs:Tail the daemon log (Ctrl-C to stop)'
+        'uninstall:Remove the background service (launchctl/systemd)'
+        'stop:Shut down the supervisor and terminate background sessions'
+      )
+      _describe 'daemon command' daemon_commands
+    else
+      case $words[$sub1] in
+        run)
+          _arguments \
+            '(-h --help)'{-h,--help}'[Display help]' \
+            '--json-path[Config file (default: ~/.claude/daemon.json)]:path:_files' \
+            '--log-file[Log file (default: ~/.claude/daemon.log)]:path:_files' \
+            '::json-path:_files'
+          ;;
+        stop)
+          _arguments \
+            '--any[Also stop a transient (non-service) daemon]' \
+            '(-h --help)'{-h,--help}'[Display help]' \
+            '--json-path[Config file (default: ~/.claude/daemon.json)]:path:_files' \
+            '--keep-workers[Leave detached sessions running]' \
+            '--log-file[Log file (default: ~/.claude/daemon.log)]:path:_files'
+          ;;
+        status|logs|uninstall)
+          _arguments \
+            '(-h --help)'{-h,--help}'[Display help]' \
+            '--json-path[Config file (default: ~/.claude/daemon.json)]:path:_files' \
+            '--log-file[Log file (default: ~/.claude/daemon.log)]:path:_files'
+          ;;
+        *)
+          _message 'no more arguments'
+          ;;
+      esac
+    fi
+    return
+    ;;
   auto-mode)
     if (( CURRENT == sub1 )); then
       local -a auto_mode_commands
@@ -803,5 +845,5 @@ _arguments -s \
   '--verbose[Override verbose mode setting from config]' \
   '(-v --version)'{-v,--version}'[Output the version number]' \
   '(-w --worktree)'{-w,--worktree}'[Create a new git worktree for this session (optionally specify a name)]::name:' \
-  '1:command:(agents attach auth auto-mode doctor install kill logs mcp plugin plugins project remote-control respawn rm setup-token stop ultrareview update upgrade)' \
+  '1:command:(agents attach auth auto-mode daemon doctor install kill logs mcp plugin plugins project remote-control respawn rm setup-token stop ultrareview update upgrade)' \
   '*:prompt:'
