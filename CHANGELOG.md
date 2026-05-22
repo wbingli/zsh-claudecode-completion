@@ -2,6 +2,14 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.148] - 2026-05-22
+
+### Added
+- New `--config` flag for `plugin install` subcommand: Set a userConfig option declared in the plugin's manifest (repeatable)
+
+### Changed
+- Updated `-y/--yes` description for `plugin prune` and `plugin uninstall` to reflect that TTY check applies to both stdin and stdout
+
 ## [2.1.145] - 2026-05-20
 
 ### Added

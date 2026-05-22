@@ -2,7 +2,7 @@
 
 # Zsh completion script for Claude Code CLI
 # https://github.com/anthropics/claude-code
-# Auto-generated for Claude v2.1.145
+# Auto-generated for Claude v2.1.148
 
 _claude_session_ids() {
   # Claude stores each project under ~/.claude/projects/ with a mangled
@@ -603,6 +603,7 @@ case $subcmd in
           ;;
         install|i)
           _arguments \
+            '*--config[Set a userConfig option declared in the plugin'\''s manifest (repeatable)]:key=value:' \
             '(-h --help)'{-h,--help}'[Display help]' \
             '(-s --scope)'{-s,--scope}'[Installation scope: user, project, or local (default: user)]:scope:(user project local)' \
             ':plugin:'
@@ -612,7 +613,7 @@ case $subcmd in
             '--dry-run[List what would be removed without removing]' \
             '(-h --help)'{-h,--help}'[Display help]' \
             '(-s --scope)'{-s,--scope}'[Prune at scope: user, project, or local (default: user)]:scope:(user project local)' \
-            '(-y --yes)'{-y,--yes}'[Skip the confirmation prompt (required when stdin is not a TTY)]'
+            '(-y --yes)'{-y,--yes}'[Skip the confirmation prompt (required when stdin or stdout is not a TTY)]'
           ;;
         uninstall|remove)
           _arguments \
@@ -620,7 +621,7 @@ case $subcmd in
             '--keep-data[Preserve the plugin'\''s persistent data directory (~/.claude/plugins/data/{id}/)]' \
             '--prune[Also remove auto-installed dependencies that are no longer needed (requires -y in non-interactive contexts)]' \
             '(-s --scope)'{-s,--scope}'[Uninstall from scope: user, project, or local (default: user)]:scope:(user project local)' \
-            '(-y --yes)'{-y,--yes}'[Skip the --prune confirmation prompt (required when stdin is not a TTY)]' \
+            '(-y --yes)'{-y,--yes}'[Skip the --prune confirmation prompt (required when stdin or stdout is not a TTY)]' \
             ':plugin:'
           ;;
         enable)
