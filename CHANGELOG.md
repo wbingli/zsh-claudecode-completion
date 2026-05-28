@@ -2,6 +2,11 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.153] - 2026-05-28
+
+### Added
+- New `--scope` flag for `plugin marketplace remove` subcommand: Remove the marketplace declaration from a specific settings scope (user, project, or local)
+
 ## [2.1.152] - 2026-05-27
 
 ### Changed
