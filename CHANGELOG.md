@@ -2,6 +2,11 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.156] - 2026-05-29
+
+### Added
+- New `--prompt-suggestions` global flag: Enable prompt suggestions; in print/SDK mode emits a `prompt_suggestion` message after each turn with a predicted next user prompt (choices: true, false, 1, 0, yes, no, on, off)
+
 ## [2.1.153] - 2026-05-28
 
 ### Added
