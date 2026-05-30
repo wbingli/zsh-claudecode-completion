@@ -2,7 +2,7 @@
 
 # Zsh completion script for Claude Code CLI
 # https://github.com/anthropics/claude-code
-# Auto-generated for Claude v2.1.153
+# Auto-generated for Claude v2.1.158
 
 _claude_session_ids() {
   # Claude stores each project under ~/.claude/projects/ with a mangled
@@ -364,6 +364,8 @@ plugin_commands=(
   'disable:Disable an enabled plugin'
   'enable:Enable a disabled plugin'
   'help:Display help for command'
+  'init:Scaffold a new plugin at ~/.claude/skills/<name>/ (auto-loads next session as <name>@skills-dir)'
+  'new:Scaffold a new plugin at ~/.claude/skills/<name>/ (auto-loads next session as <name>@skills-dir)'
   'install:Install a plugin from available marketplaces (use plugin@marketplace for specific marketplace)'
   'i:Install a plugin from available marketplaces (use plugin@marketplace for specific marketplace)'
   'list:List installed plugins'
@@ -418,6 +420,7 @@ case $subcmd in
     _arguments -s \
       ':cmd:' \
       '*--add-dir[Additional directory to allow tool access to in dispatched sessions (repeatable)]:directory:_files -/' \
+      '--agent[Default agent for sessions dispatched from agent view. Overrides the agent setting]:agent:' \
       '--allow-dangerously-skip-permissions[Make bypass-permissions mode available to dispatched sessions without defaulting to it]' \
       '--cwd[Show only background sessions started under path]:path:_files -/' \
       '--dangerously-skip-permissions[Alias for --permission-mode bypassPermissions]' \
@@ -601,6 +604,16 @@ case $subcmd in
                 ;;
             esac
           fi
+          ;;
+        init|new)
+          _arguments \
+            '--author[Author name (default: git config user.name)]:name:' \
+            '--author-email[Author email (default: git config user.email)]:email:' \
+            '--description[Manifest description]:text:' \
+            '(-f --force)'{-f,--force}'[Overwrite an existing .claude-plugin/ at the target]' \
+            '(-h --help)'{-h,--help}'[Display help]' \
+            '*--with[Also scaffold components (skills, agents, hooks, mcp, lsp, output-style, channel)]:components:(skills agents hooks mcp lsp output-style channel)' \
+            ':name:'
           ;;
         install|i)
           _arguments \
@@ -832,6 +845,7 @@ _arguments -s \
   '*--plugin-dir[Load plugins from directories for this session only (repeatable)]:directory:_files -/' \
   '*--plugin-url[Fetch a plugin .zip from a URL for this session only (repeatable)]:url:' \
   '(-p --print)'{-p,--print}'[Print response and exit (useful for pipes). Note: The workspace trust dialog is skipped when Claude is run in non-interactive mode. Only use this in directories you trust]' \
+  '--prompt-suggestions[Enable prompt suggestions (in print/SDK mode, emits a prompt_suggestion message after each turn)]:value:(true false 1 0 yes no on off)' \
   '--remote-control[Start an interactive session with Remote Control enabled (optionally named)]::name:' \
   '--remote-control-session-name-prefix[Prefix for auto-generated Remote Control session names (default: hostname)]:prefix:' \
   '--replay-user-messages[Re-emit user messages from stdin back on stdout for acknowledgment (only works with --input-format=stream-json and --output-format=stream-json)]' \
