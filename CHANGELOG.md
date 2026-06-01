@@ -2,6 +2,13 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.159] - 2026-06-01
+
+### Added
+- New `plugin init` / `plugin new` subcommand: Scaffold a new plugin at `~/.claude/skills/<name>/` with flags `--author`, `--author-email`, `--description`, `--force`, `--with`
+- New `--agent` flag for `agents` subcommand: Default agent for sessions dispatched from agent view
+- New `--prompt-suggestions` global flag: Enable prompt suggestions in print/SDK mode
+
 ## [2.1.153] - 2026-05-28
 
 ### Added
