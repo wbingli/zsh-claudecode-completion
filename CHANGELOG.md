@@ -2,6 +2,12 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.162] - 2026-06-04
+
+### Changed
+- Updated `--bare` description to reflect expanded auth semantics: Anthropic auth is strictly via `ANTHROPIC_API_KEY` or `apiKeyHelper` (OAuth and keychain are never read in bare mode)
+- Updated `--model` flag description example from `claude-sonnet-4-6` to `claude-opus-4-8`
+
 ## [2.1.160] - 2026-06-02
 
 ### Added
