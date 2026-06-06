@@ -2,6 +2,14 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.167] - 2026-06-06
+
+### Added
+- New `--strict` flag for `plugin validate` subcommand: Treat warnings as errors (exit 1), useful in CI
+
+### Changed
+- Updated `--model` flag description example from `claude-sonnet-4-6` to `claude-opus-4-8`
+
 ## [2.1.160] - 2026-06-02
 
 ### Added
