@@ -2,6 +2,16 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.173] - 2026-06-11
+
+### Added
+- New `--safe-mode` global flag: Start with all customizations disabled (CLAUDE.md, skills, plugins, hooks, MCP servers, etc.). Sets CLAUDE_CODE_SAFE_MODE=1
+- New `--all` flag for `agents` subcommand: With --json, include completed sessions (the full agent view list)
+
+### Changed
+- Updated `agents --json` description from "Print live sessions" to "Print active sessions"
+- Updated `--model` flag description to include 'fable' alias and 'claude-fable-5' as example model name
+
 ## [2.1.168] - 2026-06-07
 
 ### Changed
