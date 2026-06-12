@@ -2,7 +2,7 @@
 
 # Zsh completion script for Claude Code CLI
 # https://github.com/anthropics/claude-code
-# Auto-generated for Claude v2.1.168
+# Auto-generated for Claude v2.1.175
 
 _claude_session_ids() {
   # Claude stores each project under ~/.claude/projects/ with a mangled
@@ -421,12 +421,13 @@ case $subcmd in
       ':cmd:' \
       '*--add-dir[Additional directory to allow tool access to in dispatched sessions (repeatable)]:directory:_files -/' \
       '--agent[Default agent for sessions dispatched from agent view. Overrides the agent setting]:agent:' \
+      '--all[With --json: include completed sessions (the full agent view list)]' \
       '--allow-dangerously-skip-permissions[Make bypass-permissions mode available to dispatched sessions without defaulting to it]' \
       '--cwd[Show only background sessions started under path]:path:_files -/' \
       '--dangerously-skip-permissions[Alias for --permission-mode bypassPermissions]' \
       '--effort[Default effort level for sessions dispatched from agent view]:level:(low medium high xhigh max)' \
       '(-h --help)'{-h,--help}'[Display help for command]' \
-      '--json[Print live sessions as a JSON array and exit (for scripting; does not require a TTY)]' \
+      '--json[Print active sessions as a JSON array and exit (for scripting; does not require a TTY)]' \
       '*--mcp-config[MCP server configuration to apply to dispatched sessions (repeatable)]:config:_files' \
       '--model[Default model for sessions dispatched from agent view]:model:' \
       '--permission-mode[Default permission mode for sessions dispatched from agent view]:mode:(acceptEdits bypassPermissions default dontAsk plan auto)' \
@@ -850,6 +851,7 @@ _arguments -s \
   '--remote-control-session-name-prefix[Prefix for auto-generated Remote Control session names (default: hostname)]:prefix:' \
   '--replay-user-messages[Re-emit user messages from stdin back on stdout for acknowledgment (only works with --input-format=stream-json and --output-format=stream-json)]' \
   '(-r --resume)'{-r,--resume}'[Resume a conversation by session ID, or open interactive picker with optional search term]:session:_claude_session_ids' \
+  '--safe-mode[Start with all customizations disabled — useful for troubleshooting a broken configuration. Admin-managed settings still apply. Sets CLAUDE_CODE_SAFE_MODE=1]' \
   '--session-id[Use a specific session ID for the conversation (must be a valid UUID)]:uuid:' \
   '--setting-sources[Comma-separated list of setting sources to load (user, project, local)]:sources:' \
   '--settings[Path to a settings JSON file or a JSON string to load additional settings from]:file:_files' \
