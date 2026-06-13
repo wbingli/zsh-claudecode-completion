@@ -2,7 +2,7 @@
 
 # Zsh completion script for Claude Code CLI
 # https://github.com/anthropics/claude-code
-# Auto-generated for Claude v2.1.175
+# Auto-generated for Claude v2.1.177
 
 _claude_session_ids() {
   # Claude stores each project under ~/.claude/projects/ with a mangled
@@ -837,7 +837,7 @@ _arguments -s \
   '--max-budget-usd[Maximum dollar amount to spend on API calls (only works with --print)]:amount:' \
   '*--mcp-config[Load MCP servers from JSON files or strings (space-separated)]:config:_files' \
   '--mcp-debug[[DEPRECATED. Use --debug instead\] Enable MCP debug mode (shows MCP server errors)]' \
-  '--model[Model for the current session. Provide an alias for the latest model (e.g. '\''sonnet'\'' or '\''opus'\'') or a model'\''s full name (e.g. '\''claude-sonnet-4-6'\'')]:model:' \
+  '--model[Model for the current session. Provide an alias for the latest model (e.g. '\''fable'\'', '\''opus'\'', or '\''sonnet'\'') or a model'\''s full name (e.g. '\''claude-fable-5'\'')]:model:' \
   '(-n --name)'{-n,--name}'[Set a display name for this session (shown in the prompt box, /resume picker, and terminal title)]:name:' \
   '--no-chrome[Disable Claude in Chrome integration]' \
   '--no-session-persistence[Disable session persistence - sessions will not be saved to disk and cannot be resumed (only works with --print)]' \
