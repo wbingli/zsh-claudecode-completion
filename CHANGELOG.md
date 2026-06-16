@@ -2,6 +2,11 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.178] - 2026-06-16
+
+### Changed
+- Updated `--model` flag description to reference `fable`, `opus`, or `sonnet` as aliases and `claude-fable-5` as a full model name example (reflects new Fable 5 model)
+
 ## [2.1.175] - 2026-06-12
 
 ### Added
