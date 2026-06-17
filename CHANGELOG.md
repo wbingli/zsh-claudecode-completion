@@ -2,6 +2,12 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.179] - 2026-06-17
+
+### Changed
+- Updated `--model` flag description: examples now include `'fable'` alias and `'claude-fable-5'` full model name
+- Updated `--safe-mode` flag description: now lists specific disabled customizations (CLAUDE.md, skills, plugins, hooks, MCP servers, custom commands and agents, output styles, workflows, custom themes, keybindings) and clarifies that auth, model selection, built-in tools, and permissions work normally
+
 ## [2.1.175] - 2026-06-12
 
 ### Added
