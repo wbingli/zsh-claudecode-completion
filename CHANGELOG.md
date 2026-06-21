@@ -2,6 +2,14 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.185] - 2026-06-21
+
+### Added
+- New `--ax-screen-reader` flag: Render screen-reader friendly output (flat text, no decorative borders or animations)
+
+### Changed
+- Updated `--model` flag description to reference `fable` as an alias and `claude-fable-5` as the current full model name example (was `sonnet`/`claude-sonnet-4-6`)
+
 ## [2.1.175] - 2026-06-12
 
 ### Added
