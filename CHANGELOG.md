@@ -2,13 +2,14 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
-## [2.1.185] - 2026-06-21
+## [2.1.185] - 2026-06-22
 
 ### Added
 - New `--ax-screen-reader` flag: Render screen-reader friendly output (flat text, no decorative borders or animations)
 
 ### Changed
-- Updated `--model` flag description to reference `fable` as an alias and `claude-fable-5` as the current full model name example (was `sonnet`/`claude-sonnet-4-6`)
+- Updated `--model` flag description: Added `'fable'` as an alias example and changed full-name example to `claude-fable-5`
+- Updated `--fallback-model` flag description: Now notes comma-separated list support, "not available" case, and per-turn primary retry behavior
 
 ## [2.1.175] - 2026-06-12
 
