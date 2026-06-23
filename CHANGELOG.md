@@ -2,6 +2,13 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.186] - 2026-06-23
+
+### Added
+- New `--ax-screen-reader` global flag: Render screen-reader friendly output (flat text, no decorative borders or animations)
+- New `mcp login` subcommand with `--no-browser` flag: Authenticate with an MCP server (HTTP, SSE, or claude.ai connector)
+- New `mcp logout` subcommand: Clear stored OAuth credentials for an MCP server
+
 ## [2.1.175] - 2026-06-12
 
 ### Added
