@@ -2,7 +2,7 @@
 
 # Zsh completion script for Claude Code CLI
 # https://github.com/anthropics/claude-code
-# Auto-generated for Claude v2.1.175
+# Auto-generated for Claude v2.1.193
 
 _claude_session_ids() {
   # Claude stores each project under ~/.claude/projects/ with a mangled
@@ -353,6 +353,8 @@ mcp_commands=(
   'get:Get details about an MCP server'
   'help:Display help for command'
   'list:List configured MCP servers'
+  'login:Authenticate with an MCP server (HTTP, SSE, or claude.ai connector)'
+  'logout:Clear stored OAuth credentials for an MCP server'
   'remove:Remove an MCP server'
   'reset-project-choices:Reset all approved and rejected project-scoped (.mcp.json) servers within this project'
   'serve:Start the Claude Code MCP server'
@@ -531,6 +533,17 @@ case $subcmd in
             '(-s --scope)'{-s,--scope}'[Configuration scope (local, user, or project) (default: local)]:scope:(local user project)'
           ;;
         get)
+          _arguments \
+            '(-h --help)'{-h,--help}'[Display help]' \
+            ':name:'
+          ;;
+        login)
+          _arguments \
+            '(-h --help)'{-h,--help}'[Display help]' \
+            '--no-browser[Print the authorization URL instead of opening a browser (for SSH/headless sessions)]' \
+            ':name:'
+          ;;
+        logout)
           _arguments \
             '(-h --help)'{-h,--help}'[Display help]' \
             ':name:'
@@ -807,12 +820,14 @@ _arguments -s \
   '--agent[Agent for the current session. Overrides the agent setting]:agent:' \
   '--agents[JSON object defining custom agents]:json:' \
   '--allow-dangerously-skip-permissions[Enable bypassing all permission checks as an option, without it being enabled by default. Recommended only for sandboxes with no internet access]' \
+  '--ax-screen-reader[Render screen-reader friendly output (flat text, no decorative borders or animations)]' \
   '*--allowedTools[Comma or space-separated list of tool names to allow (e.g. "Bash(git:*) Edit")]:tools:' \
   '*--allowed-tools[Comma or space-separated list of tool names to allow (e.g. "Bash(git:*) Edit")]:tools:' \
   '--append-system-prompt[Append a system prompt to the default system prompt]:prompt:' \
   '--append-system-prompt-file[Append a system prompt from a file to the default system prompt]:file:_files' \
   '--bare[Minimal mode: skip hooks, LSP, plugin sync, attribution, auto-memory, background prefetches, keychain reads, and CLAUDE.md auto-discovery. Sets CLAUDE_CODE_SIMPLE=1]' \
   '*--betas[Beta headers to include in API requests (API key users only)]:betas:' \
+  '(--bg --background)'{--bg,--background}'[Start the session as a background agent and return immediately (manage with claude agents)]' \
   '--brief[Enable SendUserMessage tool for agent-to-user communication]' \
   '--chrome[Enable Claude in Chrome integration]' \
   '(-c --continue)'{-c,--continue}'[Continue the most recent conversation in the current directory]' \
@@ -836,8 +851,7 @@ _arguments -s \
   '--json-schema[JSON Schema for structured output validation. Example: {"type":"object","properties":{"name":{"type":"string"}},"required":["name"\]\}]:schema:' \
   '--max-budget-usd[Maximum dollar amount to spend on API calls (only works with --print)]:amount:' \
   '*--mcp-config[Load MCP servers from JSON files or strings (space-separated)]:config:_files' \
-  '--mcp-debug[[DEPRECATED. Use --debug instead\] Enable MCP debug mode (shows MCP server errors)]' \
-  '--model[Model for the current session. Provide an alias for the latest model (e.g. '\''sonnet'\'' or '\''opus'\'') or a model'\''s full name (e.g. '\''claude-sonnet-4-6'\'')]:model:' \
+  '--model[Model for the current session. Provide an alias for the latest model (e.g. '\''fable'\'', '\''opus'\'', or '\''sonnet'\'') or a model'\''s full name (e.g. '\''claude-fable-5'\'')]:model:' \
   '(-n --name)'{-n,--name}'[Set a display name for this session (shown in the prompt box, /resume picker, and terminal title)]:name:' \
   '--no-chrome[Disable Claude in Chrome integration]' \
   '--no-session-persistence[Disable session persistence - sessions will not be saved to disk and cannot be resumed (only works with --print)]' \

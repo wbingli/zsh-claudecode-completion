@@ -2,6 +2,20 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.193] - 2026-06-26
+
+### Added
+- New `--ax-screen-reader` flag: Render screen-reader friendly output (flat text, no decorative borders or animations)
+- New `--bg`/`--background` flag: Start the session as a background agent and return immediately (manage with `claude agents`)
+- New `mcp login` subcommand with `--no-browser` flag: Authenticate with an MCP server (HTTP, SSE, or claude.ai connector)
+- New `mcp logout` subcommand: Clear stored OAuth credentials for an MCP server
+
+### Changed
+- Updated `--model` description to mention 'fable' as the latest model alias example
+
+### Removed
+- Removed deprecated `--mcp-debug` flag (now returns "unknown option" error)
+
 ## [2.1.175] - 2026-06-12
 
 ### Added
