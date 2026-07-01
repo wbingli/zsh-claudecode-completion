@@ -2,7 +2,7 @@
 
 # Zsh completion script for Claude Code CLI
 # https://github.com/anthropics/claude-code
-# Auto-generated for Claude v2.1.196
+# Auto-generated for Claude v2.1.197
 
 _claude_session_ids() {
   # Claude stores each project under ~/.claude/projects/ with a mangled
@@ -545,7 +545,7 @@ case $subcmd in
         login)
           _arguments \
             '(-h --help)'{-h,--help}'[Display help]' \
-            '--no-browser[Print the authorization URL instead of opening a browser (for SSH/headless sessions)]' \
+            '--no-browser[Print the authorization URL instead of opening a browser (for SSH/headless sessions — paste the redirect URL back when prompted)]' \
             ':name:'
           ;;
         logout)
@@ -583,6 +583,7 @@ case $subcmd in
         validate)
           _arguments \
             '(-h --help)'{-h,--help}'[Display help]' \
+            '--strict[Treat warnings as errors (exit 1). Use in CI to fail on unrecognized fields, missing metadata, and other issues the runtime tolerates]' \
             ':path:_files'
           ;;
         marketplace)
@@ -595,7 +596,7 @@ case $subcmd in
                 _arguments \
                   '(-h --help)'{-h,--help}'[Display help]' \
                   '--scope[Where to declare the marketplace: user (default), project, or local]:scope:(user project local)' \
-                  '*--sparse[Limit checkout to specific directories via git sparse-checkout (for monorepos)]:path:_files -/' \
+                  '*--sparse[Limit checkout to specific directories via git sparse-checkout (for monorepos). Example: --sparse .claude-plugin plugins]:path:_files -/' \
                   ':source:_files'
                 ;;
               remove|rm)
@@ -859,7 +860,7 @@ _arguments -s \
   '--json-schema[JSON Schema for structured output validation. Example: {"type":"object","properties":{"name":{"type":"string"}},"required":["name"\]\}]:schema:' \
   '--max-budget-usd[Maximum dollar amount to spend on API calls (only works with --print)]:amount:' \
   '*--mcp-config[Load MCP servers from JSON files or strings (space-separated)]:config:_files' \
-  '--model[Model for the current session. Provide an alias for the latest model (e.g. '\''sonnet'\'' or '\''opus'\'') or a model'\''s full name (e.g. '\''claude-sonnet-4-6'\'')]:model:' \
+  '--model[Model for the current session. Provide an alias for the latest model (e.g. '\''fable'\'', '\''opus'\'', or '\''sonnet'\'') or a model'\''s full name (e.g. '\''claude-fable-5'\'')]:model:' \
   '(-n --name)'{-n,--name}'[Set a display name for this session (shown in the prompt box, /resume picker, and terminal title)]:name:' \
   '--no-chrome[Disable Claude in Chrome integration]' \
   '--no-session-persistence[Disable session persistence - sessions will not be saved to disk and cannot be resumed (only works with --print)]' \

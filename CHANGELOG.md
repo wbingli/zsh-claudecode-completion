@@ -2,6 +2,16 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.197] - 2026-07-01
+
+### Added
+- New `--strict` flag for `plugin validate`: Treat warnings as errors (exit 1)
+
+### Changed
+- Updated `--model` description to mention the new `fable` alias (e.g. 'fable', 'opus', or 'sonnet') and `claude-fable-5` example
+- Updated `mcp login --no-browser` description to mention pasting the redirect URL back when prompted
+- Updated `plugin marketplace add --sparse` description with a usage example
+
 ## [2.1.196] - 2026-06-30
 
 ### Added
