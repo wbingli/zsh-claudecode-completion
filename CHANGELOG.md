@@ -2,6 +2,17 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.199] - 2026-07-03
+
+### Added
+- New `plugin eval` subcommand: Run eval cases (evals/**/case.yaml or evals/**/prompt.md + graders/*.md) against a plugin and report scored results, with flags `--ablation`, `--allow-tools`, `--case`, `--json`, `--judge-model`, `--keep-temp`, `--max-cost-usd`, `--model`, `--no-scaffold`, `--output-dir`, `--runs`, `--scaffold`, `--tag`, `--threshold`, `--verbose`, and a nested `plugin eval init` subcommand (with `--bare`)
+- New `--strict` flag for `plugin validate`: Treat warnings as errors (exit 1)
+- New `--capacity`, `--name`, `--remote-control-session-name-prefix`, and `--spawn` flags for the `remote-control` command (documented in the CLI reference but not shown in `--help`)
+- New `--rc` flag at top level: undocumented alias for `--remote-control`
+
+### Changed
+- Updated `--model` description to reflect the current model alias examples (`fable`, `opus`, `sonnet`; full name example `claude-fable-5`)
+
 ## [2.1.196] - 2026-06-30
 
 ### Added
