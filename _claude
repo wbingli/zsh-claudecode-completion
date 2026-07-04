@@ -2,7 +2,7 @@
 
 # Zsh completion script for Claude Code CLI
 # https://github.com/anthropics/claude-code
-# Auto-generated for Claude v2.1.196
+# Auto-generated for Claude v2.1.201
 
 _claude_session_ids() {
   # Claude stores each project under ~/.claude/projects/ with a mangled
@@ -366,6 +366,7 @@ plugin_commands=(
   'details:Show a plugin'\''s component inventory and projected token cost'
   'disable:Disable an enabled plugin'
   'enable:Enable a disabled plugin'
+  'eval:Run eval cases against a plugin and report scored results'
   'help:Display help for command'
   'init:Scaffold a new plugin at ~/.claude/skills/<name>/'
   'new:Scaffold a new plugin at ~/.claude/skills/<name>/'
@@ -583,7 +584,45 @@ case $subcmd in
         validate)
           _arguments \
             '(-h --help)'{-h,--help}'[Display help]' \
+            '--strict[Treat warnings as errors (exit 1). Use in CI to fail on unrecognized fields, missing metadata, and other issues that the runtime tolerates]' \
             ':path:_files'
+          ;;
+        eval)
+          local sub2=$(( subcmd_pos + 2 ))
+          if (( CURRENT == sub2 )); then
+            _arguments -s \
+              '--ablation[Run a no-plugin baseline arm and report the score delta (none or with-without; default: with-without when targeting a plugin by name, none for a path)]:mode:(none with-without)' \
+              '*--allow-tools[Operator grant for gated tools (Bash, Write, Edit, WebFetch, mcp__*). Supports Tool(pattern:*) syntax]:tools:' \
+              '--case[Filter cases by name glob]:glob:' \
+              '(-h --help)'{-h,--help}'[Display help]' \
+              '--json[Emit aggregate-result.json to stdout (for CI)]' \
+              '--judge-model[Override LLM-grader model (default: haiku)]:model:' \
+              '--keep-temp[Preserve scaffold dirs for debugging]' \
+              '--max-cost-usd[Optional hard cost ceiling; abort and report partial results if hit (exit 2)]:usd:' \
+              '--model[Override model for all cases]:model:' \
+              '--no-scaffold[Explicitly skip scaffold_script]' \
+              '--output-dir[Directory for aggregate-result.json (default: ./evals/results/<timestamp>/)]:dir:_files -/' \
+              '--runs[Override per-case runs (default: case.runs ?? 3)]:n:' \
+              '--scaffold[Run each case'\''s scaffold_script (runs author-supplied bash as you; off by default — only use on case files you authored)]' \
+              '*--tag[Filter cases by tag (repeatable)]:tag:' \
+              '--threshold[Exit 1 if any case score is below this threshold (default: 1.0)]:threshold:' \
+              '--verbose[Stream the trace as it runs]' \
+              ':command-or-target:(init)'
+          else
+            case $words[$sub2] in
+              init)
+                _arguments \
+                  '--bare[Write a blank template (prompt.md + graders/criteria.md) instead of running the interview]' \
+                  '(-h --help)'{-h,--help}'[Display help]' \
+                  '::name:'
+                ;;
+              *)
+                _arguments \
+                  '(-h --help)'{-h,--help}'[Display help]' \
+                  '::target:_files'
+                ;;
+            esac
+          fi
           ;;
         marketplace)
           local sub2=$(( subcmd_pos + 2 ))
