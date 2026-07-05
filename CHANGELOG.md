@@ -2,12 +2,17 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
-## [2.1.201] - 2026-07-04
+## [2.1.201] - 2026-07-05
 
 ### Added
 - New `plugin eval` subcommand: Run eval cases (evals/**/case.yaml or evals/**/prompt.md + graders/*.md) against a plugin and report scored results, with flags `--ablation`, `--allow-tools`, `--case`, `--json`, `--judge-model`, `--keep-temp`, `--max-cost-usd`, `--model`, `--no-scaffold`, `--output-dir`, `--runs`, `--scaffold`, `--tag`, `--threshold`, `--verbose`
 - New `plugin eval init` subcommand: Author an eval suite under evals/ via an interview (with `--bare` flag for a blank template)
 - New `--strict` flag for `plugin validate`: Treat warnings as errors (exit 1)
+- New `--rc` alias for the top-level `--remote-control` flag
+- New flags for the `remote-control` command: `--capacity`, `-c`/`--continue`, `--create-session-in-dir`/`--no-create-session-in-dir`, `--debug-file`, `--name`, `--permission-mode`, `--remote-control-session-name-prefix`, `--session-id`, `-v` (alias for `--verbose`), `--spawn`
+
+### Changed
+- Updated `--model` description example aliases from `'sonnet'`/`'opus'`/`claude-sonnet-4-6` to `'fable'`/`'opus'`/`'sonnet'`/`claude-fable-5`
 
 ## [2.1.196] - 2026-06-30
 
