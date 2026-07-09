@@ -2,7 +2,7 @@
 
 # Zsh completion script for Claude Code CLI
 # https://github.com/anthropics/claude-code
-# Auto-generated for Claude v2.1.201
+# Auto-generated for Claude v2.1.204
 
 _claude_session_ids() {
   # Claude stores each project under ~/.claude/projects/ with a mangled
@@ -874,6 +874,7 @@ fi # end: if [[ -n "$subcmd" ]]
 # Only show global flags and commands if no subcommand matched
 _arguments -s \
   '*--add-dir[Additional directories to allow tool access to]:directory:_files -/' \
+  '--advisor[Enable a server-side advisor tool using the specified model]:model:' \
   '--agent[Agent for the current session. Overrides the agent setting]:agent:' \
   '--agents[JSON object defining custom agents]:json:' \
   '--allow-dangerously-skip-permissions[Enable bypassing all permission checks as an option, without it being enabled by default. Recommended only for sandboxes with no internet access]' \
@@ -886,8 +887,11 @@ _arguments -s \
   '(--bg --background)'{--bg,--background}'[Start the session as a background agent and return immediately (manage with `claude agents`)]' \
   '*--betas[Beta headers to include in API requests (API key users only)]:betas:' \
   '--brief[Enable SendUserMessage tool for agent-to-user communication]' \
+  '*--channels[MCP servers to listen for channel notifications (e.g. plugin:<name>@<marketplace> or server:<name>)]:server:' \
   '--chrome[Enable Claude in Chrome integration]' \
+  '(--cloud --remote)'{--cloud,--remote}'[Create a cloud session on claude.ai for the current repository (--remote is a deprecated alias)]' \
   '(-c --continue)'{-c,--continue}'[Continue the most recent conversation in the current directory]' \
+  '*--dangerously-load-development-channels[Bypass the channel plugin allowlist for local testing]:server:' \
   '--dangerously-skip-permissions[Bypass all permission checks. Recommended only for sandboxes with no internet access]' \
   '(-d --debug)'{-d,--debug}'[Enable debug mode with optional category filtering (e.g., "api,hooks" or "!1p,!file")]:filter:' \
   '--debug-file[Write debug logs to a specific file path (implicitly enables debug mode)]:path:_files' \
@@ -904,9 +908,12 @@ _arguments -s \
   '--ide[Automatically connect to IDE on startup if exactly one valid IDE is available]' \
   '--include-hook-events[Include all hook lifecycle events in the output stream (only works with --output-format=stream-json)]' \
   '--include-partial-messages[Include partial message chunks as they arrive (only works with --print and --output-format=stream-json)]' \
+  '--init[Run Setup hooks with the init matcher before starting the session]' \
+  '--init-only[Run Setup hooks with the init matcher, then exit]' \
   '--input-format[Input format (only works with --print): "text" (default), or "stream-json" (realtime streaming input)]:format:(text stream-json)' \
   '--json-schema[JSON Schema for structured output validation. Example: {"type":"object","properties":{"name":{"type":"string"}},"required":["name"\]\}]:schema:' \
   '--max-budget-usd[Maximum dollar amount to spend on API calls (only works with --print)]:amount:' \
+  '--max-turns[Limit the number of agentic turns (only works with --print)]:turns:' \
   '*--mcp-config[Load MCP servers from JSON files or strings (space-separated)]:config:_files' \
   '--model[Model for the current session. Provide an alias for the latest model (e.g. '\''fable'\'', '\''opus'\'', or '\''sonnet'\'') or a model'\''s full name (e.g. '\''claude-fable-5'\'')]:model:' \
   '(-n --name)'{-n,--name}'[Set a display name for this session (shown in the prompt box, /resume picker, and terminal title)]:name:' \
@@ -914,6 +921,7 @@ _arguments -s \
   '--no-session-persistence[Disable session persistence - sessions will not be saved to disk and cannot be resumed (only works with --print)]' \
   '--output-format[Output format (only works with --print): "text" (default), "json" (single result), or "stream-json" (realtime streaming)]:format:(text json stream-json)' \
   '--permission-mode[Permission mode to use for the session]:mode:(acceptEdits bypassPermissions default dontAsk plan auto)' \
+  '--permission-prompt-tool[MCP tool name to handle permission prompts (only works with --print)]:tool:' \
   '*--plugin-dir[Load plugins from directories for this session only (repeatable)]:directory:_files -/' \
   '*--plugin-url[Fetch a plugin .zip from a URL for this session only (repeatable)]:url:' \
   '(-p --print)'{-p,--print}'[Print response and exit (useful for pipes). Note: The workspace trust dialog is skipped when Claude is run in non-interactive mode. Only use this in directories you trust]' \
@@ -929,6 +937,8 @@ _arguments -s \
   '--strict-mcp-config[Only use MCP servers from --mcp-config, ignoring all other MCP configurations]' \
   '--system-prompt[System prompt to use for the session]:prompt:' \
   '--system-prompt-file[Read system prompt from a file]:file:_files' \
+  '--teammate-mode[Set agent team display mode]:mode:(auto tmux iterm2 in-process)' \
+  '--teleport[Resume a cloud session in the local terminal, or open an interactive picker with optional session ID]::session-id:' \
   '--tmux[Create a tmux session for the worktree (requires --worktree). Uses iTerm2 native panes when available; use --tmux=classic for traditional tmux]::style:(classic)' \
   '*--tools[Specify the list of available tools from the built-in set. Use "" to disable all tools, "default" to use all tools, or specify tool names (e.g. "Bash,Edit,Read")]:tools:' \
   '--verbose[Override verbose mode setting from config]' \

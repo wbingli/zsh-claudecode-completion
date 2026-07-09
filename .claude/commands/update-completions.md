@@ -76,6 +76,17 @@ Some flags are accepted by the CLI but not listed as their own row in `claude --
 |------|---------------|------------------------|
 | `--system-prompt-file <file>` | Mentioned as `--system-prompt[-file]` in the `--bare` flag description | `claude --system-prompt-file /tmp/nope 2>&1` → "System prompt file not found" |
 | `--append-system-prompt-file <file>` | Mentioned as `--append-system-prompt[-file]` in the `--bare` flag description | `claude --append-system-prompt-file /tmp/nope 2>&1` → "Append system prompt file not found" |
+| `--advisor <model>` | Listed in the `Advanced` section of `/en/cli-reference.md` but absent from `--help` | `claude --advisor 2>&1` → "argument missing"; `claude --advisor foo -p hi` → "cannot be used as an advisor" |
+| `--channels <servers...>` | Documented on `/en/channels.md`; absent from `--help` | `claude --channels 2>&1` → "argument missing"; `claude --channels foo -p hi` → "entries must be tagged" |
+| `--cloud` (alias `--remote`, deprecated) | Documented on `/en/claude-code-on-the-web.md`; absent from `--help` | `claude --cloud -p hi 2>&1` → "--cloud cannot be combined with --print" (same for `--remote`) |
+| `--dangerously-load-development-channels <servers...>` | Documented on `/en/channels.md` (testing a channel during research preview); absent from `--help` | `claude --dangerously-load-development-channels 2>&1` → "argument missing" |
+| `--init` / `--init-only` | Listed in the `Development & Debugging` section of `/en/cli-reference.md`; absent from `--help` | `claude --init-only 2>&1` exits 0 without an "unknown option" error |
+| `--max-turns <turns>` | Listed in the `Print Mode` section of `/en/cli-reference.md`; absent from `--help` | `claude --max-turns 2>&1` → "argument missing" |
+| `--permission-prompt-tool <tool>` | Listed in the `Advanced` section of `/en/cli-reference.md`; absent from `--help` | `claude --permission-prompt-tool 2>&1` → "argument missing" |
+| `--teammate-mode <mode>` | Listed in the `Advanced` section of `/en/cli-reference.md`; absent from `--help` | `claude --teammate-mode 2>&1` → "argument missing"; invalid value lists choices `auto, tmux, iterm2, in-process` |
+| `--teleport [session-id]` | Documented on `/en/claude-code-on-the-web.md` (`--teleport` pulls a cloud session into the terminal); absent from `--help` | `claude --teleport 2>&1` runs without an "unknown option" error |
+
+Note: `--sdk-url <url>` is also accepted but was deliberately excluded from completions — probing it returns "This flag is reserved for Remote Control worker processes connecting to Anthropic's backend," i.e. it's internal, not user-facing.
 
 **Maintaining this list**: When you find another flag in this category (referenced only inside another flag's description, mentioned in docs but absent from `--help`, etc.), add it to the table so future regenerations preserve it. When in doubt, keep the flag and probe the CLI rather than dropping it.
 

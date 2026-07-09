@@ -2,6 +2,19 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.204] - 2026-07-08
+
+### Added
+- New top-level flag `--advisor <model>`: Enable a server-side advisor tool using the specified model
+- New top-level flag `*--channels <servers...>`: MCP servers to listen for channel notifications (e.g. `plugin:<name>@<marketplace>` or `server:<name>`)
+- New top-level flag `--cloud` (aliased `--remote`, deprecated): Create a cloud session on claude.ai for the current repository
+- New top-level flag `*--dangerously-load-development-channels <servers...>`: Bypass the channel plugin allowlist for local testing
+- New top-level flags `--init` / `--init-only`: Run Setup hooks with the `init` matcher before starting the session, optionally exiting after
+- New top-level flag `--max-turns <turns>`: Limit the number of agentic turns (only works with --print)
+- New top-level flag `--permission-prompt-tool <tool>`: MCP tool name to handle permission prompts (only works with --print)
+- New top-level flag `--teammate-mode <mode>`: Set agent team display mode (auto, tmux, iterm2, in-process)
+- New top-level flag `--teleport [session-id]`: Resume a cloud session in the local terminal, or open an interactive picker
+
 ## [2.1.201] - 2026-07-05
 
 ### Added
