@@ -2,6 +2,15 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.205] - 2026-07-09
+
+No completion-relevant changes. Verified every command, subcommand, and flag
+against `--help` output across the full CLI surface (top-level, agents, auth,
+mcp, plugin/plugins incl. marketplace and eval, project, daemon, auto-mode,
+gateway, ultrareview, install, setup-token, doctor, update, and the hidden
+background-session commands) — no additions, removals, or description changes
+since v2.1.201.
+
 ## [2.1.201] - 2026-07-05
 
 ### Added
