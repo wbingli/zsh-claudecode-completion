@@ -2,6 +2,11 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.209] - 2026-07-14
+
+### Added
+- New `--label <prefix>` flag for `auto-mode defaults`: Show only rules whose label starts with this prefix (case-insensitive)
+
 ## [2.1.206] - 2026-07-10
 
 No CLI surface changes detected (commands, subcommands, and flags — including
