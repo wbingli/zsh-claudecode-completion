@@ -2,7 +2,7 @@
 
 # Zsh completion script for Claude Code CLI
 # https://github.com/anthropics/claude-code
-# Auto-generated for Claude v2.1.206
+# Auto-generated for Claude v2.1.210
 
 _claude_session_ids() {
   # Claude stores each project under ~/.claude/projects/ with a mangled
@@ -595,13 +595,15 @@ case $subcmd in
               '*--allow-tools[Operator grant for gated tools (Bash, Write, Edit, WebFetch, mcp__*). Supports Tool(pattern:*) syntax]:tools:' \
               '--case[Filter cases by name glob]:glob:' \
               '(-h --help)'{-h,--help}'[Display help]' \
-              '--json[Emit aggregate-result.json to stdout (for CI)]' \
+              '--json[Print the full run result (prompts, graders, per-run scores) as JSON to stdout, or write it to this .json file]::path:_files' \
               '--judge-model[Override LLM-grader model (default: haiku)]:model:' \
               '--keep-temp[Preserve scaffold dirs for debugging]' \
               '--max-cost-usd[Optional hard cost ceiling; abort and report partial results if hit (exit 2)]:usd:' \
               '--model[Override model for all cases]:model:' \
               '--no-scaffold[Explicitly skip scaffold_script]' \
               '--output-dir[Directory for aggregate-result.json (default: ./evals/results/<timestamp>/)]:dir:_files -/' \
+              '--publish-report[Publish the HTML report privately to claude.ai and print its link]' \
+              '--report[Write a self-contained HTML report (scores, prompts, grader verdicts) to path]:path:_files' \
               '--runs[Override per-case runs (default: case.runs ?? 3)]:n:' \
               '--scaffold[Run each case'\''s scaffold_script (runs author-supplied bash as you; off by default — only use on case files you authored)]' \
               '*--tag[Filter cases by tag (repeatable)]:tag:' \
@@ -808,9 +810,14 @@ case $subcmd in
             '(-h --help)'{-h,--help}'[Display help]' \
             '--model[Override which model is used]:model:'
           ;;
-        config|defaults)
+        config)
           _arguments \
             '(-h --help)'{-h,--help}'[Display help]'
+          ;;
+        defaults)
+          _arguments \
+            '(-h --help)'{-h,--help}'[Display help]' \
+            '--label[Show only rules whose label starts with this prefix (case-insensitive)]:prefix:'
           ;;
         *)
           _message 'no more arguments'
@@ -880,6 +887,7 @@ _arguments -s \
   '--allow-dangerously-skip-permissions[Enable bypassing all permission checks as an option, without it being enabled by default. Recommended only for sandboxes with no internet access]' \
   '*--allowedTools[Comma or space-separated list of tool names to allow (e.g. "Bash(git:*) Edit")]:tools:' \
   '*--allowed-tools[Comma or space-separated list of tool names to allow (e.g. "Bash(git:*) Edit")]:tools:' \
+  '--append-subagent-system-prompt[Append custom text to every subagent'\''s system prompt]:prompt:' \
   '--append-system-prompt[Append a system prompt to the default system prompt]:prompt:' \
   '--append-system-prompt-file[Append a system prompt from a file to the default system prompt]:file:_files' \
   '--ax-screen-reader[Render screen-reader friendly output (flat text, no decorative borders or animations)]' \
@@ -913,6 +921,7 @@ _arguments -s \
   '--input-format[Input format (only works with --print): "text" (default), or "stream-json" (realtime streaming input)]:format:(text stream-json)' \
   '--json-schema[JSON Schema for structured output validation. Example: {"type":"object","properties":{"name":{"type":"string"}},"required":["name"\]\}]:schema:' \
   '--max-budget-usd[Maximum dollar amount to spend on API calls (only works with --print)]:amount:' \
+  '--maintenance[Run Setup hooks with the maintenance matcher before starting the session]' \
   '--max-turns[Limit the number of agentic turns (only works with --print)]:turns:' \
   '*--mcp-config[Load MCP servers from JSON files or strings (space-separated)]:config:_files' \
   '--model[Model for the current session. Provide an alias for the latest model (e.g. '\''fable'\'', '\''opus'\'', or '\''sonnet'\'') or a model'\''s full name (e.g. '\''claude-fable-5'\'')]:model:' \

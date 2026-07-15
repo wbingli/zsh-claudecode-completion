@@ -2,6 +2,17 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.210] - 2026-07-15
+
+### Added
+- New top-level flag `--append-subagent-system-prompt <prompt>`: Append custom text to every subagent's system prompt (hidden — documented in cli-reference, absent from `--help`)
+- New top-level flag `--maintenance`: Run Setup hooks with the `maintenance` matcher before starting the session (hidden — documented in cli-reference, absent from `--help`)
+- New flag `--label <prefix>` for `auto-mode defaults`: Show only rules whose label starts with this prefix
+- New flags for `plugin eval`: `--publish-report` (publish the HTML report to claude.ai) and `--report <path>` (write a self-contained HTML report to a path)
+
+### Changed
+- `plugin eval --json` now accepts an optional path argument (writes the full run result to that `.json` file instead of only printing aggregate results to stdout)
+
 ## [2.1.206] - 2026-07-10
 
 No CLI surface changes detected (commands, subcommands, and flags — including
