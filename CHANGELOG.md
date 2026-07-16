@@ -2,6 +2,17 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.211] - 2026-07-16
+
+### Added
+- New top-level flag `--forward-subagent-text`: Forward subagent text and thinking blocks as assistant/user messages with `parent_tool_use_id` set (only works with `--print` and `--output-format=stream-json`)
+- New `plugin eval` flag `--publish-report`: Publish the HTML report privately to claude.ai and print its link
+- New `plugin eval` flag `--report <path>`: Write a self-contained HTML report (scores, prompts, grader verdicts) to `<path>`
+
+### Changed
+- `plugin eval`'s `--json` flag now accepts an optional path argument (previously boolean-only): prints the full run result to stdout, or writes it to a given `.json` file
+- `plugin eval`'s `--max-cost-usd` and `--ablation` flag descriptions updated to match the CLI's more detailed help text
+
 ## [2.1.206] - 2026-07-10
 
 No CLI surface changes detected (commands, subcommands, and flags — including
