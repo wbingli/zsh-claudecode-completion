@@ -45,6 +45,12 @@ Some Claude CLI commands are **hidden** — they work but are not listed in `cla
 |---------|-------------|-------------|
 | `remote-control` | `claude remote-control --help` | Connect local environment to claude.ai/code |
 | `daemon` | `claude daemon --help` | Manage the background-session supervisor (`run`, `status`, `logs`, `uninstall`, `stop`) |
+| `attach` | `claude attach --help` | Open a background session in this terminal |
+| `logs` | `claude logs --help` | Print a background session's recent terminal output |
+| `stop` | `claude stop --help` | Stop a background session |
+| `kill` | `claude kill --help` | Alias for `stop` |
+| `respawn` | `claude respawn --help` | Restart a background session (or all of them) |
+| `rm` | `claude rm --help` | Delete a background session and its worktree |
 
 For each hidden command:
 1. Run its `--help` to get flags and description

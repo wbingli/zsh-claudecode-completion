@@ -2,6 +2,18 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.212] - 2026-07-17
+
+### Added
+- New top-level flag `--forward-subagent-text`: Forward subagent text and thinking blocks as assistant/user messages with `parent_tool_use_id` set (only works with `--print` and `--output-format=stream-json`)
+- New `auto-mode reset` subcommand: Reset auto mode configuration to the shipped defaults by removing the `autoMode` section from your user settings file (with `-y`/`--yes` flag)
+- New `plugin eval` flags: `--publish-report` (publish the HTML report privately to claude.ai and print its link) and `--report <path>` (write a self-contained HTML report to `<path>`)
+
+### Changed
+- `plugin eval --json` now takes an optional path argument (prints the full run result to stdout, or writes it to a `.json` file) instead of being a boolean-only flag
+- Updated `doctor` description to match the CLI's current wording ("Check the health of your Claude Code installation")
+- The background-session commands (`attach`, `logs`, `stop`, `kill`, `respawn`, `rm`) are no longer listed in top-level `claude --help` output as of this version; they remain functional and are kept in completions (documented in the Hidden Commands table in `.claude/commands/update-completions.md`)
+
 ## [2.1.206] - 2026-07-10
 
 No CLI surface changes detected (commands, subcommands, and flags — including
