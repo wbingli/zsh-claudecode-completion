@@ -2,7 +2,7 @@
 
 # Zsh completion script for Claude Code CLI
 # https://github.com/anthropics/claude-code
-# Auto-generated for Claude v2.1.206
+# Auto-generated for Claude v2.1.212
 
 _claude_session_ids() {
   # Claude stores each project under ~/.claude/projects/ with a mangled
@@ -315,21 +315,21 @@ typeset -A opt_args
 local -a commands
 commands=(
   'agents:Open agent view (manage background sessions)'
-  'attach:Attach to a background session in this terminal'
+  'attach:Open a background session in this terminal'
   'auth:Manage authentication'
   'auto-mode:Inspect auto mode classifier configuration'
   'daemon:Manage the background session supervisor'
-  'doctor:Check the health of your Claude Code auto-updater'
+  'doctor:Check the health of your Claude Code installation'
   'gateway:Run the enterprise auth/telemetry gateway'
   'install:Install Claude Code native build. Use [target] to specify version (stable, latest, or specific version)'
   'kill:Stop a background session (alias for stop)'
-  'logs:Print a background session'\''s recent output'
+  'logs:Print a background session'\''s recent terminal output'
   'mcp:Configure and manage MCP servers'
   'plugin:Manage Claude Code plugins'
   'plugins:Manage Claude Code plugins'
   'project:Manage Claude Code project state'
-  'respawn:Restart a stopped background session with its conversation intact'
-  'rm:Remove a background session from the list'
+  'respawn:Restart a background session (or all of them) so it picks up the current Claude binary'
+  'rm:Delete a background session and its worktree (works on already-exited sessions)'
   'setup-token:Set up a long-lived authentication token (requires Claude subscription)'
   'remote-control:Connect your local environment to claude.ai/code'
   'stop:Stop a background session'
@@ -595,13 +595,15 @@ case $subcmd in
               '*--allow-tools[Operator grant for gated tools (Bash, Write, Edit, WebFetch, mcp__*). Supports Tool(pattern:*) syntax]:tools:' \
               '--case[Filter cases by name glob]:glob:' \
               '(-h --help)'{-h,--help}'[Display help]' \
-              '--json[Emit aggregate-result.json to stdout (for CI)]' \
+              '--json[Print the full run result (prompts, graders, per-run scores) as JSON to stdout, or write it to a .json file]::path:_files' \
               '--judge-model[Override LLM-grader model (default: haiku)]:model:' \
               '--keep-temp[Preserve scaffold dirs for debugging]' \
               '--max-cost-usd[Optional hard cost ceiling; abort and report partial results if hit (exit 2)]:usd:' \
               '--model[Override model for all cases]:model:' \
               '--no-scaffold[Explicitly skip scaffold_script]' \
               '--output-dir[Directory for aggregate-result.json (default: ./evals/results/<timestamp>/)]:dir:_files -/' \
+              '--publish-report[Publish the HTML report privately to claude.ai and print its link]' \
+              '--report[Write a self-contained HTML report (scores, prompts, grader verdicts) to path]:path:_files' \
               '--runs[Override per-case runs (default: case.runs ?? 3)]:n:' \
               '--scaffold[Run each case'\''s scaffold_script (runs author-supplied bash as you; off by default — only use on case files you authored)]' \
               '*--tag[Filter cases by tag (repeatable)]:tag:' \
@@ -799,6 +801,7 @@ case $subcmd in
         'critique:Get AI feedback on your custom auto mode rules'
         'defaults:Print the default auto mode environment, allow, soft_deny, and hard_deny rules as JSON'
         'help:Display help for command'
+        'reset:Reset auto mode configuration to the shipped defaults by removing the autoMode section from your user settings file'
       )
       _describe 'auto-mode command' auto_mode_commands
     else
@@ -807,6 +810,11 @@ case $subcmd in
           _arguments \
             '(-h --help)'{-h,--help}'[Display help]' \
             '--model[Override which model is used]:model:'
+          ;;
+        reset)
+          _arguments \
+            '(-h --help)'{-h,--help}'[Display help]' \
+            '(-y --yes)'{-y,--yes}'[Skip the confirmation prompt]'
           ;;
         config|defaults)
           _arguments \
@@ -903,6 +911,7 @@ _arguments -s \
   '--fallback-model[Enable automatic fallback to specified model when default model is overloaded (only works with --print)]:model:' \
   '*--file[File resources to download at startup. Format: file_id:relative_path (e.g., --file file_abc:doc.txt file_def:img.png)]:file:' \
   '--fork-session[When resuming, create a new session ID instead of reusing the original (use with --resume or --continue)]' \
+  '--forward-subagent-text[Forward subagent text and thinking blocks as assistant/user messages with parent_tool_use_id set (only works with --print and --output-format=stream-json)]' \
   '--from-pr[Resume a session linked to a PR by PR number/URL, or open interactive picker with optional search term]:value:' \
   '(-h --help)'{-h,--help}'[Display help for command]' \
   '--ide[Automatically connect to IDE on startup if exactly one valid IDE is available]' \
