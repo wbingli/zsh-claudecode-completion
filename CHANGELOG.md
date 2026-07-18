@@ -2,6 +2,18 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.214] - 2026-07-18
+
+### Added
+- New `auto-mode defaults` flag: `--label <prefix>` — show only rules whose label starts with this prefix (case-insensitive)
+
+### Changed
+- `--permission-mode` choices changed across the top-level flag, `agents --permission-mode`, and `remote-control --permission-mode`: removed `default`, added `manual` (now `acceptEdits, auto, bypassPermissions, manual, dontAsk, plan`)
+- Updated `--fallback-model` description to reflect comma-separated model list and per-turn retry of the primary model
+- Updated `--plugin-dir` / `--plugin-url` descriptions to mention `.zip` support and the repeatable invocation form
+- Updated `agents --all` and `agents --json` descriptions to match current CLI wording
+- Minor description wording updates: `mcp login --no-browser`, `plugin tag`, `plugin marketplace add --sparse`, `project purge --all`
+
 ## [2.1.212] - 2026-07-17
 
 ### Added
