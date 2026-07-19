@@ -32,7 +32,7 @@ done
 log "case 3: 'claude agents --permission-mode <TAB>' offers mode values"
 output=$(run_completion "$home" "$home" 'claude agents --permission-mode \t')
 assert_no_completion_errors "$output"
-for mode in acceptEdits bypassPermissions default plan; do
+for mode in acceptEdits bypassPermissions manual plan; do
     assert_contains "$mode" "$output" "permission-mode value '$mode'"
 done
 
