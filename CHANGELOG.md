@@ -2,6 +2,12 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.216] - 2026-07-21
+
+No CLI structure changes detected. Verified all commands, subcommands, flags
+(including hidden commands and flags) against Claude CLI v2.1.216 — identical
+to v2.1.214. Version bump only.
+
 ## [2.1.214] - 2026-07-18
 
 ### Added
