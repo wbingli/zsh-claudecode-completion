@@ -2,7 +2,7 @@
 
 # Zsh completion script for Claude Code CLI
 # https://github.com/anthropics/claude-code
-# Auto-generated for Claude v2.1.214
+# Auto-generated for Claude v2.1.218
 
 _claude_session_ids() {
   # Claude stores each project under ~/.claude/projects/ with a mangled
