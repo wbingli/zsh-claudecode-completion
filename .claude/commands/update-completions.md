@@ -82,11 +82,13 @@ Some flags are accepted by the CLI but not listed as their own row in `claude --
 |------|---------------|------------------------|
 | `--system-prompt-file <file>` | Mentioned as `--system-prompt[-file]` in the `--bare` flag description | `claude --system-prompt-file /tmp/nope 2>&1` → "System prompt file not found" |
 | `--append-system-prompt-file <file>` | Mentioned as `--append-system-prompt[-file]` in the `--bare` flag description | `claude --append-system-prompt-file /tmp/nope 2>&1` → "Append system prompt file not found" |
+| `--append-subagent-system-prompt <prompt>` | Documented on `/en/cli-reference.md` (v2.1.205+); absent from `--help` | `claude --append-subagent-system-prompt 2>&1` → "argument missing" |
 | `--advisor <model>` | Listed in the `Advanced` section of `/en/cli-reference.md` but absent from `--help` | `claude --advisor 2>&1` → "argument missing"; `claude --advisor foo -p hi` → "cannot be used as an advisor" |
 | `--channels <servers...>` | Documented on `/en/channels.md`; absent from `--help` | `claude --channels 2>&1` → "argument missing"; `claude --channels foo -p hi` → "entries must be tagged" |
 | `--cloud` (alias `--remote`, deprecated) | Documented on `/en/claude-code-on-the-web.md`; absent from `--help` | `claude --cloud -p hi 2>&1` → "--cloud cannot be combined with --print" (same for `--remote`) |
 | `--dangerously-load-development-channels <servers...>` | Documented on `/en/channels.md` (testing a channel during research preview); absent from `--help` | `claude --dangerously-load-development-channels 2>&1` → "argument missing" |
 | `--init` / `--init-only` | Listed in the `Development & Debugging` section of `/en/cli-reference.md`; absent from `--help` | `claude --init-only 2>&1` exits 0 without an "unknown option" error |
+| `--maintenance` | Listed in the `Session & Execution` section of `/en/cli-reference.md` (runs Setup hooks with the `maintenance` matcher, print mode only); absent from `--help` | `claude --maintenance 2>&1` → "Input must be provided either through stdin or as a prompt argument when using --print" (not "unknown option") |
 | `--max-turns <turns>` | Listed in the `Print Mode` section of `/en/cli-reference.md`; absent from `--help` | `claude --max-turns 2>&1` → "argument missing" |
 | `--permission-prompt-tool <tool>` | Listed in the `Advanced` section of `/en/cli-reference.md`; absent from `--help` | `claude --permission-prompt-tool 2>&1` → "argument missing" |
 | `--teammate-mode <mode>` | Listed in the `Advanced` section of `/en/cli-reference.md`; absent from `--help` | `claude --teammate-mode 2>&1` → "argument missing"; invalid value lists choices `auto, tmux, iterm2, in-process` |

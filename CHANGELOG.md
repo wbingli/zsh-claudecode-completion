@@ -2,6 +2,12 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.220] - 2026-07-31
+
+### Added
+- New hidden top-level flag `--maintenance`: Run Setup hooks with the `maintenance` matcher before starting the session (only works with `--print`); documented on `/en/cli-reference.md` but absent from `--help`
+- New hidden top-level flag `--append-subagent-system-prompt <prompt>`: Append a system prompt to every subagent's system prompt (v2.1.205+); documented on `/en/cli-reference.md` but absent from `--help`
+
 ## [2.1.218] - 2026-07-23
 
 No CLI surface changes detected (commands, subcommands, and flags — including
