@@ -2,7 +2,7 @@
 
 # Zsh completion script for Claude Code CLI
 # https://github.com/anthropics/claude-code
-# Auto-generated for Claude v2.1.218
+# Auto-generated for Claude v2.1.221
 
 _claude_session_ids() {
   # Claude stores each project under ~/.claude/projects/ with a mangled
@@ -895,6 +895,7 @@ _arguments -s \
   '*--allowed-tools[Comma or space-separated list of tool names to allow (e.g. "Bash(git:*) Edit")]:tools:' \
   '--append-system-prompt[Append a system prompt to the default system prompt]:prompt:' \
   '--append-system-prompt-file[Append a system prompt from a file to the default system prompt]:file:_files' \
+  '--autocompact[Auto-compact window size (auto, or 100k-1M tokens)]:size:(auto)' \
   '--ax-screen-reader[Render screen-reader friendly output (flat text, no decorative borders or animations)]' \
   '--bare[Minimal mode: skip hooks, LSP, plugin sync, attribution, auto-memory, background prefetches, keychain reads, and CLAUDE.md auto-discovery. Sets CLAUDE_CODE_SIMPLE=1]' \
   '(--bg --background)'{--bg,--background}'[Start the session as a background agent and return immediately (manage with `claude agents`)]' \

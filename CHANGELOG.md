@@ -2,6 +2,11 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.221] - 2026-08-04
+
+### Added
+- New top-level flag `--autocompact <auto|tokens>`: Auto-compact window size (auto, or 100k-1M tokens)
+
 ## [2.1.218] - 2026-07-23
 
 No CLI surface changes detected (commands, subcommands, and flags — including
