@@ -2,6 +2,12 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.223] - 2026-08-06
+
+### Added
+- New top-level command `import [source]`: Import config from another AI coding agent into Claude Code (source: `codex`, `gemini`), with `--dry-run` and `--yes` flags
+- New top-level flag `--autocompact <auto|tokens>`: Auto-compact window size (auto, or 100k-1M tokens)
+
 ## [2.1.218] - 2026-07-23
 
 No CLI surface changes detected (commands, subcommands, and flags — including
