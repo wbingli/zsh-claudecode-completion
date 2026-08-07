@@ -2,6 +2,19 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.224] - 2026-08-07
+
+### Added
+- New top-level command `import [source]`: Import config from another AI coding agent into Claude Code (`codex`, `gemini`), with `--dry-run` and `--yes[=<digest>]` flags
+- New top-level flags: `--autocompact <auto|tokens>` (auto-compact window size) and `--environment <environment_id>` (create a cloud session on a self-hosted environment)
+- New `plugin eval` flag `--no-publish`: keep the HTML report local only, skip publishing to claude.ai
+- New `plugin eval init` flag `-i`/`--interactive`: run the authoring interview (already the default in a terminal)
+
+### Changed
+- Updated `plugin eval --publish-report` description: now "also require publishing" (already the default when supported) rather than "publish privately"
+- Updated `plugin eval --max-cost-usd` description to mention the per-run overrun bound and that paid graders are skipped while free graders still score it
+- Minor description wording updates: `plugin eval --ablation`, `plugin eval --json`, `plugin eval --report`
+
 ## [2.1.218] - 2026-07-23
 
 No CLI surface changes detected (commands, subcommands, and flags — including
