@@ -2,6 +2,24 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.226] - 2026-08-08
+
+### Added
+- New top-level command `import [source]`: Import config from another AI coding agent into Claude Code (source: `codex` or `gemini`), with flags `--dry-run` and `--yes` (accepts an optional `=<digest>` for headless surfaces)
+- New top-level flag `--autocompact <auto|tokens>`: Auto-compact window size (auto, or 100k-1M tokens)
+- New top-level flag `--environment <environment_id>`: Create a new cloud session that runs on the given self-hosted environment (`ccpool_...`)
+- New hidden top-level flag `--append-subagent-system-prompt <prompt>`: Append custom text to every subagent's system prompt (non-interactive mode only)
+- New hidden top-level flag `--ref <ref>`: Base a cloud session (`--cloud` or `--environment`) on this branch/ref instead of local HEAD
+- New hidden top-level flag `--maintenance`: Run Setup hooks with the maintenance matcher before starting the session (print mode only)
+- New `plugin eval` flag `--no-publish`: Keep the HTML report local only; skip publishing it to claude.ai
+- New `plugin eval init` flag `-i`/`--interactive`: Run the authoring interview (already the default in a terminal)
+
+### Changed
+- `--cloud` (and deprecated alias `--remote`) now accepts an optional value — a description, session ID, or claude.ai/code URL — instead of being a plain boolean flag
+- `--teleport` description updated to "Resume a teleport session, optionally specify session ID"; it is no longer fully hidden and now appears directly in `claude --help`
+- `plugin eval --publish-report` description updated: publishing to claude.ai is now the default when the account supports it; the flag now explains why publishing is unavailable rather than opting in
+- Updated `doctor` description to match the CLI's current, fuller wording
+
 ## [2.1.218] - 2026-07-23
 
 No CLI surface changes detected (commands, subcommands, and flags — including

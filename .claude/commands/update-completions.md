@@ -90,7 +90,10 @@ Some flags are accepted by the CLI but not listed as their own row in `claude --
 | `--max-turns <turns>` | Listed in the `Print Mode` section of `/en/cli-reference.md`; absent from `--help` | `claude --max-turns 2>&1` → "argument missing" |
 | `--permission-prompt-tool <tool>` | Listed in the `Advanced` section of `/en/cli-reference.md`; absent from `--help` | `claude --permission-prompt-tool 2>&1` → "argument missing" |
 | `--teammate-mode <mode>` | Listed in the `Advanced` section of `/en/cli-reference.md`; absent from `--help` | `claude --teammate-mode 2>&1` → "argument missing"; invalid value lists choices `auto, tmux, iterm2, in-process` |
-| `--teleport [session-id]` | Documented on `/en/claude-code-on-the-web.md` (`--teleport` pulls a cloud session into the terminal); absent from `--help` | `claude --teleport 2>&1` runs without an "unknown option" error |
+| `--teleport [session-id]` | As of v2.1.226 this is visible in `claude --help` ("Resume a teleport session, optionally specify session ID"), so it's no longer strictly hidden — kept here for history | `claude --teleport 2>&1` runs without an "unknown option" error |
+| `--append-subagent-system-prompt <prompt>` | Listed in the `Advanced` section of `/en/cli-reference.md`; absent from `--help` | `claude --append-subagent-system-prompt 2>&1` → "argument missing" |
+| `--ref <ref>` | Listed in the `Advanced`/`Print Mode` sections of `/en/cli-reference.md` (used with `--environment` to base a cloud checkout on a named ref); absent from `--help` | `claude --ref 2>&1` → "argument missing"; `claude --ref main -p hi 2>&1` → "--ref sets the base branch for a cloud session; pass --cloud or --environment" |
+| `--maintenance` | Listed in the `Print Mode`/`Advanced` sections of `/en/cli-reference.md` (runs Setup hooks with the `maintenance` matcher before starting the session, print mode only); absent from `--help` | `claude --maintenance 2>&1` runs without an "unknown option" error |
 
 Note: `--sdk-url <url>` is also accepted but was deliberately excluded from completions — probing it returns "This flag is reserved for Remote Control worker processes connecting to Anthropic's backend," i.e. it's internal, not user-facing.
 
