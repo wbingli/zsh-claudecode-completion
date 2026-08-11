@@ -2,6 +2,21 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.227] - 2026-08-11
+
+### Added
+- New top-level command `import [source]`: import config from another AI coding agent (codex, gemini) into Claude Code, with `--dry-run` and `--yes[=<digest>]` flags
+- New top-level flags: `--environment <environment_id>` (create a cloud session on a self-hosted environment), `--autocompact <auto|tokens>` (auto-compact window size), `--exec <command>` (run a shell command as a background job, requires `--bg`/`--background`), `--maintenance` (run Setup hooks with the maintenance matcher, print mode only), `--ref <branch>` (base a new `--environment` session's checkout on a named ref), `--append-subagent-system-prompt <prompt>` (append text to every subagent's system prompt)
+- New `ultrareview` flags: `--post` / `--no-post` — post the finished review's findings to the PR as a plain comment (mutually exclusive; `--no-post` is the default)
+- New `plugin eval` flag: `--no-publish` — keep the HTML report local only, skip publishing to claude.ai
+- New `plugin eval init` flag: `-i`/`--interactive` — run the authoring interview explicitly
+
+### Changed
+- `plugin eval --json` description updated ("write it to this .json file")
+- `plugin eval --max-cost-usd` description expanded to explain overrun handling (paid graders skipped past the ceiling, free graders still score)
+- `plugin eval --publish-report` description updated to reflect it's now the default when available, rather than opt-in
+- `plugin eval --report` description updated ("instead of the results dir")
+
 ## [2.1.218] - 2026-07-23
 
 No CLI surface changes detected (commands, subcommands, and flags — including

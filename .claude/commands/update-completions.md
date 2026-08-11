@@ -87,8 +87,12 @@ Some flags are accepted by the CLI but not listed as their own row in `claude --
 | `--cloud` (alias `--remote`, deprecated) | Documented on `/en/claude-code-on-the-web.md`; absent from `--help` | `claude --cloud -p hi 2>&1` → "--cloud cannot be combined with --print" (same for `--remote`) |
 | `--dangerously-load-development-channels <servers...>` | Documented on `/en/channels.md` (testing a channel during research preview); absent from `--help` | `claude --dangerously-load-development-channels 2>&1` → "argument missing" |
 | `--init` / `--init-only` | Listed in the `Development & Debugging` section of `/en/cli-reference.md`; absent from `--help` | `claude --init-only 2>&1` exits 0 without an "unknown option" error |
+| `--maintenance` | Listed in the `Development & Debugging` section of `/en/cli-reference.md` (runs Setup hooks with the maintenance matcher, print mode only); absent from `--help` | `claude --maintenance 2>&1` proceeds past option parsing (no "unknown option" error) |
 | `--max-turns <turns>` | Listed in the `Print Mode` section of `/en/cli-reference.md`; absent from `--help` | `claude --max-turns 2>&1` → "argument missing" |
 | `--permission-prompt-tool <tool>` | Listed in the `Advanced` section of `/en/cli-reference.md`; absent from `--help` | `claude --permission-prompt-tool 2>&1` → "argument missing" |
+| `--ref <branch>` | Listed in the `Print Mode` section of `/en/cli-reference.md` (used with `--environment` to base the checkout on a named ref); absent from `--help` | `claude --ref 2>&1` → "argument missing" |
+| `--append-subagent-system-prompt <prompt>` | Listed in the `Advanced` section of `/en/cli-reference.md`; absent from `--help` | `claude --append-subagent-system-prompt 2>&1` → "argument missing" |
+| `--exec <command>` | Documented in the `Print Mode` section of `/en/cli-reference.md`; only valid combined with `--bg`/`--background` (runs the command as a PTY-backed background job instead of starting a session) | `claude --exec 'echo hi' 2>&1` alone → "unknown option '--exec'"; `claude --bg --exec 'echo hi' 2>&1` → backgrounds the job |
 | `--teammate-mode <mode>` | Listed in the `Advanced` section of `/en/cli-reference.md`; absent from `--help` | `claude --teammate-mode 2>&1` → "argument missing"; invalid value lists choices `auto, tmux, iterm2, in-process` |
 | `--teleport [session-id]` | Documented on `/en/claude-code-on-the-web.md` (`--teleport` pulls a cloud session into the terminal); absent from `--help` | `claude --teleport 2>&1` runs without an "unknown option" error |
 
