@@ -2,7 +2,7 @@
 
 # Zsh completion script for Claude Code CLI
 # https://github.com/anthropics/claude-code
-# Auto-generated for Claude v2.1.218
+# Auto-generated for Claude v2.1.228
 
 _claude_session_ids() {
   # Claude stores each project under ~/.claude/projects/ with a mangled
@@ -317,10 +317,11 @@ commands=(
   'agents:Open agent view (manage background sessions)'
   'attach:Open a background session in this terminal'
   'auth:Manage authentication'
-  'auto-mode:Inspect auto mode classifier configuration'
+  'auto-mode:Inspect or reset auto mode classifier configuration'
   'daemon:Manage the background session supervisor'
   'doctor:Check the health of your Claude Code installation'
   'gateway:Run the enterprise auth/telemetry gateway'
+  'import:Import config from another AI coding agent into Claude Code'
   'install:Install Claude Code native build. Use [target] to specify version (stable, latest, or specific version)'
   'kill:Stop a background session (alias for stop)'
   'logs:Print a background session'\''s recent terminal output'
@@ -397,7 +398,7 @@ marketplace_commands=(
 # This handles cases where flags appear before the subcommand (e.g., alias claude='claude --flag').
 local subcmd_pos=0
 local subcmd=""
-local -a known_commands=(agents attach auth auto-mode daemon doctor gateway install kill logs mcp plugin plugins project remote-control respawn rm setup-token stop ultrareview update upgrade)
+local -a known_commands=(agents attach auth auto-mode daemon doctor gateway import install kill logs mcp plugin plugins project remote-control respawn rm setup-token stop ultrareview update upgrade)
 local i
 for (( i=2; i <= ${#words}; i++ )); do
   # Skip flags and their values
@@ -591,19 +592,20 @@ case $subcmd in
           local sub2=$(( subcmd_pos + 2 ))
           if (( CURRENT == sub2 )); then
             _arguments -s \
-              '--ablation[Run a no-plugin baseline arm and report the score delta (none or with-without; default: with-without when targeting a plugin by name, none for a path)]:mode:(none with-without)' \
+              '--ablation[Run a no-plugin baseline arm and report the score delta (none or with-without; default: with-without when targeting a plugin by name (installed or skills-dir), none for a path)]:mode:(none with-without)' \
               '*--allow-tools[Operator grant for gated tools (Bash, Write, Edit, WebFetch, mcp__*). Supports Tool(pattern:*) syntax]:tools:' \
               '--case[Filter cases by name glob]:glob:' \
               '(-h --help)'{-h,--help}'[Display help]' \
-              '--json[Print the full run result (prompts, graders, per-run scores) as JSON to stdout, or write it to a .json file]::path:_files' \
+              '--json[Print the full run result (prompts, graders, per-run scores) as JSON to stdout, or write it to this .json file]::path:_files' \
               '--judge-model[Override LLM-grader model (default: haiku)]:model:' \
               '--keep-temp[Preserve scaffold dirs for debugging]' \
-              '--max-cost-usd[Optional hard cost ceiling; abort and report partial results if hit (exit 2)]:usd:' \
+              '--max-cost-usd[Optional hard cost ceiling; abort and report partial results if hit (exit 2). Overrun is bounded to one agent run — when that run breaches, paid graders (llm/baseline) are skipped while free graders still score it]:usd:' \
               '--model[Override model for all cases]:model:' \
+              '--no-publish[Keep the HTML report local only; skip publishing it to claude.ai]' \
               '--no-scaffold[Explicitly skip scaffold_script]' \
               '--output-dir[Directory for aggregate-result.json (default: ./evals/results/<timestamp>/)]:dir:_files -/' \
-              '--publish-report[Publish the HTML report privately to claude.ai and print its link]' \
-              '--report[Write a self-contained HTML report (scores, prompts, grader verdicts) to path]:path:_files' \
+              '--publish-report[Also require publishing the report to claude.ai (already the default when your account supports it); explains why if unavailable]' \
+              '--report[Write the self-contained HTML report (scores, prompts, grader verdicts) to path instead of the results dir]:path:_files' \
               '--runs[Override per-case runs (default: case.runs ?? 3)]:n:' \
               '--scaffold[Run each case'\''s scaffold_script (runs author-supplied bash as you; off by default — only use on case files you authored)]' \
               '*--tag[Filter cases by tag (repeatable)]:tag:' \
@@ -616,6 +618,7 @@ case $subcmd in
                 _arguments \
                   '--bare[Write a blank template (prompt.md + graders/criteria.md) instead of running the interview]' \
                   '(-h --help)'{-h,--help}'[Display help]' \
+                  '(-i --interactive)'{-i,--interactive}'[Run the authoring interview (already the default in a terminal); requires an interactive terminal]' \
                   '::name:'
                 ;;
               *)
@@ -866,10 +869,21 @@ case $subcmd in
       ':cmd:'
     return
     ;;
+  import)
+    _arguments \
+      '--dry-run[Show what would be imported without writing anything]' \
+      '(-h --help)'{-h,--help}'[Display help for command]' \
+      '--yes[Skip the interactive picker. On headless surfaces, pass --yes=<digest> from the /import preview]' \
+      ':cmd:' \
+      '::source:(codex gemini)'
+    return
+    ;;
   ultrareview)
     _arguments \
       '(-h --help)'{-h,--help}'[Display help]' \
       '--json[Print the raw bugs.json payload instead of formatted findings]' \
+      '(--post --no-post)--no-post[Do not post the findings to the PR (the default; accepted for parity with the /ultrareview and /code-review ultra flags)]' \
+      '(--post --no-post)--post[Post the finished review'\''s findings to the PR as you (PR targets only; one plain comment, not a review)]' \
       '--timeout[Maximum minutes to wait for the review to finish (default: 30)]:minutes:' \
       ':cmd:' \
       '::target:'
@@ -895,6 +909,7 @@ _arguments -s \
   '*--allowed-tools[Comma or space-separated list of tool names to allow (e.g. "Bash(git:*) Edit")]:tools:' \
   '--append-system-prompt[Append a system prompt to the default system prompt]:prompt:' \
   '--append-system-prompt-file[Append a system prompt from a file to the default system prompt]:file:_files' \
+  '--autocompact[Auto-compact window size (auto, or 100k-1M tokens)]:auto|tokens:' \
   '--ax-screen-reader[Render screen-reader friendly output (flat text, no decorative borders or animations)]' \
   '--bare[Minimal mode: skip hooks, LSP, plugin sync, attribution, auto-memory, background prefetches, keychain reads, and CLAUDE.md auto-discovery. Sets CLAUDE_CODE_SIMPLE=1]' \
   '(--bg --background)'{--bg,--background}'[Start the session as a background agent and return immediately (manage with `claude agents`)]' \
@@ -902,7 +917,7 @@ _arguments -s \
   '--brief[Enable SendUserMessage tool for agent-to-user communication]' \
   '*--channels[MCP servers to listen for channel notifications (e.g. plugin:<name>@<marketplace> or server:<name>)]:server:' \
   '--chrome[Enable Claude in Chrome integration]' \
-  '(--cloud --remote)'{--cloud,--remote}'[Create a cloud session on claude.ai for the current repository (--remote is a deprecated alias)]' \
+  '(--cloud --remote)'{--cloud,--remote}'[Create a cloud session with the given description, or attach to an existing one by session ID or claude.ai/code URL (--remote is a deprecated alias)]::description:' \
   '(-c --continue)'{-c,--continue}'[Continue the most recent conversation in the current directory]' \
   '*--dangerously-load-development-channels[Bypass the channel plugin allowlist for local testing]:server:' \
   '--dangerously-skip-permissions[Bypass all permission checks. Recommended only for sandboxes with no internet access]' \
@@ -912,6 +927,7 @@ _arguments -s \
   '*--disallowedTools[Comma or space-separated list of tool names to deny (e.g. "Bash(git:*) Edit")]:tools:' \
   '*--disallowed-tools[Comma or space-separated list of tool names to deny (e.g. "Bash(git:*) Edit")]:tools:' \
   '--effort[Effort level for the current session (low, medium, high, xhigh, max)]:level:(low medium high xhigh max)' \
+  '--environment[Create a new cloud session that runs on the given self-hosted environment (ccpool_...)]:environment_id:' \
   '--exclude-dynamic-system-prompt-sections[Move per-machine sections (cwd, env info, memory paths, git status) from the system prompt into the first user message. Improves cross-user prompt-cache reuse. Only applies with the default system prompt (ignored with --system-prompt)]' \
   '--fallback-model[Enable automatic fallback to specified model(s) when default model is overloaded or not available. Accepts a comma-separated list to try each in order. Re-tries the primary at the start of each user turn (only works with --print)]:model:' \
   '*--file[File resources to download at startup. Format: file_id:relative_path (e.g., --file file_abc:doc.txt file_def:img.png)]:file:' \
@@ -958,5 +974,5 @@ _arguments -s \
   '--verbose[Override verbose mode setting from config]' \
   '(-v --version)'{-v,--version}'[Output the version number]' \
   '(-w --worktree)'{-w,--worktree}'[Create a new git worktree for this session (optionally specify a name)]::name:' \
-  '1:command:(agents attach auth auto-mode daemon doctor gateway install kill logs mcp plugin plugins project remote-control respawn rm setup-token stop ultrareview update upgrade)' \
+  '1:command:(agents attach auth auto-mode daemon doctor gateway import install kill logs mcp plugin plugins project remote-control respawn rm setup-token stop ultrareview update upgrade)' \
   '*:prompt:'

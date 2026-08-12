@@ -2,6 +2,20 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.228] - 2026-08-12
+
+### Added
+- New top-level command `import [source]`: Import config from another AI coding agent into Claude Code (`codex`, `gemini`), with `--dry-run` and `--yes` flags
+- New top-level flags `--autocompact <auto|tokens>` (auto-compact window size) and `--environment <environment_id>` (create a new cloud session on a self-hosted environment)
+- New `ultrareview` flags: `--post` (post the finished review's findings to the PR as you) and `--no-post` (do not post the findings, the default)
+- New `plugin eval` flag `--no-publish`: keep the HTML report local only, skip publishing it to claude.ai
+- New `plugin eval init` flag `-i`/`--interactive`: run the authoring interview (already the default in a terminal)
+
+### Changed
+- `--cloud`/`--remote` now take an optional `description|session_id|url` value (create a new cloud session with a description, or attach to an existing one by session ID or claude.ai/code URL) instead of being boolean-only flags
+- Updated `plugin eval` descriptions to match current CLI wording: `--ablation`, `--json`, `--max-cost-usd`, `--publish-report`, `--report`
+- Updated `auto-mode` command description to "Inspect or reset auto mode classifier configuration"
+
 ## [2.1.218] - 2026-07-23
 
 No CLI surface changes detected (commands, subcommands, and flags — including
