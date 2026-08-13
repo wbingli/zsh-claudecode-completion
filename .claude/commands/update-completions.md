@@ -91,8 +91,11 @@ Some flags are accepted by the CLI but not listed as their own row in `claude --
 | `--permission-prompt-tool <tool>` | Listed in the `Advanced` section of `/en/cli-reference.md`; absent from `--help` | `claude --permission-prompt-tool 2>&1` → "argument missing" |
 | `--teammate-mode <mode>` | Listed in the `Advanced` section of `/en/cli-reference.md`; absent from `--help` | `claude --teammate-mode 2>&1` → "argument missing"; invalid value lists choices `auto, tmux, iterm2, in-process` |
 | `--teleport [session-id]` | Documented on `/en/claude-code-on-the-web.md` (`--teleport` pulls a cloud session into the terminal); absent from `--help` | `claude --teleport 2>&1` runs without an "unknown option" error |
+| `--maintenance` | Listed in the `Print Mode` section of `/en/cli-reference.md`; absent from `--help` | `claude --maintenance -p hi 2>&1` proceeds past option parsing (e.g. to an auth/login error) instead of "unknown option" |
+| `--ref <branch>` | Listed in the main CLI flags table of `/en/cli-reference.md` (used with `--environment`); absent from `--help` | `claude --ref 2>&1` → "argument missing" |
+| `--append-subagent-system-prompt <prompt>` | Listed in the main CLI flags table of `/en/cli-reference.md`; absent from `--help` | `claude --append-subagent-system-prompt 2>&1` → "argument missing" |
 
-Note: `--sdk-url <url>` is also accepted but was deliberately excluded from completions — probing it returns "This flag is reserved for Remote Control worker processes connecting to Anthropic's backend," i.e. it's internal, not user-facing.
+Note: `--sdk-url <url>` is also accepted but was deliberately excluded from completions — probing it returns "This flag is reserved for Remote Control worker processes connecting to Anthropic's backend," i.e. it's internal, not user-facing. `--exec` is documented in `/en/cli-reference.md` but returns `error: unknown option '--exec'` on this CLI version — not yet real, so also excluded.
 
 **Maintaining this list**: When you find another flag in this category (referenced only inside another flag's description, mentioned in docs but absent from `--help`, etc.), add it to the table so future regenerations preserve it. When in doubt, keep the flag and probe the CLI rather than dropping it.
 

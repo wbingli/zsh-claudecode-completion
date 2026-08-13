@@ -2,6 +2,22 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.231] - 2026-08-13
+
+### Added
+- New top-level command `import [source]`: Import config from another AI coding agent into Claude Code (`--dry-run`, `--yes`, source: `codex`/`gemini`)
+- New top-level flags: `--append-subagent-system-prompt <prompt>` (append text to every subagent's system prompt, only works with `--print`), `--environment <environment_id>` (create a cloud session on a self-hosted environment), `--maintenance` (hidden; run Setup hooks with the maintenance matcher, only works with `--print`), `--ref <branch>` (hidden; with `--environment`, base the new session's checkout on a named ref instead of local HEAD)
+- New `plugin eval` flag: `--no-publish` (keep the HTML report local only; skip publishing it to claude.ai)
+- New `plugin eval init` flag: `-i`/`--interactive` (run the authoring interview; already the default in a terminal)
+- New `plugin install` and `plugin update` flag: `-y`/`--yes` (accept a marketplace-declared install/update command without the confirmation prompt)
+- New `ultrareview` flags: `--post` / `--no-post` (post the finished review's findings to the PR as you; `--no-post` is the default)
+
+### Changed
+- `plugin eval --publish-report` description updated: publishing is now the default when the account supports it; the flag explains why it's unavailable rather than opting in
+- `plugin eval --report`, `--max-cost-usd`, and `--ablation` descriptions updated to match current CLI wording
+
+Note: `--exec` appears in the CLI reference docs but is not yet accepted by this CLI version (`error: unknown option '--exec'`) — not added to completions.
+
 ## [2.1.218] - 2026-07-23
 
 No CLI surface changes detected (commands, subcommands, and flags — including
