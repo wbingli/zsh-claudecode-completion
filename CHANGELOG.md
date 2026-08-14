@@ -2,6 +2,22 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.232] - 2026-08-14
+
+### Added
+- New top-level command `import [source]`: import config from another AI coding agent (`codex`, `gemini`) into Claude Code, with `--dry-run` and `--yes` flags
+- New top-level flags: `--autocompact <auto|tokens>` (set the auto-compact window size for the session) and `--environment <environment_id>` (create a new cloud session on a self-hosted environment, `ccpool_...`)
+- New hidden flag `--ref <ref>`: with `--environment`, base the new session's checkout on this ref instead of local `HEAD`
+- New `ultrareview` flags: `--post` / `--no-post` — post the finished review's findings to the PR as a plain comment (PR targets only), or don't (the default)
+- New `plugin eval` flag: `--no-publish` — keep the HTML report local only, skip publishing it to claude.ai
+- New `plugin eval init` flag: `-i`/`--interactive` — run the authoring interview (already the default in a terminal); requires an interactive terminal
+- New `-y`/`--yes` flag on `plugin install` and `plugin update` — accept a marketplace-declared install/update command without the confirmation prompt (required when stdin/stdout is not a TTY)
+
+### Changed
+- `--cloud`/`--remote` now accepts an optional value (`[description|session_id|url]`) to create a session with a description or attach to an existing one by session ID or claude.ai/code URL, instead of being a boolean-only flag
+- Updated `plugin eval --publish-report` description: now means "also require publishing the report to claude.ai (already the default when supported)" rather than "publish privately and print its link"
+- Updated `plugin eval --report` description to note it writes the report to `<path>` instead of the results dir
+
 ## [2.1.218] - 2026-07-23
 
 No CLI surface changes detected (commands, subcommands, and flags — including
