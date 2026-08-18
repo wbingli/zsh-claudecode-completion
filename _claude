@@ -2,7 +2,7 @@
 
 # Zsh completion script for Claude Code CLI
 # https://github.com/anthropics/claude-code
-# Auto-generated for Claude v2.1.233
+# Auto-generated for Claude v2.1.234
 
 _claude_session_ids() {
   # Claude stores each project under ~/.claude/projects/ with a mangled
@@ -369,8 +369,8 @@ plugin_commands=(
   'enable:Enable a disabled plugin'
   'eval:Run eval cases against a plugin and report scored results'
   'help:Display help for command'
-  'init:Scaffold a new plugin at ~/.claude/skills/<name>/'
-  'new:Scaffold a new plugin at ~/.claude/skills/<name>/'
+  'init:Scaffold a new plugin at ~/.claude/skills/<name>/ (auto-loads next session as <name>@skills-dir)'
+  'new:Scaffold a new plugin at ~/.claude/skills/<name>/ (auto-loads next session as <name>@skills-dir)'
   'install:Install a plugin from available marketplaces (use plugin@marketplace for specific marketplace)'
   'i:Install a plugin from available marketplaces (use plugin@marketplace for specific marketplace)'
   'list:List installed plugins'
@@ -381,7 +381,7 @@ plugin_commands=(
   'remove:Uninstall an installed plugin'
   'tag:Create a {name}--v{version} git tag for a plugin release, validating that plugin.json and any enclosing marketplace entry agree'
   'update:Update a plugin to the latest version (restart required to apply)'
-  'validate:Validate a plugin or marketplace manifest'
+  'validate:Validate a plugin or marketplace manifest, or the skills, agents, and commands in a directory'
 )
 
 local -a marketplace_commands
@@ -592,11 +592,11 @@ case $subcmd in
           local sub2=$(( subcmd_pos + 2 ))
           if (( CURRENT == sub2 )); then
             _arguments -s \
-              '--ablation[Run a no-plugin baseline arm and report the score delta (none or with-without; default: with-without when targeting a plugin by name, none for a path)]:mode:(none with-without)' \
+              '--ablation[Run a no-plugin baseline arm and report the score delta (none or with-without; default: with-without whenever a plugin resolves, none when nothing does)]:mode:(none with-without)' \
               '*--allow-tools[Operator grant for gated tools (Bash, Write, Edit, WebFetch, mcp__*). Supports Tool(pattern:*) syntax]:tools:' \
               '--case[Filter cases by name glob]:glob:' \
               '(-h --help)'{-h,--help}'[Display help]' \
-              '--json[Print the full run result (prompts, graders, per-run scores) as JSON to stdout, or write it to a .json file]::path:_files' \
+              '--json[Print the full run result (prompts, graders, per-run scores) as JSON to stdout, or write it to this .json file]::path:_files' \
               '--judge-model[Override LLM-grader model (default: haiku)]:model:' \
               '--keep-temp[Preserve scaffold dirs for debugging]' \
               '--max-cost-usd[Optional hard cost ceiling; abort and report partial results if hit (exit 2)]:usd:' \
@@ -605,7 +605,7 @@ case $subcmd in
               '--no-scaffold[Explicitly skip scaffold_script]' \
               '--output-dir[Directory for aggregate-result.json (default: ./evals/results/<timestamp>/)]:dir:_files -/' \
               '--publish-report[Also require publishing the report to claude.ai (already the default when your account supports it); explains why if unavailable]' \
-              '--report[Write a self-contained HTML report (scores, prompts, grader verdicts) to path]:path:_files' \
+              '--report[Write the self-contained HTML report (scores, prompts, grader verdicts) to path instead of the results dir]:path:_files' \
               '--runs[Override per-case runs (default: case.runs ?? 3)]:n:' \
               '--scaffold[Run each case'\''s scaffold_script (runs author-supplied bash as you; off by default — only use on case files you authored)]' \
               '*--tag[Filter cases by tag (repeatable)]:tag:' \
@@ -618,6 +618,7 @@ case $subcmd in
                 _arguments \
                   '--bare[Write a blank template (prompt.md + graders/criteria.md) instead of running the interview]' \
                   '(-h --help)'{-h,--help}'[Display help]' \
+                  '(-i --interactive)'{-i,--interactive}'[Run the authoring interview (already the default in a terminal); requires an interactive terminal]' \
                   '::name:'
                 ;;
               *)
@@ -678,6 +679,7 @@ case $subcmd in
             '*--config[Set a userConfig option declared in the plugin'\''s manifest (repeatable)]:key=value:' \
             '(-h --help)'{-h,--help}'[Display help]' \
             '(-s --scope)'{-s,--scope}'[Installation scope: user, project, or local (default: user)]:scope:(user project local)' \
+            '(-y --yes)'{-y,--yes}'[For a plugin installed by running a marketplace-declared command: accept the displayed command without the confirmation prompt (required when stdin or stdout is not a TTY)]' \
             ':plugin:'
           ;;
         prune|autoremove)
@@ -713,6 +715,7 @@ case $subcmd in
           _arguments \
             '(-h --help)'{-h,--help}'[Display help]' \
             '(-s --scope)'{-s,--scope}'[Installation scope: user, project, local, managed (default: user)]:scope:(user project local managed)' \
+            '(-y --yes)'{-y,--yes}'[For a plugin installed by running a marketplace-declared command: accept a changed command without the confirmation prompt (required when stdin or stdout is not a TTY)]' \
             ':plugin:'
           ;;
         list)
