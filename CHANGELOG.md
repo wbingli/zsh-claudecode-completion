@@ -2,6 +2,21 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.239] - 2026-08-22
+
+### Added
+- New hidden top-level flag `--maintenance`: Run Setup hooks with the maintenance matcher before starting the session
+- New `plugin eval` flag: `--eval-dir <dir>` — directory name (below the plugin) that holds the eval cases
+- New `plugin eval init` flags: `--eval-dir <dir>` and `-i, --interactive` (run the authoring interview; already the default in a terminal)
+- New `plugin install` flag: `-y, --yes` — accept the displayed marketplace-declared command without the confirmation prompt
+- New `plugin update` flag: `-y, --yes` — accept the displayed marketplace-declared command without the confirmation prompt
+
+### Changed
+- Updated `plugin validate` description: now "Validate a plugin or marketplace manifest, or the skills, agents, and commands in a directory"
+- Updated `plugin init`/`new` description: now notes the plugin "auto-loads next session as `<name>@skills-dir`"
+- Updated `plugin eval --ablation` description to reflect the new default-selection logic (with-without whenever a plugin resolves, else none)
+- Updated `plugin eval --output-dir` and `--report` descriptions to reference the configurable eval dir
+
 ## [2.1.233] - 2026-08-15
 
 ### Added
