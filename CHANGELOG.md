@@ -2,6 +2,19 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.241] - 2026-08-23
+
+### Added
+- New `plugin eval` flag: `--eval-dir <dir>` (directory name below the plugin that holds eval cases; results go alongside it)
+- New `plugin eval init` flags: `--eval-dir <dir>` (directory to write cases into) and `-i`/`--interactive` (run the authoring interview; already the default in a terminal)
+- New `plugin install`/`plugin i` flag: `-y`/`--yes` (accept the displayed marketplace-declared command without the confirmation prompt)
+- New `plugin update` flag: `-y`/`--yes` (accept the displayed marketplace-declared command without the confirmation prompt)
+
+### Changed
+- Updated `plugin validate` description: now "Validate a plugin or marketplace manifest, or the skills, agents, and commands in a directory"
+- Updated `plugin eval --ablation` description to reflect the new default resolution rule (with-without whenever a plugin resolves, else none)
+- Updated `plugin eval --output-dir` description: now references `<eval dir>` instead of the hardcoded `evals/`
+
 ## [2.1.233] - 2026-08-15
 
 ### Added
