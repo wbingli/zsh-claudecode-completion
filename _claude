@@ -2,7 +2,7 @@
 
 # Zsh completion script for Claude Code CLI
 # https://github.com/anthropics/claude-code
-# Auto-generated for Claude v2.1.233
+# Auto-generated for Claude v2.1.245
 
 _claude_session_ids() {
   # Claude stores each project under ~/.claude/projects/ with a mangled
@@ -592,18 +592,20 @@ case $subcmd in
           local sub2=$(( subcmd_pos + 2 ))
           if (( CURRENT == sub2 )); then
             _arguments -s \
-              '--ablation[Run a no-plugin baseline arm and report the score delta (none or with-without; default: with-without when targeting a plugin by name, none for a path)]:mode:(none with-without)' \
+              '--ablation[Run a no-plugin baseline arm and report the score delta (none or with-without; default: with-without whenever a plugin resolves, none when nothing does; under with-without, with-only graders are a plugin-fired indicator rather than part of the score)]:mode:(none with-without)' \
               '*--allow-tools[Operator grant for gated tools (Bash, Write, Edit, WebFetch, mcp__*). Supports Tool(pattern:*) syntax]:tools:' \
               '--case[Filter cases by name glob]:glob:' \
+              '--eval-dir[Directory name (below the plugin) that holds the eval cases (default: the manifest'\''s experimental.evals value, else evals/)]:dir:_files -/' \
               '(-h --help)'{-h,--help}'[Display help]' \
-              '--json[Print the full run result (prompts, graders, per-run scores) as JSON to stdout, or write it to a .json file]::path:_files' \
+              '--json[Print the full run result (prompts, graders, per-run scores) as JSON to stdout, or write it to this .json file]::path:_files' \
               '--judge-model[Override LLM-grader model (default: haiku)]:model:' \
               '--keep-temp[Preserve scaffold dirs for debugging]' \
               '--max-cost-usd[Optional hard cost ceiling; abort and report partial results if hit (exit 2)]:usd:' \
+              '--mocks[Mock stand-ins for MCP servers, from <eval dir>/mocks/ (record or off; default: record — off spawns the real servers, gated by --allow-tools as usual)]:mode:(record off)' \
               '--model[Override model for all cases]:model:' \
               '--no-publish[Keep the HTML report local only; skip publishing it to claude.ai]' \
               '--no-scaffold[Explicitly skip scaffold_script]' \
-              '--output-dir[Directory for aggregate-result.json (default: ./evals/results/<timestamp>/)]:dir:_files -/' \
+              '--output-dir[Directory for aggregate-result.json (default: ./<eval dir>/results/<timestamp>/)]:dir:_files -/' \
               '--publish-report[Also require publishing the report to claude.ai (already the default when your account supports it); explains why if unavailable]' \
               '--report[Write a self-contained HTML report (scores, prompts, grader verdicts) to path]:path:_files' \
               '--runs[Override per-case runs (default: case.runs ?? 3)]:n:' \
@@ -617,7 +619,9 @@ case $subcmd in
               init)
                 _arguments \
                   '--bare[Write a blank template (prompt.md + graders/criteria.md) instead of running the interview]' \
+                  '--eval-dir[Directory (below the current directory) to write cases into (default: experimental.evals from the plugin.json in the current directory, else evals/)]:dir:_files -/' \
                   '(-h --help)'{-h,--help}'[Display help]' \
+                  '(-i --interactive)'{-i,--interactive}'[Run the authoring interview (already the default in a terminal); requires an interactive terminal]' \
                   '::name:'
                 ;;
               *)
@@ -967,7 +971,7 @@ _arguments -s \
   '--system-prompt[System prompt to use for the session]:prompt:' \
   '--system-prompt-file[Read system prompt from a file]:file:_files' \
   '--teammate-mode[Set agent team display mode]:mode:(auto tmux iterm2 in-process)' \
-  '--teleport[Resume a cloud session in the local terminal, or open an interactive picker with optional session ID]::session-id:' \
+  '--teleport[Resume a teleport session, optionally specify session ID]::session-id:' \
   '--tmux[Create a tmux session for the worktree (requires --worktree). Uses iTerm2 native panes when available; use --tmux=classic for traditional tmux]::style:(classic)' \
   '*--tools[Specify the list of available tools from the built-in set. Use "" to disable all tools, "default" to use all tools, or specify tool names (e.g. "Bash,Edit,Read")]:tools:' \
   '--verbose[Override verbose mode setting from config]' \

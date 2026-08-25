@@ -2,6 +2,18 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.245] - 2026-08-25
+
+### Added
+- New `plugin eval` flag: `--eval-dir <dir>` — directory name (below the plugin) that holds the eval cases
+- New `plugin eval` flag: `--mocks <record|off>` — mock stand-ins for MCP servers, from `<eval dir>/mocks/`
+- New `plugin eval init` flags: `--eval-dir <dir>` and `-i`/`--interactive` (run the authoring interview)
+
+### Changed
+- Updated `plugin eval --ablation` description to reflect the new default-resolution rule and `with-only` grader semantics
+- Updated `plugin eval --output-dir` description: default path is now `./<eval dir>/results/<timestamp>/` instead of `./evals/results/<timestamp>/`
+- Updated top-level `--teleport` description: now "Resume a teleport session, optionally specify session ID"
+
 ## [2.1.233] - 2026-08-15
 
 ### Added
