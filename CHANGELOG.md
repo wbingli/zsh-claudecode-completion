@@ -2,6 +2,18 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.246] - 2026-08-26
+
+### Added
+- New `plugin eval` flags: `--eval-dir <dir>` (directory below the plugin that holds eval cases) and `--mocks <mode>` (mock stand-ins for MCP servers from `<eval dir>/mocks/`; `record` or `off`, default `record`)
+- New `plugin eval init` flags: `--eval-dir <dir>` and `-i`/`--interactive`
+- New `plugin install`/`plugin i` flag: `-y`/`--yes` (accept the displayed marketplace-declared command without the confirmation prompt)
+- New `plugin update` flag: `-y`/`--yes` (accept the displayed marketplace-declared command without the confirmation prompt)
+
+### Changed
+- Updated `plugin eval --ablation` description to reflect the new default-resolution behavior (with-without whenever a plugin resolves, none when nothing does)
+- Updated `plugin eval --output-dir` description to reference `<eval dir>` instead of a hardcoded `evals/` path
+
 ## [2.1.233] - 2026-08-15
 
 ### Added
