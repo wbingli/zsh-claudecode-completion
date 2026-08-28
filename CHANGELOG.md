@@ -2,6 +2,26 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.250] - 2026-08-28
+
+### Added
+- New top-level flag `--restricted`: removes the built-in tools that run commands or code (Bash, PowerShell, REPL and other code-running tools) and WebFetch unless `--tools` names them, and ignores user/project/local settings files
+- New `agents --restricted` flag: start dispatched sessions in restricted mode
+- New `plugin eval` flag: `--eval-dir <dir>` — directory name (below the plugin) that holds the eval cases
+- New `plugin eval` flag: `--mocks <mode>` (`record`/`off`) — mock stand-ins for MCP servers, from `<eval dir>/mocks/`
+- New `plugin eval init` flag: `--eval-dir <dir>` — directory (below the current directory) to write cases into
+- New `plugin eval init` flag: `-i, --interactive` — run the authoring interview (already the default in a terminal)
+- New `plugin install` flag: `-y, --yes` — accept the displayed marketplace-declared command without the confirmation prompt
+- New `plugin update` flag: `-y, --yes` — accept the displayed marketplace-declared command without the confirmation prompt
+
+### Changed
+- Updated `plugin eval --ablation` description: default now applies "whenever a plugin resolves" (by name or target path) rather than only "when targeting a plugin by name"
+- Updated `plugin eval --max-cost-usd` description: clarified that overrun is bounded to one agent run
+- Updated `plugin eval --output-dir` description: default path now reflects the configurable eval dir (`./<eval dir>/results/<timestamp>/`)
+- Updated `plugin eval --report` description: now writes to `<path>` instead of the results dir
+- Updated `plugin eval --json` description: minor wording change ("this .json file")
+- Updated `plugin validate` description: now also covers "the skills, agents, and commands in a directory"
+
 ## [2.1.233] - 2026-08-15
 
 ### Added
