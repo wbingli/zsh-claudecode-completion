@@ -2,6 +2,20 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.251] - 2026-08-29
+
+### Added
+- New top-level flag `--restricted`: restricted mode that removes command/code-running tools and WebFetch unless `--tools` names them, ignores user/project/local settings files, confines file tools to working directories, and refuses `bypassPermissions` (also added to `agents --restricted`)
+- New `plugin eval` flags: `--eval-dir <dir>` (directory below the plugin that holds eval cases) and `--mocks <mode>` (mock stand-ins for MCP servers: `record` or `off`)
+- New `plugin eval init` flags: `--eval-dir <dir>` and `-i`/`--interactive`
+- New `-y`/`--yes` flag on `plugin install` and `plugin update`: accept the displayed marketplace-declared command without the confirmation prompt
+
+### Changed
+- `mcp add` description for `-H`/`--header` updated: now "Set headers for HTTP/SSE servers" (was "Set WebSocket headers")
+- `mcp add-json` description updated: now supports "stdio, SSE, HTTP, or WebSocket" (was "stdio or SSE")
+- `plugin eval --output-dir` default text updated to reflect the new `--eval-dir` option: `./<eval dir>/results/<timestamp>/`
+- `plugin validate` description updated: now also validates "the skills, agents, and commands in a directory"
+
 ## [2.1.233] - 2026-08-15
 
 ### Added

@@ -2,7 +2,7 @@
 
 # Zsh completion script for Claude Code CLI
 # https://github.com/anthropics/claude-code
-# Auto-generated for Claude v2.1.233
+# Auto-generated for Claude v2.1.251
 
 _claude_session_ids() {
   # Claude stores each project under ~/.claude/projects/ with a mangled
@@ -351,7 +351,7 @@ local -a mcp_commands
 mcp_commands=(
   'add:Add an MCP server to Claude Code'
   'add-from-claude-desktop:Import MCP servers from Claude Desktop (Mac and WSL only)'
-  'add-json:Add an MCP server (stdio or SSE) with a JSON string'
+  'add-json:Add an MCP server (stdio, SSE, HTTP, or WebSocket) with a JSON string'
   'get:Get details about an MCP server'
   'help:Display help for command'
   'list:List configured MCP servers'
@@ -367,7 +367,7 @@ plugin_commands=(
   'details:Show a plugin'\''s component inventory and projected token cost'
   'disable:Disable an enabled plugin'
   'enable:Enable a disabled plugin'
-  'eval:Run eval cases against a plugin and report scored results'
+  'eval:Run eval cases against a plugin and report scored results (eval dir configurable via --eval-dir)'
   'help:Display help for command'
   'init:Scaffold a new plugin at ~/.claude/skills/<name>/'
   'new:Scaffold a new plugin at ~/.claude/skills/<name>/'
@@ -381,7 +381,7 @@ plugin_commands=(
   'remove:Uninstall an installed plugin'
   'tag:Create a {name}--v{version} git tag for a plugin release, validating that plugin.json and any enclosing marketplace entry agree'
   'update:Update a plugin to the latest version (restart required to apply)'
-  'validate:Validate a plugin or marketplace manifest'
+  'validate:Validate a plugin or marketplace manifest, or the skills, agents, and commands in a directory'
 )
 
 local -a marketplace_commands
@@ -437,6 +437,7 @@ case $subcmd in
       '--model[Default model for sessions dispatched from agent view]:model:' \
       '--permission-mode[Default permission mode for sessions dispatched from agent view]:mode:(acceptEdits auto bypassPermissions manual dontAsk plan)' \
       '*--plugin-dir[Load plugins from specified directory for the agent view and dispatched sessions (repeatable)]:path:_files -/' \
+      '--restricted[Start dispatched sessions in restricted mode]' \
       '--setting-sources[Comma-separated list of setting sources to load (user, project, local)]:sources:' \
       '--settings[Settings file or JSON string to apply to the agent view and dispatched sessions]:file-or-json:_files' \
       '--strict-mcp-config[Only use MCP servers from --mcp-config in dispatched sessions]'
@@ -508,7 +509,7 @@ case $subcmd in
             '--client-id[OAuth client ID for HTTP/SSE servers]:clientId:' \
             '--client-secret[Prompt for OAuth client secret (or set MCP_CLIENT_SECRET env var)]' \
             '(-e --env)*'{-e,--env}'[Set environment variables (e.g. -e KEY=value)]:env:' \
-            '(-H --header)*'{-H,--header}'[Set WebSocket headers (e.g. -H "X-Api-Key: abc123" -H "X-Custom: value")]:header:' \
+            '(-H --header)*'{-H,--header}'[Set headers for HTTP/SSE servers (e.g. -H "X-Api-Key: abc123" -H "X-Custom: value")]:header:' \
             '(-h --help)'{-h,--help}'[Display help]' \
             '(-s --scope)'{-s,--scope}'[Configuration scope (local, user, or project) (default: local)]:scope:(local user project)' \
             '(-t --transport)'{-t,--transport}'[Transport type (stdio, sse, http). Defaults to stdio if not specified]:transport:(stdio sse http)' \
@@ -595,15 +596,17 @@ case $subcmd in
               '--ablation[Run a no-plugin baseline arm and report the score delta (none or with-without; default: with-without when targeting a plugin by name, none for a path)]:mode:(none with-without)' \
               '*--allow-tools[Operator grant for gated tools (Bash, Write, Edit, WebFetch, mcp__*). Supports Tool(pattern:*) syntax]:tools:' \
               '--case[Filter cases by name glob]:glob:' \
+              '--eval-dir[Directory name (below the plugin) that holds the eval cases (default: the manifest'\''s experimental.evals value, else evals/)]:dir:_files -/' \
               '(-h --help)'{-h,--help}'[Display help]' \
               '--json[Print the full run result (prompts, graders, per-run scores) as JSON to stdout, or write it to a .json file]::path:_files' \
               '--judge-model[Override LLM-grader model (default: haiku)]:model:' \
               '--keep-temp[Preserve scaffold dirs for debugging]' \
               '--max-cost-usd[Optional hard cost ceiling; abort and report partial results if hit (exit 2)]:usd:' \
+              '--mocks[Mock stand-ins for MCP servers, from <eval dir>/mocks/ (default: record)]:mode:(record off)' \
               '--model[Override model for all cases]:model:' \
               '--no-publish[Keep the HTML report local only; skip publishing it to claude.ai]' \
               '--no-scaffold[Explicitly skip scaffold_script]' \
-              '--output-dir[Directory for aggregate-result.json (default: ./evals/results/<timestamp>/)]:dir:_files -/' \
+              '--output-dir[Directory for aggregate-result.json (default: ./<eval dir>/results/<timestamp>/)]:dir:_files -/' \
               '--publish-report[Also require publishing the report to claude.ai (already the default when your account supports it); explains why if unavailable]' \
               '--report[Write a self-contained HTML report (scores, prompts, grader verdicts) to path]:path:_files' \
               '--runs[Override per-case runs (default: case.runs ?? 3)]:n:' \
@@ -617,7 +620,9 @@ case $subcmd in
               init)
                 _arguments \
                   '--bare[Write a blank template (prompt.md + graders/criteria.md) instead of running the interview]' \
+                  '--eval-dir[Directory (below the current directory) to write cases into (default: experimental.evals from plugin.json, else evals/)]:dir:_files -/' \
                   '(-h --help)'{-h,--help}'[Display help]' \
+                  '(-i --interactive)'{-i,--interactive}'[Run the authoring interview (already the default in a terminal); requires an interactive terminal]' \
                   '::name:'
                 ;;
               *)
@@ -678,6 +683,7 @@ case $subcmd in
             '*--config[Set a userConfig option declared in the plugin'\''s manifest (repeatable)]:key=value:' \
             '(-h --help)'{-h,--help}'[Display help]' \
             '(-s --scope)'{-s,--scope}'[Installation scope: user, project, or local (default: user)]:scope:(user project local)' \
+            '(-y --yes)'{-y,--yes}'[Accept the displayed marketplace-declared command without the confirmation prompt (required when stdin or stdout is not a TTY)]' \
             ':plugin:'
           ;;
         prune|autoremove)
@@ -713,6 +719,7 @@ case $subcmd in
           _arguments \
             '(-h --help)'{-h,--help}'[Display help]' \
             '(-s --scope)'{-s,--scope}'[Installation scope: user, project, local, managed (default: user)]:scope:(user project local managed)' \
+            '(-y --yes)'{-y,--yes}'[Accept the displayed marketplace-declared command without the confirmation prompt (required when stdin or stdout is not a TTY)]' \
             ':plugin:'
           ;;
         list)
@@ -958,6 +965,7 @@ _arguments -s \
   '(--remote-control --rc)'{--remote-control,--rc}'[Start an interactive session with Remote Control enabled (optionally named)]::name:' \
   '--remote-control-session-name-prefix[Prefix for auto-generated Remote Control session names (default: hostname)]:prefix:' \
   '--replay-user-messages[Re-emit user messages from stdin back on stdout for acknowledgment (only works with --input-format=stream-json and --output-format=stream-json)]' \
+  '--restricted[Restricted mode: removes command/code-running tools and WebFetch unless --tools names them, ignores user/project/local settings files, confines file tools to working directories, and refuses bypassPermissions]' \
   '(-r --resume)'{-r,--resume}'[Resume a conversation by session ID, or open interactive picker with optional search term]:session:_claude_session_ids' \
   '--safe-mode[Start with all customizations disabled — useful for troubleshooting a broken configuration. Admin-managed settings still apply. Sets CLAUDE_CODE_SAFE_MODE=1]' \
   '--session-id[Use a specific session ID for the conversation (must be a valid UUID)]:uuid:' \
