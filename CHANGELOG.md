@@ -2,6 +2,14 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.252] - 2026-09-01
+
+### Added
+- New top-level flag `--restricted`: Restricted mode — removes the built-in tools that run commands or code (Bash, PowerShell, REPL, etc.) and WebFetch unless `--tools` names them, and ignores user/project/local settings files
+- New `agents` flag `--restricted`: Start dispatched sessions in restricted mode
+- New `plugin eval` flags: `--eval-dir <dir>` (directory holding eval cases, below the plugin) and `--mocks <mode>` (mock stand-ins for MCP servers; `record` or `off`, default `record`)
+- New `plugin eval init` flags: `--eval-dir <dir>` (directory to write cases into) and `-i`/`--interactive` (run the authoring interview; already the default in a terminal)
+
 ## [2.1.233] - 2026-08-15
 
 ### Added
