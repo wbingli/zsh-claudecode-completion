@@ -2,6 +2,17 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.258] - 2026-09-02
+
+### Added
+- New top-level flag `--system-prompt-snapshot <on|off>`: Record the system prompt once per conversation and reuse it verbatim on every request and resume (recommended: on)
+
+### Changed
+- `mcp add-json` now documents support for WebSocket servers (was "stdio or SSE", now "stdio, SSE, HTTP, or WebSocket")
+- `--teleport` description updated to match the CLI's own wording ("Resume a teleport session, optionally specify session ID")
+- `--exclude-dynamic-system-prompt-sections` description now notes its default (`false`)
+- `respawn`, `rm`, `stop`, and `kill` top-level command descriptions refreshed to match the CLI's current wording
+
 ## [2.1.252] - 2026-09-01
 
 ### Added
