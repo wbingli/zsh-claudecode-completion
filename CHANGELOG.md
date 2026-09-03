@@ -2,6 +2,22 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.259] - 2026-09-03
+
+### Added
+- New top-level flag `--permission-prompts <target>`: Who answers permission prompts with `--print` — `host` (the SDK host or `--permission-prompt-tool`) or `none` (nobody: anything that would prompt is denied automatically)
+- New top-level flag `--system-prompt-snapshot <on|off>`: Record the system prompt once per conversation and reuse it verbatim on every request and resume (recommended: on)
+- New `plugin validate` flag: `--json` (output the validation report as JSON, same exit codes)
+- New `plugin install` and `plugin update` flag: `-y`/`--yes` (accept the displayed marketplace-declared command without the confirmation prompt; required when stdin or stdout is not a TTY)
+
+### Changed
+- Updated `--bg`/`--background` description: now documents that it prints the id used by `claude attach`, `logs`, `stop`, and `rm`, that `claude agents` lists it, and its `--resume` interaction
+- Updated `mcp add -H`/`--header` description: now "Set headers for HTTP/SSE servers" (was "Set WebSocket headers")
+- Updated `mcp add-json` description: now mentions HTTP and WebSocket support in addition to stdio/SSE
+- Updated `plugin init`/`new` description: now notes the plugin auto-loads next session as `<name>@skills-dir`
+- Updated `plugin validate` description: now covers validating skills, agents, and commands in a directory
+- `ultrareview --timeout` default changed from 30 to 45 minutes
+
 ## [2.1.252] - 2026-09-01
 
 ### Added
