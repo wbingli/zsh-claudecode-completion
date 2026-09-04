@@ -2,6 +2,21 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.260] - 2026-09-04
+
+### Added
+- New top-level flag `--permission-prompts <host|none>`: Who answers permission prompts with `--print` — `host` (the SDK host or `--permission-prompt-tool`) or `none` (deny automatically)
+- New top-level flag `--system-prompt-snapshot <on|off>`: Record the system prompt once per conversation and reuse it verbatim on every request and resume
+- New `rm` flag: `--discard-unpushed <commit>@<worktree-id>` — also discard the worktree's unpushed commits (and any uncommitted changes) while it is still the same worktree at that commit
+- New `plugin install`/`i` and `plugin update` flag: `-y`/`--yes` — accept the displayed marketplace-declared command without the confirmation prompt (required when stdin or stdout is not a TTY)
+- New `plugin validate` flag: `--json` — output the validation report as JSON (same exit codes)
+
+### Changed
+- Updated top-level `--bg`/`--background` description to explain it prints the id used by `attach`/`logs`/`stop`/`rm`, and its interaction with `--resume`
+- `ultrareview --timeout` default changed from 30 to 45 minutes
+- `plugin validate` description now also covers validating skills, agents, and commands in a directory
+- Updated several `plugin eval` flag descriptions (`--ablation`, `--eval-dir`, `--max-cost-usd`, `--mocks`, `--output-dir`, `--report`) for accuracy
+
 ## [2.1.252] - 2026-09-01
 
 ### Added
