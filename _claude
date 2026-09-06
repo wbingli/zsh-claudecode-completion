@@ -2,7 +2,7 @@
 
 # Zsh completion script for Claude Code CLI
 # https://github.com/anthropics/claude-code
-# Auto-generated for Claude v2.1.252
+# Auto-generated for Claude v2.1.263
 
 _claude_session_ids() {
   # Claude stores each project under ~/.claude/projects/ with a mangled
@@ -381,7 +381,7 @@ plugin_commands=(
   'remove:Uninstall an installed plugin'
   'tag:Create a {name}--v{version} git tag for a plugin release, validating that plugin.json and any enclosing marketplace entry agree'
   'update:Update a plugin to the latest version (restart required to apply)'
-  'validate:Validate a plugin or marketplace manifest'
+  'validate:Validate a plugin or marketplace manifest, or the skills, agents, and commands in a directory'
 )
 
 local -a marketplace_commands
@@ -443,12 +443,20 @@ case $subcmd in
       '--strict-mcp-config[Only use MCP servers from --mcp-config in dispatched sessions]'
     return
     ;;
-  attach|logs|stop|kill|rm)
+  attach|logs|stop|kill)
     # The leading ':cmd:' placeholder accounts for the subcommand word
     # already in $words — _arguments here is invoked as `claude`'s completer
     # and counts positionals from $words[2], so position 1 = the subcommand
     # itself and position 2 is the actual session-id slot.
     _arguments \
+      '(-h --help)'{-h,--help}'[Display help for command]' \
+      ':cmd:' \
+      ':session:_claude_background_session_ids'
+    return
+    ;;
+  rm)
+    _arguments \
+      '--discard-unpushed[Also discard the worktree'\''s unpushed commits (and any uncommitted changes) while it is still the same worktree at that commit - pass the value a previous claude rm <id> reported]:commit@worktree-id:' \
       '(-h --help)'{-h,--help}'[Display help for command]' \
       ':cmd:' \
       ':session:_claude_background_session_ids'
@@ -509,7 +517,7 @@ case $subcmd in
             '--client-id[OAuth client ID for HTTP/SSE servers]:clientId:' \
             '--client-secret[Prompt for OAuth client secret (or set MCP_CLIENT_SECRET env var)]' \
             '(-e --env)*'{-e,--env}'[Set environment variables (e.g. -e KEY=value)]:env:' \
-            '(-H --header)*'{-H,--header}'[Set WebSocket headers (e.g. -H "X-Api-Key: abc123" -H "X-Custom: value")]:header:' \
+            '(-H --header)*'{-H,--header}'[Set headers for HTTP/SSE servers (e.g. -H "X-Api-Key: abc123" -H "X-Custom: value")]:header:' \
             '(-h --help)'{-h,--help}'[Display help]' \
             '(-s --scope)'{-s,--scope}'[Configuration scope (local, user, or project) (default: local)]:scope:(local user project)' \
             '(-t --transport)'{-t,--transport}'[Transport type (stdio, sse, http). Defaults to stdio if not specified]:transport:(stdio sse http)' \
@@ -586,6 +594,7 @@ case $subcmd in
         validate)
           _arguments \
             '(-h --help)'{-h,--help}'[Display help]' \
+            '--json[Output the validation report as JSON (same exit codes)]' \
             '--strict[Treat warnings as errors (exit 1). Use in CI to fail on unrecognized fields, missing metadata, and other issues that the runtime tolerates]' \
             ':path:_files'
           ;;
@@ -641,6 +650,7 @@ case $subcmd in
             case $words[$sub2] in
               add)
                 _arguments \
+                  '--claudeai[Add the marketplace of this name that claude.ai hosts for you, by its listed name or its local name]' \
                   '(-h --help)'{-h,--help}'[Display help]' \
                   '--scope[Where to declare the marketplace: user (default), project, or local]:scope:(user project local)' \
                   '*--sparse[Limit checkout to specific directories via git sparse-checkout (for monorepos), e.g. --sparse .claude-plugin plugins]:path:_files -/' \
@@ -683,6 +693,7 @@ case $subcmd in
             '*--config[Set a userConfig option declared in the plugin'\''s manifest (repeatable)]:key=value:' \
             '(-h --help)'{-h,--help}'[Display help]' \
             '(-s --scope)'{-s,--scope}'[Installation scope: user, project, or local (default: user)]:scope:(user project local)' \
+            '(-y --yes)'{-y,--yes}'[Accept the displayed marketplace-declared command without the confirmation prompt (required when stdin or stdout is not a TTY)]' \
             ':plugin:'
           ;;
         prune|autoremove)
@@ -718,6 +729,7 @@ case $subcmd in
           _arguments \
             '(-h --help)'{-h,--help}'[Display help]' \
             '(-s --scope)'{-s,--scope}'[Installation scope: user, project, local, managed (default: user)]:scope:(user project local managed)' \
+            '(-y --yes)'{-y,--yes}'[Accept the displayed marketplace-declared command without the confirmation prompt (required when stdin or stdout is not a TTY)]' \
             ':plugin:'
           ;;
         list)
@@ -888,7 +900,7 @@ case $subcmd in
       '--json[Print the raw bugs.json payload instead of formatted findings]' \
       '(--no-post --post)--no-post[Do not post the findings to the PR (the default; accepted for parity with the /ultrareview and /code-review ultra flags)]' \
       '(--no-post --post)--post[Post the finished review'\''s findings to the PR as you (PR targets only; one plain comment, not a review)]' \
-      '--timeout[Maximum minutes to wait for the review to finish (default: 30)]:minutes:' \
+      '--timeout[Maximum minutes to wait for the review to finish (default: 45)]:minutes:' \
       ':cmd:' \
       '::target:'
     return
@@ -956,6 +968,7 @@ _arguments -s \
   '--output-format[Output format (only works with --print): "text" (default), "json" (single result), or "stream-json" (realtime streaming)]:format:(text json stream-json)' \
   '--permission-mode[Permission mode to use for the session]:mode:(acceptEdits auto bypassPermissions manual dontAsk plan)' \
   '--permission-prompt-tool[MCP tool name to handle permission prompts (only works with --print)]:tool:' \
+  '--permission-prompts[Who answers permission prompts with --print: host (the SDK host or --permission-prompt-tool) or none (nobody: anything that would prompt is denied automatically; the permission mode still decides everything else)]:target:(host none)' \
   '*--plugin-dir[Load a plugin from a directory or .zip for this session only (repeatable: --plugin-dir A --plugin-dir B.zip)]:directory:_files -/' \
   '*--plugin-url[Fetch a plugin .zip from a URL for this session only (repeatable: --plugin-url A --plugin-url B)]:url:' \
   '(-p --print)'{-p,--print}'[Print response and exit (useful for pipes). Note: The workspace trust dialog is skipped when Claude is run in non-interactive mode. Only use this in directories you trust]' \
@@ -972,6 +985,7 @@ _arguments -s \
   '--strict-mcp-config[Only use MCP servers from --mcp-config, ignoring all other MCP configurations]' \
   '--system-prompt[System prompt to use for the session]:prompt:' \
   '--system-prompt-file[Read system prompt from a file]:file:_files' \
+  '--system-prompt-snapshot[Record the system prompt once per conversation and reuse it verbatim on every request and resume (recommended: on). By default on for the built-in prompt; passing --system-prompt or --append-system-prompt turns it off so the given text applies fresh each launch]:on-off:(on off)' \
   '--teammate-mode[Set agent team display mode]:mode:(auto tmux iterm2 in-process)' \
   '--teleport[Resume a cloud session in the local terminal, or open an interactive picker with optional session ID]::session-id:' \
   '--tmux[Create a tmux session for the worktree (requires --worktree). Uses iTerm2 native panes when available; use --tmux=classic for traditional tmux]::style:(classic)' \
