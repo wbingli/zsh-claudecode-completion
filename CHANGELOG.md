@@ -2,6 +2,22 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.267] - 2026-09-10
+
+### Added
+- New top-level flag `--permission-prompts <target>`: who answers permission prompts with `--print` — `host` (the SDK host or `--permission-prompt-tool`) or `none` (deny automatically)
+- New top-level flag `--system-prompt-snapshot <on|off>`: record the system prompt once per conversation and reuse it verbatim on every request and resume
+- New `rm` flag `--discard-unpushed <commit>@<worktree-id>`: also discard the worktree's unpushed commits (and any uncommitted changes) while it is still the same worktree at that commit
+- New `plugin validate` flag `--json`: output the validation report as JSON (same exit codes)
+- New `plugin marketplace add` flag `--claudeai`: add the marketplace of this name that claude.ai hosts for you
+- New `plugin install` and `plugin update` flag `-y`/`--yes`: accept the displayed marketplace-declared command without the confirmation prompt (required when stdin or stdout is not a TTY)
+- Added `cursor` as a valid `import` source alongside `codex` and `gemini`
+
+### Changed
+- `ultrareview --timeout` default changed from 30 to 45 minutes
+- Updated `mcp add --header` description: now "Set headers for HTTP/SSE servers" (was "Set WebSocket headers")
+- Updated `plugin validate` description to mention validating skills, agents, and commands in a directory
+
 ## [2.1.252] - 2026-09-01
 
 ### Added
