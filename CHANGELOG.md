@@ -2,6 +2,14 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.270] - 2026-09-13
+
+### Added
+- New `plugin eval` flags: `--allow-real-servers` (with `--mocks record`, also start a plugin's real MCP server processes for servers with no mock), `-j`/`--concurrency <n>` (run up to n agent runs at once, 1-8, default 1), and `--trust-plugin` (skip the first-run untrusted-plugin trust prompt, for CI)
+
+### Changed
+- Updated `plugin validate` description: now "Validate a plugin or marketplace manifest, or the skills, agents, and commands in a directory"
+
 ## [2.1.268] - 2026-09-11
 
 ### Added
