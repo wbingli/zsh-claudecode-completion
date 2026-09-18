@@ -2,6 +2,17 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.276] - 2026-09-18
+
+### Added
+- New `plugin eval` flags: `--allow-real-servers` (with `--mocks record`, also start the plugin's real MCP server processes for servers that have no mock), `-j`/`--concurrency <n>` (run up to n agent runs at once, 1-8, default 1), and `--trust-plugin` (skip the first-run trust prompt, for CI)
+- New `--accept-command <sha256>` flag for `plugin install` and `plugin update` (accept a marketplace-declared command whose sha256 a previous `--json` run reported)
+- New `--registry <url>` flag for `plugin install` (resolve and download a `package@npm` install from a specific npm registry)
+
+### Changed
+- Updated `plugin eval --ablation` description to reflect the current default-resolution and with-only-grader behavior
+- Removed the stale "(only works with --print)" qualifier from the top-level `--fallback-model` description — it does not appear in the current `--help` output
+
 ## [2.1.268] - 2026-09-11
 
 ### Added

@@ -2,7 +2,7 @@
 
 # Zsh completion script for Claude Code CLI
 # https://github.com/anthropics/claude-code
-# Auto-generated for Claude v2.1.268
+# Auto-generated for Claude v2.1.276
 
 _claude_session_ids() {
   # Claude stores each project under ~/.claude/projects/ with a mangled
@@ -603,9 +603,11 @@ case $subcmd in
           local sub2=$(( subcmd_pos + 2 ))
           if (( CURRENT == sub2 )); then
             _arguments -s \
-              '--ablation[Run a no-plugin baseline arm and report the score delta (none or with-without; default: with-without when targeting a plugin by name, none for a path)]:mode:(none with-without)' \
+              '--ablation[Run a no-plugin baseline arm and report the score delta (none or with-without; default: with-without whenever a plugin resolves by name or target path, none otherwise; with-only graders are a plugin-fired indicator, not part of the score)]:mode:(none with-without)' \
+              '--allow-real-servers[With --mocks record: also start the plugin'\''s real MCP server processes for servers that have no mock (runs as you, outside the OS sandbox; use only on plugins you trust)]' \
               '*--allow-tools[Operator grant for gated tools (Bash, Write, Edit, WebFetch, mcp__*). Supports Tool(pattern:*) syntax]:tools:' \
               '--case[Filter cases by name glob]:glob:' \
+              '(-j --concurrency)'{-j,--concurrency}'[Run up to n agent runs at once (1-8; default 1). Each run is a full claude child on your own credential, so they share one rate limit]:n:' \
               '--eval-dir[Directory name (below the plugin) that holds the eval cases (default: the manifest'\''s experimental.evals value, else evals/)]:dir:_files -/' \
               '(-h --help)'{-h,--help}'[Display help]' \
               '--json[Print the full run result (prompts, graders, per-run scores) as JSON to stdout, or write it to a .json file]::path:_files' \
@@ -623,6 +625,7 @@ case $subcmd in
               '--scaffold[Run each case'\''s scaffold_script (runs author-supplied bash as you; off by default — only use on case files you authored)]' \
               '*--tag[Filter cases by tag (repeatable)]:tag:' \
               '--threshold[Exit 1 if any case score is below this threshold (default: 1.0)]:threshold:' \
+              '--trust-plugin[Assert that you trust this plugin'\''s code and eval suite, and skip the first-run trust prompt (for CI; only pass it for plugins you would run yourself)]' \
               '--verbose[Log per-message trace events to the debug log (use --debug-file to read them)]' \
               ':command-or-target:(init)'
           else
@@ -691,9 +694,11 @@ case $subcmd in
           ;;
         install|i)
           _arguments \
+            '--accept-command[Accept the marketplace-declared command whose sha256 a previous --json run reported as shownCommand.sha256; counts as -y for exactly that command, for that plugin and marketplace catalog]:sha256:' \
             '*--config[Set a userConfig option declared in the plugin'\''s manifest (repeatable)]:key=value:' \
             '(-h --help)'{-h,--help}'[Display help]' \
             '--json[Print one machine-readable result line on stdout instead of the human message (same exit codes; a marketplace-declared command is still shown and must be confirmed - pass -y when not interactive)]' \
+            '--registry[For a package@npm install: resolve and download from this npm registry instead of the one your npm configuration selects]:url:' \
             '(-s --scope)'{-s,--scope}'[Installation scope: user, project, or local (default: user)]:scope:(user project local)' \
             '(-y --yes)'{-y,--yes}'[Accept the displayed marketplace-declared command without the confirmation prompt (required when stdin or stdout is not a TTY)]' \
             ':plugin:'
@@ -732,6 +737,7 @@ case $subcmd in
           ;;
         update)
           _arguments \
+            '--accept-command[Accept the marketplace-declared command whose sha256 a previous --json run reported as shownCommand.sha256; counts as -y for exactly that command, for that plugin and marketplace catalog]:sha256:' \
             '(-h --help)'{-h,--help}'[Display help]' \
             '--json[Print one machine-readable result line on stdout instead of the human message (same exit codes; a marketplace-declared command is still shown and must be confirmed - pass -y when not interactive)]' \
             '(-s --scope)'{-s,--scope}'[Installation scope: user, project, local, managed (default: user)]:scope:(user project local managed)' \
@@ -951,7 +957,7 @@ _arguments -s \
   '--effort[Effort level for the current session (low, medium, high, xhigh, max)]:level:(low medium high xhigh max)' \
   '--environment[Create a new cloud session that runs on the given self-hosted environment (ccpool_...)]:environment_id:' \
   '--exclude-dynamic-system-prompt-sections[Move per-machine sections (cwd, env info, memory paths, git status) from the system prompt into the first user message. Improves cross-user prompt-cache reuse. Only applies with the default system prompt (ignored with --system-prompt)]' \
-  '--fallback-model[Enable automatic fallback to specified model(s) when default model is overloaded or not available. Accepts a comma-separated list to try each in order. Re-tries the primary at the start of each user turn (only works with --print)]:model:' \
+  '--fallback-model[Enable automatic fallback to specified model(s) when default model is overloaded or not available. Accepts a comma-separated list to try each in order. Re-tries the primary at the start of each user turn]:model:' \
   '*--file[File resources to download at startup. Format: file_id:relative_path (e.g., --file file_abc:doc.txt file_def:img.png)]:file:' \
   '--fork-session[When resuming, create a new session ID instead of reusing the original (use with --resume or --continue)]' \
   '--forward-subagent-text[Forward subagent text and thinking blocks as assistant/user messages with parent_tool_use_id set (only works with --print and --output-format=stream-json)]' \
