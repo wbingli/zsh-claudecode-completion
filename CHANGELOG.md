@@ -2,6 +2,18 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.278] - 2026-09-19
+
+### Added
+- New `plugin eval` flags: `--allow-real-servers` (with `--mocks record`, also start the plugin's real MCP server processes for servers with no mock), `-j`/`--concurrency <n>` (run up to n agent runs at once, 1-8, default 1), and `--trust-plugin` (assert trust and skip the first-run confirmation prompt, for CI)
+- New `plugin install` flags: `--accept-command <sha256>` and `--registry <url>` (resolve a `<package>@npm` install from a specific npm registry)
+- New `plugin update` flag: `--accept-command <sha256>`
+
+### Changed
+- Updated `plugin validate` description: now "Validate a plugin or marketplace manifest, or the skills, agents, and commands in a directory"
+- Updated `plugin eval --output-dir` description: default is now `./<eval dir>/results/<timestamp>/` (was `./evals/results/<timestamp>/`)
+- Updated `plugin eval --report` description: now writes to `<path>` instead of the results dir
+
 ## [2.1.268] - 2026-09-11
 
 ### Added
