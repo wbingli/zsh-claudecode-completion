@@ -2,6 +2,18 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.280] - 2026-09-23
+
+No CLI surface changes. Verified `claude --help` output for every top-level
+command and nested subcommand (including hidden commands `remote-control`,
+`daemon` + its subcommands, `attach`, `logs`, `stop`, `kill`, `respawn`, `rm`)
+and all documented hidden flags (`--system-prompt-file`,
+`--append-system-prompt-file`, `--advisor`, `--channels`, `--cloud`/`--remote`,
+`--dangerously-load-development-channels`, `--init`/`--init-only`,
+`--max-turns`, `--permission-prompt-tool`, `--teammate-mode`, `--teleport`)
+against v2.1.280 — no commands, subcommands, or flags were added, changed, or
+removed since v2.1.278. Bumped the tracked version only.
+
 ## [2.1.278] - 2026-09-19
 
 ### Added
