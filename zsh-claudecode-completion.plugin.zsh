@@ -15,7 +15,7 @@ local _cache_dir="${ZSH_CACHE_DIR:-$HOME/.cache/zsh}/completions"
 # This avoids fpath duplication issues when plugin dir is symlinked
 if [[ -f "$_plugin_dir/_claude" ]]; then
   if [[ ! -f "$_cache_dir/_claude" || "$_plugin_dir/_claude" -nt "$_cache_dir/_claude" ]]; then
-    cp "$_plugin_dir/_claude" "$_cache_dir/_claude"
+    command cp "$_plugin_dir/_claude" "$_cache_dir/_claude"
   fi
 fi
 
