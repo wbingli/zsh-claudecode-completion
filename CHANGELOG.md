@@ -2,6 +2,24 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.281] - 2026-09-24
+
+No new commands, subcommands, or flags detected. CLI help text picked up more
+detailed wording for several `plugin eval` and `plugin install`/`update`
+flags; descriptions below were updated to match.
+
+### Changed
+- Updated `plugin eval --ablation` description: clarifies default resolution (by name or target path) and that with-only graders (e.g. `tool_used: Skill`) act as a plugin-fired indicator rather than part of the score
+- Updated `plugin eval --allow-real-servers` description: now notes it runs outside the OS sandbox that confines shell tools and to use only on trusted plugins
+- Updated `plugin eval -j`/`--concurrency` description: notes each run is a full `claude` child sharing one rate limit, and results keep case order
+- Updated `plugin eval --eval-dir` description: notes results go to `<plugin>/<dir>/results/`
+- Updated `plugin eval --max-cost-usd` description: clarifies the ceiling is checked before each run launches, bounding overrun, and that paid graders are skipped on breach
+- Updated `plugin eval --mocks` description: explains `record` vs `off` behavior in detail
+- Updated `plugin eval --trust-plugin` description: notes it does not imply `--scaffold`, `--allow-tools`, or `--mocks off`
+- Updated `plugin install`/`plugin update --accept-command` description: clarifies it covers command-source installs and headersHelper archive fetches, scoped to that exact command
+- Updated `plugin install --registry` description: now "instead of the one your npm configuration selects"
+- Updated `plugin install`/`plugin update -y`/`--yes` description: clarifies what's being accepted (a run-command install vs. a headersHelper archive fetch)
+
 ## [2.1.278] - 2026-09-19
 
 ### Added
