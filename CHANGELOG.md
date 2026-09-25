@@ -2,6 +2,13 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.282] - 2026-09-25
+
+No changes to commands, subcommands, or flags detected. Compared full `--help`
+output (top-level, all subcommands, and nested subcommands) against 2.1.281
+and confirmed hidden flags (`--system-prompt-file`, `--advisor`,
+`--max-turns`, `--teleport`, `--sdk-url`) still behave as documented.
+
 ## [2.1.281] - 2026-09-24
 
 No new commands, subcommands, or flags detected. CLI help text picked up more
