@@ -2,6 +2,11 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.283] - 2026-09-26
+
+### Added
+- New global `--client-data-url <url>` flag: URL for a signed configuration document; Claude Code exits if it cannot load it or it does not cover the selected model
+
 ## [2.1.281] - 2026-09-24
 
 No new commands, subcommands, or flags detected. CLI help text picked up more
