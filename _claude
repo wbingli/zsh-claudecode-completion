@@ -2,7 +2,7 @@
 
 # Zsh completion script for Claude Code CLI
 # https://github.com/anthropics/claude-code
-# Auto-generated for Claude v2.1.281
+# Auto-generated for Claude v2.1.283
 
 _claude_session_ids() {
   # Claude stores each project under ~/.claude/projects/ with a mangled
@@ -945,6 +945,7 @@ _arguments -s \
   '--brief[Enable SendUserMessage tool for agent-to-user communication]' \
   '*--channels[MCP servers to listen for channel notifications (e.g. plugin:<name>@<marketplace> or server:<name>)]:server:' \
   '--chrome[Enable Claude in Chrome integration]' \
+  '--client-data-url[URL for a signed configuration document. Claude Code exits if it cannot load it or it does not cover the selected model]:url:' \
   '(--cloud --remote)'{--cloud,--remote}'[Create a cloud session with the given description, or attach to an existing one by session ID or claude.ai/code URL (--remote is a deprecated alias)]::description:' \
   '(-c --continue)'{-c,--continue}'[Continue the most recent conversation in the current directory]' \
   '*--dangerously-load-development-channels[Bypass the channel plugin allowlist for local testing]:server:' \
