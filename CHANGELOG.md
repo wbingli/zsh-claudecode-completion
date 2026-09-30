@@ -2,6 +2,13 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.285] - 2026-09-30
+
+### Added
+- New global `--desktop` flag: Open in the Claude Desktop app instead of the terminal
+- New `plugin configure <plugin>` subcommand with flags: `--json`, `--values-stdin`
+- New `plugin list --data-size [plugin]` flag: Measure saved plugin data directories (requires `--json`)
+
 ## [2.1.283] - 2026-09-26
 
 ### Added

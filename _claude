@@ -364,6 +364,7 @@ mcp_commands=(
 
 local -a plugin_commands
 plugin_commands=(
+  'configure:Show a plugin'\''s options and which are unset, or save values from stdin with --values-stdin'
   'details:Show a plugin'\''s component inventory and projected token cost'
   'disable:Disable an enabled plugin'
   'enable:Enable a disabled plugin'
@@ -577,6 +578,13 @@ case $subcmd in
       _describe 'plugin command' plugin_commands
     else
       case $words[$sub1] in
+        configure)
+          _arguments \
+            '(-h --help)'{-h,--help}'[Display help]' \
+            '--json[Output as JSON]' \
+            '--values-stdin[Read option values from stdin as a JSON object of single-line strings; options left out keep their values]' \
+            ':plugin:'
+          ;;
         details)
           _arguments \
             '(-h --help)'{-h,--help}'[Display help]' \
@@ -747,6 +755,7 @@ case $subcmd in
         list)
           _arguments \
             '--available[Include available plugins from marketplaces (requires --json)]' \
+            '--data-size[Measure each installed plugin'\''s saved data directory, or only the named plugin'\''s (requires --json)]::plugin:' \
             '(-h --help)'{-h,--help}'[Display help]' \
             '--json[Output as JSON]'
           ;;
@@ -952,6 +961,7 @@ _arguments -s \
   '--dangerously-skip-permissions[Bypass all permission checks. Recommended only for sandboxes with no internet access]' \
   '(-d --debug)'{-d,--debug}'[Enable debug mode with optional category filtering (e.g., "api,hooks" or "!1p,!file")]:filter:' \
   '--debug-file[Write debug logs to a specific file path (implicitly enables debug mode)]:path:_files' \
+  '--desktop[Open in the Claude Desktop app instead of the terminal (with --continue or --resume <id> to pick the session)]' \
   '--disable-slash-commands[Disable all skills]' \
   '*--disallowedTools[Comma or space-separated list of tool names to deny (e.g. "Bash(git:*) Edit")]:tools:' \
   '*--disallowed-tools[Comma or space-separated list of tool names to deny (e.g. "Bash(git:*) Edit")]:tools:' \
