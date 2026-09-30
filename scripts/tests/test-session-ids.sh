@@ -10,7 +10,7 @@
 #
 # The fixture path is intentionally placed under a directory whose name
 # contains a `.` so we also exercise the dot-mangling branch (commit history
-# shows that branch was previously broken).
+# shows that branch was previously broken). Case 4 covers a space and `_`.
 
 set -e
 TEST_NAME=test-session-ids
@@ -33,8 +33,7 @@ build_fixture() {
     local home="$1" work_dir="$2" mode="$3"
     mkdir -p "$work_dir"
 
-    local mangled="${work_dir//\//-}"
-    mangled="${mangled//./-}"
+    local mangled="${work_dir//[^a-zA-Z0-9]/-}"
     local proj_dir
     if [[ "$mode" == "matching" ]]; then
         proj_dir="$home/.claude/projects/$mangled"
@@ -183,5 +182,18 @@ assert_no_completion_errors "$output"
 # should be capped out.
 assert_contains "aaaaaaaa" "$output" "newest session under cap"
 assert_not_contains "bbbbbbbb" "$output" "older session capped out"
+
+# ---------------------------------------------------------------------------
+# Test 4: every non-alphanumeric character is mangled, not only `/` and `.`
+# ---------------------------------------------------------------------------
+rm -rf "$home/.claude"
+work_dir4="$home/my project_x/work"
+proj_dir4=$(build_fixture "$home" "$work_dir4" "matching")
+rm "$proj_dir4/sessions-index.json"
+
+log "case 4: space and underscore in path, no index fallback"
+output=$(run_completion "$home" "$work_dir4" 'claude -r \t')
+assert_no_completion_errors "$output"
+assert_contains "bbbbbbbb" "$output" "session under space-mangled path"
 
 pass "session id auto-suggestion OK"

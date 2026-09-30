@@ -6,11 +6,11 @@
 
 _claude_session_ids() {
   # Claude stores each project under ~/.claude/projects/ with a mangled
-  # folder name: both `/` and `.` are replaced with `-`. The prior version
-  # only handled `/`, so any hidden-directory path (e.g. `/Users/x/.fabro/y`)
-  # silently returned no completions.
-  local mangled="${PWD//\//-}"
-  mangled="${mangled//./-}"
+  # folder name: every character outside [a-zA-Z0-9] is replaced with `-`
+  # (Claude Code's `replace(/[^a-zA-Z0-9]/g, "-")`). Earlier versions only
+  # handled `/` and `.`, so a path with a space or `_` (e.g.
+  # `/Users/x/My Project`) silently returned no completions.
+  local mangled="${PWD//[^a-zA-Z0-9]/-}"
   local project_dir="$HOME/.claude/projects/$mangled"
 
   # Fallback: if the mangled folder isn't found (e.g. unknown future naming
