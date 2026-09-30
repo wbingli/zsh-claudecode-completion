@@ -7,6 +7,7 @@
 #   2. Unindexed JSONL sessions appear too, with branch + summary parsed.
 #   3. The originalPath fallback matches when the mangled directory is missing.
 #   4. CLAUDE_COMPLETION_SESSION_LIMIT caps the displayed count.
+#   5. A character beyond U+FFFF mangles to two hyphens (UTF-16 code units).
 #
 # The fixture path is intentionally placed under a directory whose name
 # contains a `.` so we also exercise the dot-mangling branch (commit history
@@ -33,6 +34,8 @@ build_fixture() {
     local home="$1" work_dir="$2" mode="$3"
     mkdir -p "$work_dir"
 
+    # ASCII paths only: bash substitutes per character, Claude per UTF-16
+    # code unit. Case 5 spells its non-ASCII key out by hand.
     local mangled="${work_dir//[^a-zA-Z0-9]/-}"
     local proj_dir
     if [[ "$mode" == "matching" ]]; then
@@ -195,5 +198,47 @@ log "case 4: space and underscore in path, no index fallback"
 output=$(run_completion "$home" "$work_dir4" 'claude -r \t')
 assert_no_completion_errors "$output"
 assert_contains "bbbbbbbb" "$output" "session under space-mangled path"
+
+# ---------------------------------------------------------------------------
+# Test 5: a character beyond U+FFFF counts as two UTF-16 code units in
+# Claude's `replace(/[^a-zA-Z0-9]/g, "-")`, so `💩` mangles to `--`. A decoy
+# sibling at the one-hyphen key must not win, and no index file may rescue
+# a wrong key via originalPath.
+# ---------------------------------------------------------------------------
+rm -rf "$home/.claude"
+# Zsh substitutes per character only under a UTF-8 locale, and CI runners do
+# not all export one, so pick an installed one for the spawned shell.
+utf8_locale=$(locale -a 2>/dev/null | grep -i -m1 -E '^(C|en_US)\.(UTF-8|utf8)$' || true)
+if [[ -z "$utf8_locale" ]]; then
+    log "case 5: skipped, no UTF-8 locale installed"
+else
+    mkdir -p "$home/emoji💩/work"
+    # Expected keys spelled out from the JS rule, not derived with the
+    # substitution under test: `/` -> `-`, `💩` -> `--`. Only the ASCII
+    # mktemp prefix goes through the shell substitution.
+    home_key="${home//[^a-zA-Z0-9]/-}"
+    correct_dir="$home/.claude/projects/${home_key}-emoji---work"
+    decoy_dir="$home/.claude/projects/${home_key}-emoji--work"
+    mkdir -p "$correct_dir" "$decoy_dir"
+    cat > "$correct_dir/aaaaaaaa-5555-2222-3333-aaaaaaaaaaaa.jsonl" <<JSONL
+{"type":"user","gitBranch":"main","message":{"content":"emoji project session"}}
+JSONL
+    cat > "$decoy_dir/bbbbbbbb-5555-2222-3333-bbbbbbbbbbbb.jsonl" <<JSONL
+{"type":"user","gitBranch":"main","message":{"content":"decoy sibling session"}}
+JSONL
+
+    log "case 5: non-BMP character mangles to two hyphens (LC_ALL=$utf8_locale)"
+    # The emoji must not pass through Tcl: Apple's expect (Tcl 8.5) cannot
+    # carry characters beyond U+FFFF. The spawned zsh enters the directory
+    # itself, through a glob, while it sources the test rc.
+    printf 'cd ~/emoji*/work\n' >> "$home/.zshrc"
+    output=$(run_completion "$home" "$home" 'claude -r \t' \
+        "set env(LC_ALL) \"$utf8_locale\"")
+    assert_no_completion_errors "$output"
+    # One match per directory, and zsh inserts a lone match instead of
+    # listing its label — so assert on the UUID.
+    assert_contains "aaaaaaaa" "$output" "session under the two-hyphen key"
+    assert_not_contains "bbbbbbbb" "$output" "decoy under the one-hyphen key"
+fi
 
 pass "session id auto-suggestion OK"
