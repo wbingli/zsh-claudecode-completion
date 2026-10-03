@@ -2,6 +2,11 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.288] - 2026-10-03
+
+### Added
+- New `plugin test [dir]` subcommand: Run a mod's tests
+
 ## [2.1.286] - 2026-10-01
 
 No new commands, subcommands, or flags detected.
