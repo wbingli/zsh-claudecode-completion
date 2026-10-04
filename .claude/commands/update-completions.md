@@ -129,6 +129,7 @@ Key patterns to follow:
 - File completion: `:file:_files`
 - Directory completion: `:directory:_files -/`
 - Comma-separated value lists: `:sources:_values -s , source user project local`. `_values -s ,` leaves out values already on the line and joins with a comma. `--setting-sources` uses this (top level and `agents`); keep it when regenerating, and cover it with `scripts/tests/test-setting-sources.sh`
+- Agent options: `:agent:_claude_agents` for `--agent` and `agents --agent`. The helper reads the frontmatter of `.claude/agents/**/*.md` (project, walking up to the repository root) and `$CLAUDE_CONFIG_DIR/agents/**/*.md` (user); it never runs `claude`. Keep it and `scripts/tests/test-agent-names.sh` when regenerating
 
 ## Step 4: Update Version File
 
@@ -280,7 +281,7 @@ This prevents duplicates when the plugin directory is symlinked (e.g., from oh-m
 
 ### Known Anti-Patterns (AVOID)
 These patterns cause duplicate completions and must NOT be used:
-- Nested helper functions (e.g., `_claude_mcp()` called from main completion)
+- Nested helper functions for subcommand dispatch (e.g., `_claude_mcp()` called from main completion). Leaf value completers are fine and must be kept: `_claude_session_ids`, `_claude_background_session_ids` and `_claude_agents` only add matches (`_claude_project_dirs` is a shared lookup they call) and are used as `_arguments` actions
 - `_arguments -C` with complex state machines (use `-s` instead)
 - Missing `return` statement after case blocks
 - `_claude() { }` wrapper function with `_claude "$@"` at end

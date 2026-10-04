@@ -310,6 +310,103 @@ _claude_background_session_ids() {
   _wanted bg-session-ids expl 'background session' compadd -o nosort -d labels -a ids
 }
 
+# Set $reply to the directories Claude treats as the current project: the
+# working directory and each parent up to the repository root, closest
+# first. Outside a repository that is the working directory alone. Symlinks
+# are resolved, because Claude keys project state by the resolved path.
+_claude_project_dirs() {
+  local d=${PWD:A} root=""
+  reply=($d)
+  while true; do
+    if [[ -e $d/.git ]]; then root=$d; break; fi
+    [[ $d == / ]] && break
+    d=${d:h}
+  done
+  d=$reply[1]
+  while [[ -n $root && $d != "$root" ]]; do
+    d=${d:h}
+    reply+=($d)
+  done
+}
+
+# Offer the subagents defined in the user's and the project's
+# `.claude/agents/` directories, the way Claude finds them
+# (https://code.claude.com/docs/en/sub-agents):
+#   - project: every `.claude/agents/` from the working directory up to the
+#     repository root, closest first, so `claude --agent` works from a
+#     subdirectory. Outside a repository only the working directory counts.
+#   - user: `$CLAUDE_CONFIG_DIR/agents`, `~/.claude/agents` by default.
+#   - both are searched recursively, and the agent is identified by the
+#     `name` in its frontmatter, never by its path or file name.
+# Only the frontmatter is read, in zsh itself, so no process is started
+# per file. A file without usable frontmatter is skipped.
+_claude_agents() {
+  setopt localoptions extendedglob
+  local -a reply dirs agents
+  local -A seen
+  local d f line key val name desc
+  local -i n block
+
+  _claude_project_dirs
+  dirs=(${^reply}/.claude/agents "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/agents")
+
+  for d in $dirs; do
+    for f in $d/**/*.md(N-.); do
+      name="" desc="" n=0 block=0
+      while IFS= read -r line || [[ -n $line ]]; do
+        (( n++ ))
+        line=${line%$'\r'}
+        if (( n == 1 )); then
+          # A byte-order mark may precede the opening `---`.
+          line=${line#$'\xef\xbb\xbf'}
+          [[ ${line%%[[:space:]]#} == '---' ]] || break
+          continue
+        fi
+        [[ ${line%%[[:space:]]#} == '---' ]] && break
+        (( n > 200 )) && break
+        if (( block )); then
+          # First line of a `description: |` or `>` block.
+          block=0
+          if [[ $line == [[:space:]]##[^[:space:]]* ]]; then
+            desc=${${line##[[:space:]]#}%%[[:space:]]#}
+            continue
+          fi
+        fi
+        [[ $line == (name|description):* ]] || continue
+        key=${line%%:*}
+        val=${${line#*:}##[[:space:]]#}
+        if [[ $val == \"* ]]; then
+          val=${${val#\"}%%\"*}
+        elif [[ $val == \'* ]]; then
+          val=${${val#\'}%%\'*}
+        else
+          # Unquoted: drop a trailing ` # comment`, then trailing blanks.
+          [[ $val == \#* ]] && val=""
+          val=${${val%%[[:space:]]##\#*}%%[[:space:]]#}
+        fi
+        if [[ $key == name ]]; then
+          name=$val
+        elif [[ $val == [\|\>]([+-]|)([0-9]|) ]]; then
+          block=1
+        else
+          desc=$val
+        fi
+      done < $f 2>/dev/null
+
+      # `:` is reserved for plugin-scoped agents; Claude skips such a file.
+      [[ -n $name && $name != *:* ]] || continue
+      (( ${+seen[$name]} )) && continue
+      seen[$name]=1
+      # Descriptions often carry escaped examples; keep the first line short.
+      desc=${desc%%\\n*}
+      (( ${#desc} > 80 )) && desc="${desc[1,77]}..."
+      agents+=("${name}${desc:+:$desc}")
+    done
+  done
+
+  _describe -t agents 'agent' agents "$@"
+}
+
 # Offer a freshly-generated UUID for --session-id, which expects a NEW,
 # user-assigned session identifier (not an existing session to resume).
 local curcontext="$curcontext" state line
@@ -438,7 +535,7 @@ case $subcmd in
   agents)
     _arguments -s \
       '*--add-dir[Additional directory to allow tool access to in dispatched sessions (repeatable)]:directory:_files -/' \
-      '--agent[Default agent for sessions dispatched from agent view. Overrides the agent setting]:agent:' \
+      '--agent[Default agent for sessions dispatched from agent view. Overrides the agent setting]:agent:_claude_agents' \
       '--all[With --json: also include completed background sessions]' \
       '--allow-dangerously-skip-permissions[Make bypass-permissions mode available to dispatched sessions without defaulting to it]' \
       '--cwd[Show only background sessions started under path]:path:_files -/' \
@@ -992,7 +1089,7 @@ fi # end: if [[ -n "$subcmd" ]]
 _arguments -s \
   '*--add-dir[Additional directories to allow tool access to]:directory:_files -/' \
   '--advisor[Enable a server-side advisor tool using the specified model]:model:' \
-  '--agent[Agent for the current session. Overrides the agent setting]:agent:' \
+  '--agent[Agent for the current session. Overrides the agent setting]:agent:_claude_agents' \
   '--agents[JSON object defining custom agents]:json:' \
   '--allow-dangerously-skip-permissions[Enable bypassing all permission checks as an option, without it being enabled by default. Recommended only for sandboxes with no internet access]' \
   '*--allowedTools[Comma or space-separated list of tool names to allow (e.g. "Bash(git:*) Edit")]:tools:' \

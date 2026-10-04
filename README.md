@@ -74,6 +74,7 @@ claude --model <TAB>      # Show model names
 claude --output-format <TAB>  # Show output formats
 claude --setting-sources user,<TAB>  # Show the remaining setting sources
 claude --resume <TAB>     # Show recent sessions (newest first)
+claude --agent <TAB>      # Show your user and project subagents
 ```
 
 ## Configuration
