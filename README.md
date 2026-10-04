@@ -70,6 +70,8 @@ Type `claude` followed by `Tab` to see available completions:
 ```bash
 claude <TAB>              # Show commands and options
 claude mcp <TAB>          # Show MCP subcommands
+claude plugin enable <TAB>   # Show installed plugins (needs jq 1.6+)
+claude plugin install <TAB>  # Show plugins from your marketplaces (needs jq 1.6+)
 claude --model <TAB>      # Show model names
 claude --output-format <TAB>  # Show output formats
 claude --setting-sources user,<TAB>  # Show the remaining setting sources

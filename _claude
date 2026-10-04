@@ -310,6 +310,103 @@ _claude_background_session_ids() {
   _wanted bg-session-ids expl 'background session' compadd -o nosort -d labels -a ids
 }
 
+# Set $reply to the directories Claude treats as the current project: the
+# working directory and each parent up to the repository root, closest
+# first. Outside a repository that is the working directory alone. Symlinks
+# are resolved, because Claude keys project state by the resolved path.
+_claude_project_dirs() {
+  local d=${PWD:A} root=""
+  reply=($d)
+  while true; do
+    if [[ -e $d/.git ]]; then root=$d; break; fi
+    [[ $d == / ]] && break
+    d=${d:h}
+  done
+  d=$reply[1]
+  while [[ -n $root && $d != "$root" ]]; do
+    d=${d:h}
+    reply+=($d)
+  done
+}
+
+
+# The three helpers below complete plugin and marketplace values from the
+# files Claude keeps under `$CLAUDE_CONFIG_DIR/plugins` (`~/.claude/plugins`
+# by default). They need `jq` 1.6 or newer, never run `claude` and never use the
+# network. A missing or malformed file, or a malformed entry in one,
+# leaves the remaining values in place.
+
+# Installed plugins, as `name@marketplace`, from installed_plugins.json.
+# The value of an entry is a list of installs, or a single install in the
+# older format. An install made for one project (project or local scope,
+# with a `projectPath`) only counts inside that project, as found by
+# _claude_project_dirs; the first install that counts supplies the
+# description.
+_claude_installed_plugins() {
+  local -a reply plugins
+  local file="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/plugins/installed_plugins.json"
+  [[ -r $file ]] || return 1
+  _claude_project_dirs
+  plugins=("${(@f)$(command jq -r '
+    $ARGS.positional as $dirs
+    | .plugins | objects | to_entries[]
+    | select(.key | test("[[:cntrl:]]") | not)
+    | ([.value | if type == "array" then .[] else . end | objects
+        | select((.projectPath | type) != "string" or (.projectPath as $p | $dirs | index($p) != null))
+       ] | first) as $install
+    | select($install != null)
+    | "\(.key | gsub(":"; "\\:")):\($install.version // "unknown" | tostring) (\($install.scope // "user" | tostring) scope)"
+  ' "$file" --args $reply 2>/dev/null)}")
+  plugins=(${plugins:#})
+
+  _describe -t plugins 'installed plugin' plugins "$@"
+}
+
+# Marketplace names, from known_marketplaces.json.
+_claude_marketplaces() {
+  local -a marketplaces
+  local file="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/plugins/known_marketplaces.json"
+  [[ -r $file ]] || return 1
+  marketplaces=("${(@f)$(command jq -r '
+    objects | to_entries[]
+    | select((.value | type) == "object")
+    | select(.key | test("[[:cntrl:]]") | not)
+    | ((.value.source | objects | (.repo // .url // .path // .source) | strings | split("?")[0]) // "") as $source
+    | "\(.key | gsub(":"; "\\:")):\($source)"
+  ' "$file" 2>/dev/null)}")
+  marketplaces=(${marketplaces:#})
+
+  _describe -t marketplaces 'marketplace' marketplaces "$@"
+}
+
+# Plugins that can be installed, as `name@marketplace`, from the manifest
+# each known marketplace caches under marketplaces/<name>/.
+# All manifests go through one jq process. Each is handed over as text
+# (`--rawfile <marketplace> <file>`) and parsed inside jq, so a manifest
+# that is not valid JSON is skipped. Passed as input files instead, jq
+# would give up at the first broken one.
+_claude_marketplace_plugins() {
+  local -a manifests rawfiles plugins
+  local manifest
+  manifests=("${CLAUDE_CONFIG_DIR:-$HOME/.claude}"/plugins/marketplaces/*/.claude-plugin/marketplace.json(N-.))
+  (( $#manifests )) || return 1
+  for manifest in $manifests; do
+    rawfiles+=(--rawfile ${manifest:h:h:t} $manifest)
+  done
+  plugins=("${(@f)$(command jq -n -r $rawfiles '
+    $ARGS.named | to_entries[]
+    | .key as $marketplace
+    | .value | fromjson? | objects | .plugins | arrays | .[] | objects
+    | select((.name | type) == "string")
+    | select(.name | test("[[:cntrl:]]") | not)
+    | ((.description | strings | gsub("[[:cntrl:]]"; " ") | .[0:80]) // "") as $description
+    | "\("\(.name)@\($marketplace)" | gsub(":"; "\\:")):\($description)"
+  ' 2>/dev/null)}")
+  plugins=(${plugins:#})
+
+  _describe -t plugins 'plugin' plugins "$@"
+}
+
 # Offer a freshly-generated UUID for --session-id, which expects a NEW,
 # user-assigned session identifier (not an existing session to resume).
 local curcontext="$curcontext" state line
@@ -594,12 +691,12 @@ case $subcmd in
             '(-h --help)'{-h,--help}'[Display help]' \
             '--json[Output as JSON]' \
             '--values-stdin[Read option values from stdin as a JSON object of single-line strings; options left out keep their values]' \
-            ':plugin:'
+            ':plugin:_claude_installed_plugins'
           ;;
         details)
           _arguments \
             '(-h --help)'{-h,--help}'[Display help]' \
-            ':name:'
+            ':name:_claude_installed_plugins'
           ;;
         tag)
           _arguments \
@@ -692,7 +789,7 @@ case $subcmd in
               '--threshold[Exit 1 if any case score is below this threshold (default: 1.0)]:threshold:' \
               '--trust-plugin[Assert that you trust this plugin'\''s code and eval suite, and skip the first-run trust prompt (for CI; does not imply --scaffold, --allow-tools, or --mocks off)]' \
               '--verbose[Log per-message trace events to the debug log (use --debug-file to read them)]' \
-              '::command-or-target:{_alternative "commands:command:(init)" "files:target:_files"}'
+              '::command-or-target:{_alternative "commands:command:(init)" "plugins:installed plugin:_claude_installed_plugins" "files:target:_files"}'
           fi
           ;;
         marketplace)
@@ -714,12 +811,12 @@ case $subcmd in
                 _arguments \
                   '(-h --help)'{-h,--help}'[Display help]' \
                   '--scope[Remove the marketplace declaration from a specific settings scope: user, project, or local. Omit to remove it from every scope]:scope:(user project local)' \
-                  ':name:'
+                  ':name:_claude_marketplaces'
                 ;;
               update)
                 _arguments \
                   '(-h --help)'{-h,--help}'[Display help]' \
-                  '::name:'
+                  '::name:_claude_marketplaces'
                 ;;
               list)
                 _arguments \
@@ -752,7 +849,7 @@ case $subcmd in
             '--registry[For a <package>@npm install: resolve and download from this npm registry instead of the one your npm configuration selects]:url:' \
             '(-s --scope)'{-s,--scope}'[Installation scope: user, project, or local (default: user)]:scope:(user project local)' \
             '(-y --yes)'{-y,--yes}'[Accept the displayed marketplace-declared command without the confirmation prompt - a plugin installed by running a command, or one fetched via a headersHelper command (required when stdin or stdout is not a TTY)]' \
-            ':plugin:'
+            ':plugin:_claude_marketplace_plugins'
           ;;
         prune|autoremove)
           _arguments \
@@ -769,14 +866,14 @@ case $subcmd in
             '--prune[Also remove auto-installed dependencies that are no longer needed (requires -y in non-interactive contexts)]' \
             '(-s --scope)'{-s,--scope}'[Uninstall from scope: user, project, or local (default: user)]:scope:(user project local)' \
             '(-y --yes)'{-y,--yes}'[Skip the --prune confirmation prompt (required when stdin or stdout is not a TTY)]' \
-            ':plugin:'
+            ':plugin:_claude_installed_plugins'
           ;;
         enable)
           _arguments \
             '(-h --help)'{-h,--help}'[Display help]' \
             '--json[Print one machine-readable result line on stdout instead of the human message (same exit codes)]' \
             '(-s --scope)'{-s,--scope}'[Installation scope: user, project, local (default: auto-detect)]:scope:(user project local)' \
-            ':plugin:'
+            ':plugin:_claude_installed_plugins'
           ;;
         disable)
           _arguments \
@@ -784,7 +881,7 @@ case $subcmd in
             '(-h --help)'{-h,--help}'[Display help]' \
             '--json[Print one machine-readable result line on stdout instead of the human message (same exit codes)]' \
             '(-s --scope)'{-s,--scope}'[Installation scope: user, project, local (default: auto-detect)]:scope:(user project local)' \
-            '::plugin:'
+            '::plugin:_claude_installed_plugins'
           ;;
         update)
           _arguments \
@@ -793,12 +890,12 @@ case $subcmd in
             '--json[Print one machine-readable result line on stdout instead of the human message (same exit codes; a marketplace-declared command is still shown and must be confirmed - pass -y when not interactive)]' \
             '(-s --scope)'{-s,--scope}'[Installation scope: user, project, local, managed (default: user)]:scope:(user project local managed)' \
             '(-y --yes)'{-y,--yes}'[Accept the displayed marketplace-declared command without the confirmation prompt - a changed install command, or the headersHelper command that fetches its archive (required when stdin or stdout is not a TTY)]' \
-            ':plugin:'
+            ':plugin:_claude_installed_plugins'
           ;;
         list)
           _arguments \
             '--available[Include available plugins from marketplaces (requires --json)]' \
-            '--data-size[Measure each installed plugin'\''s saved data directory, or only the named plugin'\''s (requires --json)]::plugin:' \
+            '--data-size[Measure each installed plugin'\''s saved data directory, or only the named plugin'\''s (requires --json)]::plugin:_claude_installed_plugins' \
             '(-h --help)'{-h,--help}'[Display help]' \
             '--json[Output as JSON]'
           ;;
