@@ -129,6 +129,7 @@ Key patterns to follow:
 - File completion: `:file:_files`
 - Directory completion: `:directory:_files -/`
 - Comma-separated value lists: `:sources:_values -s , source user project local`. `_values -s ,` leaves out values already on the line and joins with a comma. `--setting-sources` uses this (top level and `agents`); keep it when regenerating, and cover it with `scripts/tests/test-setting-sources.sh`
+- MCP server names: `:name:_claude_mcp_servers` for `mcp get`, `mcp remove`, `mcp login` and `mcp logout` (not `mcp add` / `add-json`, which take a new name). The helper reads `mcpServers` from `${CLAUDE_CONFIG_DIR:-$HOME}/.claude.json` (user scope, and local scope under `projects.<path>`) and from `.mcp.json` (project scope) with `jq`; it never runs `claude`. Keep it and `scripts/tests/test-mcp-server-names.sh` when regenerating
 
 ## Step 4: Update Version File
 
@@ -280,7 +281,7 @@ This prevents duplicates when the plugin directory is symlinked (e.g., from oh-m
 
 ### Known Anti-Patterns (AVOID)
 These patterns cause duplicate completions and must NOT be used:
-- Nested helper functions (e.g., `_claude_mcp()` called from main completion)
+- Nested helper functions for subcommand dispatch (e.g., `_claude_mcp()` called from main completion). Leaf value completers are fine and must be kept: `_claude_session_ids`, `_claude_background_session_ids` and `_claude_mcp_servers` only add matches (`_claude_project_dirs` is a shared lookup they call) and are used as `_arguments` actions
 - `_arguments -C` with complex state machines (use `-s` instead)
 - Missing `return` statement after case blocks
 - `_claude() { }` wrapper function with `_claude "$@"` at end

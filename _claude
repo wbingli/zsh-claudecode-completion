@@ -310,6 +310,67 @@ _claude_background_session_ids() {
   _wanted bg-session-ids expl 'background session' compadd -o nosort -d labels -a ids
 }
 
+# Set $reply to the directories Claude treats as the current project: the
+# working directory and each parent up to the repository root, closest
+# first. Outside a repository that is the working directory alone. Symlinks
+# are resolved, because Claude keys project state by the resolved path.
+_claude_project_dirs() {
+  local d=${PWD:A} root=""
+  reply=($d)
+  while true; do
+    if [[ -e $d/.git ]]; then root=$d; break; fi
+    [[ $d == / ]] && break
+    d=${d:h}
+  done
+  d=$reply[1]
+  while [[ -n $root && $d != "$root" ]]; do
+    d=${d:h}
+    reply+=($d)
+  done
+}
+
+# Offer the MCP servers configured for the current directory, read from
+# Claude's own files (https://code.claude.com/docs/en/mcp):
+#   - user scope:    `mcpServers` in ~/.claude.json
+#   - local scope:   `projects.<project path>.mcpServers` in ~/.claude.json
+#   - project scope: `mcpServers` in the project's `.mcp.json`
+# With CLAUDE_CONFIG_DIR set, .claude.json is read from that directory.
+# The project is looked up from the working directory up to the repository
+# root (see _claude_project_dirs), so servers are also found from a
+# subdirectory or through a symlinked path. Needs `jq` 1.6 or newer (for
+# `$ARGS`); without it, or with a missing or malformed file, nothing is
+# offered.
+_claude_mcp_servers() {
+  local -a reply servers
+  local d cfg="${CLAUDE_CONFIG_DIR:-$HOME}/.claude.json"
+  # One `name:scope - type target` row per server. A `:` in the name is
+  # escaped for _describe. The query string of a URL is dropped, since it
+  # can hold a token.
+  local rows='def rows($scope):
+    objects | to_entries[]
+    | select((.value | type) == "object")
+    | select(.key | test("[[:cntrl:]]") | not)
+    | (.value.url // .value.command // "" | tostring | split("?")[0] // "") as $target
+    | (.value.type // (if .value.url then "http" else "stdio" end) | tostring) as $type
+    | "\(.key | gsub(":"; "\\:")):\($scope) - \($type) \($target)";'
+
+  _claude_project_dirs
+  if [[ -r $cfg ]]; then
+    servers+=("${(@f)$(command jq -r "$rows"'
+      (.mcpServers | rows("user")),
+      (.projects as $p | $ARGS.positional[] | $p[.]?.mcpServers? | rows("local"))
+    ' "$cfg" --args $reply 2>/dev/null)}")
+  fi
+  for d in $reply; do
+    [[ -r $d/.mcp.json ]] || continue
+    servers+=("${(@f)$(command jq -r "$rows"' .mcpServers | rows("project")' \
+      "$d/.mcp.json" 2>/dev/null)}")
+  done
+  servers=(${servers:#})
+
+  _describe -t mcp-servers 'MCP server' servers "$@"
+}
+
 # Offer a freshly-generated UUID for --session-id, which expects a NEW,
 # user-assigned session identifier (not an existing session to resume).
 local curcontext="$curcontext" state line
@@ -540,7 +601,7 @@ case $subcmd in
           _arguments \
             '(-h --help)'{-h,--help}'[Display help]' \
             '(-s --scope)'{-s,--scope}'[Configuration scope (local, user, or project) - if not specified, removes from whichever scope it exists in]:scope:(local user project)' \
-            ':name:'
+            ':name:_claude_mcp_servers'
           ;;
         add-json)
           _arguments \
@@ -558,7 +619,7 @@ case $subcmd in
         get)
           _arguments \
             '(-h --help)'{-h,--help}'[Display help]' \
-            ':name:'
+            ':name:_claude_mcp_servers'
           ;;
         list|reset-project-choices)
           _arguments \
@@ -568,12 +629,12 @@ case $subcmd in
           _arguments \
             '(-h --help)'{-h,--help}'[Display help]' \
             '--no-browser[Print the authorization URL instead of opening a browser (for SSH/headless sessions - paste the redirect URL back when prompted)]' \
-            ':name:'
+            ':name:_claude_mcp_servers'
           ;;
         logout)
           _arguments \
             '(-h --help)'{-h,--help}'[Display help]' \
-            ':name:'
+            ':name:_claude_mcp_servers'
           ;;
         *)
           _message 'no more arguments'
