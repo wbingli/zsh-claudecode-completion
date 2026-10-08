@@ -2,6 +2,11 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.294] - 2026-10-08
+
+### Added
+- New `--marketplace <source>` flag for `plugin install`: Install a plugin from the marketplace at the given source (owner/repo, git/https URL, or path)
+
 ## [2.1.291] - 2026-10-06
 
 No new commands, subcommands, or flags detected.
