@@ -438,7 +438,7 @@ case $subcmd in
       '--allow-dangerously-skip-permissions[Make bypass-permissions mode available to dispatched sessions without defaulting to it]' \
       '--cwd[Show only background sessions started under path]:path:_files -/' \
       '--dangerously-skip-permissions[Alias for --permission-mode bypassPermissions]' \
-      '--effort[Default effort level for sessions dispatched from agent view]:level:(low medium high xhigh max)' \
+      '--effort[Default effort level for sessions dispatched from agent view]:level:(low medium high xhigh max ultracode)' \
       '(-h --help)'{-h,--help}'[Display help for command]' \
       '--json[Print active sessions (interactive and background) as a JSON array and exit (for scripting; does not require a TTY)]' \
       '*--mcp-config[MCP server configuration to apply to dispatched sessions (repeatable)]:config:_files' \
@@ -1015,7 +1015,7 @@ _arguments -s \
   '--disable-slash-commands[Disable all skills]' \
   '*--disallowedTools[Comma or space-separated list of tool names to deny (e.g. "Bash(git:*) Edit")]:tools:' \
   '*--disallowed-tools[Comma or space-separated list of tool names to deny (e.g. "Bash(git:*) Edit")]:tools:' \
-  '--effort[Effort level for the current session (low, medium, high, xhigh, max)]:level:(low medium high xhigh max)' \
+  '--effort[Effort level for the current session (low, medium, high, xhigh, max)]:level:(low medium high xhigh max ultracode)' \
   '--environment[Create a new cloud session that runs on the given self-hosted environment (ccpool_...)]:environment_id:' \
   '--exclude-dynamic-system-prompt-sections[Move per-machine sections (cwd, env info, memory paths, git status) from the system prompt into the first user message. Improves cross-user prompt-cache reuse. Only applies with the default system prompt (ignored with --system-prompt)]' \
   '--exec[Run a shell command as a background job instead of a Claude session (requires --bg)]:command:' \

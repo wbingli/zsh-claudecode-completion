@@ -102,6 +102,14 @@ Note: `--sdk-url <url>` is also accepted but was deliberately excluded from comp
 
 **Maintaining this list**: When you find another flag in this category (referenced only inside another flag's description, mentioned in docs but absent from `--help`, etc.), add it to the table so future regenerations preserve it. When in doubt, keep the flag and probe the CLI rather than dropping it.
 
+### Hidden Flag Values
+
+Some values are accepted by a flag but missing from the value list in its `--help` description. Keep them in the flag's completion list, and leave the description as the CLI prints it.
+
+| Flag | Hidden value | How to detect | Verify it still exists |
+|------|--------------|---------------|------------------------|
+| `--effort <level>` (top level and `claude agents`) | `ultracode` | Listed in `/en/cli-reference.md` (xhigh effort with ultracode turned on); absent from the `--help` list and from the "Valid values: low, medium, high, xhigh, max" warning | `claude --effort ultracode -p hi 2>&1` prints no "Unknown --effort value" warning (`claude --effort bogus -p hi` does). Without starting a session: `LC_ALL=C grep -a -c 'ultracode:"xhigh"' "$(readlink -f "$(command -v claude)")"` is non-zero, the alias table both flags are parsed with |
+
 ## Step 3: Regenerate Completion Script
 
 Read the existing `_claude` file and regenerate it based on the help output. Preserve the zsh completion structure:
