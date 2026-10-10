@@ -59,6 +59,7 @@ For each hidden command:
 3. Add a `'name:description'` entry to the `claude_commands` array and a branch to the `case` statement, same as visible commands. Do not rename the array to `commands`: that is zsh's special hash of executables, and a local of that name hides it from every completer `_claude` calls
 4. Do not edit `known_commands` (used by the subcommand-position scanner) or the `'1:command:(...)'` spec at the bottom by hand; both are derived from `claude_commands`
 5. Every entry in `claude_commands` needs a `case` branch: the scanner detects each listed name, and a detected command without a branch falls through to the top-level flags and command list
+6. Do not add a `':cmd:'` placeholder to its `_arguments` call (see Required Structure below)
 
 **Maintaining this list**: When you discover new hidden commands (e.g., a command referenced in docs or changelogs but missing from `--help`), add them to this table so future updates preserve them.
 
@@ -101,6 +102,14 @@ Note: `--sdk-url <url>` is also accepted but was deliberately excluded from comp
 
 **Maintaining this list**: When you find another flag in this category (referenced only inside another flag's description, mentioned in docs but absent from `--help`, etc.), add it to the table so future regenerations preserve it. When in doubt, keep the flag and probe the CLI rather than dropping it.
 
+### Hidden Flag Values
+
+Some values are accepted by a flag but missing from the value list in its `--help` description. Keep them in the flag's completion list, and leave the description as the CLI prints it.
+
+| Flag | Hidden value | How to detect | Verify it still exists |
+|------|--------------|---------------|------------------------|
+| `--effort <level>` (top level and `claude agents`) | `ultracode` | Listed in `/en/cli-reference.md` (xhigh effort with ultracode turned on); absent from the `--help` list and from the "Valid values: low, medium, high, xhigh, max" warning | `claude --effort ultracode -p hi 2>&1` prints no "Unknown --effort value" warning (`claude --effort bogus -p hi` does). Without starting a session: `LC_ALL=C grep -a -c 'ultracode:"xhigh"' "$(readlink -f "$(command -v claude)")"` is non-zero, the alias table both flags are parsed with |
+
 ## Step 3: Regenerate Completion Script
 
 Read the existing `_claude` file and regenerate it based on the help output. Preserve the zsh completion structure:
@@ -119,6 +128,7 @@ Key patterns to follow:
 - Repeatable flags: `'*--flag[Description]:value:_files'`
 - File completion: `:file:_files`
 - Directory completion: `:directory:_files -/`
+- Comma-separated value lists: `:sources:_values -s , source user project local`. `_values -s ,` leaves out values already on the line and joins with a comma. `--setting-sources` uses this (top level and `agents`); keep it when regenerating, and cover it with `scripts/tests/test-setting-sources.sh`
 
 ## Step 4: Update Version File
 
@@ -278,7 +288,13 @@ These patterns cause duplicate completions and must NOT be used:
 
 ### Required Structure
 The completion script must use this flat structure:
-- `case $words[2] in` for subcommand detection (not `$words[1]` which is always "claude")
+- A scan over `$words` for the first known command **before the cursor** (`i < CURRENT`). The word being completed is not a command yet, and words after the cursor must not change what is offered
+- `$words` trimmed so the command is `$words[1]`: `shift $(( subcmd_pos - 1 )) words; (( CURRENT -= subcmd_pos - 1 ))`. `_arguments` counts positionals from `$words[2]`, so after the trim a block lists only its own arguments
+- One more `shift words; (( CURRENT-- ))` at each nested level, right before that level's `case` (see `mcp`, `plugin`, `plugin marketplace`)
+- **No `':cmd:'` placeholder specs.** They were needed when the whole command line was passed to `_arguments`; with the trimmed `$words` they shift every positional by one
+- `plugin eval`: a single `_arguments` call holds all eval flags, so they complete before and after the target. `init` is the command when it is the first word before the cursor that is neither an option nor an option's value, because `plugin eval --verbose init --bare` is valid and `plugin eval --case init` is not an `init` call. The `eval_value_opts` list names the eval options that take a value; add any new one to it
+- An action that calls `_alternative` goes in braces: `'::target:{_alternative ...}'`. `_arguments` passes compadd options to a bare action and `_alternative` prints `bad option: -J`
 - Early `return` after each case block to prevent fallthrough
 - Simple `_arguments -s` (not `-C`) for main flags
 - Simple command list: `"1:command:($known_commands)"`, derived from the `claude_commands` array (do not write the names out again as a literal list)
+

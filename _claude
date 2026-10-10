@@ -406,12 +406,14 @@ marketplace_commands=(
 
 # Find the subcommand position by scanning for the first non-flag argument after the command name.
 # This handles cases where flags appear before the subcommand (e.g., alias claude='claude --flag').
+# Only words before the cursor count: the word being completed is not a
+# subcommand yet, and words after it must not change what is offered here.
 local subcmd_pos=0
-local subcmd=""
+local subcmd="" subcmd2="" subcmd3=""
 # Every name in claude_commands must have a branch in the case statement below.
 local -a known_commands=(${claude_commands%%:*})
 local i
-for (( i=2; i <= ${#words}; i++ )); do
+for (( i=2; i < CURRENT; i++ )); do
   # Skip flags and their values
   [[ "$words[$i]" == -* ]] && continue
   # Check if this word is a known subcommand
@@ -424,24 +426,24 @@ done
 
 # If no subcommand found yet, fall through to main _arguments
 if [[ -n "$subcmd" ]]; then
-# Calculate positions relative to the subcommand
-local sub1=$(( subcmd_pos + 1 ))
+# Drop everything before the subcommand so that $words[1] is the subcommand
+# itself. `_arguments` counts positionals from $words[2], so each block
+# below can list its own arguments without accounting for `claude` or for
+# flags an alias put in front. Nested levels shift once more for the same
+# reason, right before their own `case`.
+shift $(( subcmd_pos - 1 )) words
+(( CURRENT -= subcmd_pos - 1 ))
 
 case $subcmd in
   agents)
-    # `_arguments` here is invoked as `claude`'s completer and counts
-    # positionals from $words[2], so the leading ':cmd:' placeholder is
-    # required to absorb the `agents` subcommand word — without it, the
-    # flag specs never engage and `claude agents <TAB>` produces nothing.
     _arguments -s \
-      ':cmd:' \
       '*--add-dir[Additional directory to allow tool access to in dispatched sessions (repeatable)]:directory:_files -/' \
       '--agent[Default agent for sessions dispatched from agent view. Overrides the agent setting]:agent:' \
       '--all[With --json: also include completed background sessions]' \
       '--allow-dangerously-skip-permissions[Make bypass-permissions mode available to dispatched sessions without defaulting to it]' \
       '--cwd[Show only background sessions started under path]:path:_files -/' \
       '--dangerously-skip-permissions[Alias for --permission-mode bypassPermissions]' \
-      '--effort[Default effort level for sessions dispatched from agent view]:level:(low medium high xhigh max)' \
+      '--effort[Default effort level for sessions dispatched from agent view]:level:(low medium high xhigh max ultracode)' \
       '(-h --help)'{-h,--help}'[Display help for command]' \
       '--json[Print active sessions (interactive and background) as a JSON array and exit (for scripting; does not require a TTY)]' \
       '*--mcp-config[MCP server configuration to apply to dispatched sessions (repeatable)]:config:_files' \
@@ -449,19 +451,14 @@ case $subcmd in
       '--permission-mode[Default permission mode for sessions dispatched from agent view]:mode:(acceptEdits auto bypassPermissions manual dontAsk plan)' \
       '*--plugin-dir[Load plugins from specified directory for the agent view and dispatched sessions (repeatable)]:path:_files -/' \
       '--restricted[Start dispatched sessions in restricted mode]' \
-      '--setting-sources[Comma-separated list of setting sources to load (user, project, local)]:sources:' \
+      '--setting-sources[Comma-separated list of setting sources to load (user, project, local)]:sources:_values -s , source user project local' \
       '--settings[Settings file or JSON string to apply to the agent view and dispatched sessions]:file-or-json:_files' \
       '--strict-mcp-config[Only use MCP servers from --mcp-config in dispatched sessions]'
     return
     ;;
   attach|logs|stop|kill)
-    # The leading ':cmd:' placeholder accounts for the subcommand word
-    # already in $words — _arguments here is invoked as `claude`'s completer
-    # and counts positionals from $words[2], so position 1 = the subcommand
-    # itself and position 2 is the actual session-id slot.
     _arguments \
       '(-h --help)'{-h,--help}'[Display help for command]' \
-      ':cmd:' \
       ':session:_claude_background_session_ids'
     return
     ;;
@@ -470,7 +467,6 @@ case $subcmd in
       '--discard-unpushed[Also discard the worktree'\''s unpushed commits (and any uncommitted changes) while it is still the same worktree at that commit - pass the value a previous claude rm <id> reported]:commit@worktree-id:' \
       '--force-remove-worktree[Delete the worktree directory even though the WorktreeRemove hook or git couldn'\''t remove it - pass the value a previous claude rm <id> reported]:worktree-id:' \
       '(-h --help)'{-h,--help}'[Display help for command]' \
-      ':cmd:' \
       ':session:_claude_background_session_ids'
     return
     ;;
@@ -478,15 +474,16 @@ case $subcmd in
     _arguments \
       '(--all)--all[Restart every stopped session]' \
       '(-h --help)'{-h,--help}'[Display help for command]' \
-      ':cmd:' \
       '(--all):session:_claude_background_session_ids'
     return
     ;;
   auth)
-    if (( CURRENT == sub1 )); then
+    if (( CURRENT == 2 )); then
       _describe 'auth command' auth_commands
     else
-      case $words[$sub1] in
+      subcmd2=$words[2]
+      shift words; (( CURRENT-- ))
+      case $subcmd2 in
         login)
           _arguments \
             '--claudeai[Use Claude subscription (default)]' \
@@ -513,10 +510,12 @@ case $subcmd in
     return
     ;;
   mcp)
-    if (( CURRENT == sub1 )); then
+    if (( CURRENT == 2 )); then
       _describe 'mcp command' mcp_commands
     else
-      case $words[$sub1] in
+      subcmd2=$words[2]
+      shift words; (( CURRENT-- ))
+      case $subcmd2 in
         serve)
           _arguments \
             '(-d --debug)'{-d,--debug}'[Enable debug mode]' \
@@ -584,10 +583,12 @@ case $subcmd in
     return
     ;;
   plugin|plugins)
-    if (( CURRENT == sub1 )); then
+    if (( CURRENT == 2 )); then
       _describe 'plugin command' plugin_commands
     else
-      case $words[$sub1] in
+      subcmd2=$words[2]
+      shift words; (( CURRENT-- ))
+      case $subcmd2 in
         configure)
           _arguments \
             '(-h --help)'{-h,--help}'[Display help]' \
@@ -623,8 +624,49 @@ case $subcmd in
             ':path:_files'
           ;;
         eval)
-          local sub2=$(( subcmd_pos + 2 ))
-          if (( CURRENT == sub2 )); then
+          # `eval init` is its own command with its own flags, and it may
+          # come after eval flags (`plugin eval --verbose init --bare`). So
+          # find the first word before the cursor that is neither an option
+          # nor an option's value, and see whether it is `init`. The values
+          # have to be skipped, or `--case init` would count: one word for
+          # most options, one word if there is one for `--json [path]`, and
+          # every word up to the next option for the `<value...>` ones.
+          # Keep these lists in step with the eval options below.
+          local -a eval_value_opts=(--ablation --case -j --concurrency
+            --eval-dir --judge-model --max-cost-usd --mocks --model --output-dir
+            --report --runs --threshold)
+          local -a eval_optional_value_opts=(--json)
+          local -a eval_multi_value_opts=(--allow-tools --tag)
+          i=2
+          while (( i < CURRENT )); do
+            if (( ${eval_value_opts[(Ie)$words[i]]} )); then
+              (( i += 2 ))
+            elif (( ${eval_optional_value_opts[(Ie)$words[i]]} )); then
+              (( i++ ))
+              (( i < CURRENT )) && [[ $words[i] != -* ]] && (( i++ ))
+            elif (( ${eval_multi_value_opts[(Ie)$words[i]]} )); then
+              (( i++ ))
+              while (( i < CURRENT )) && [[ $words[i] != -* ]]; do
+                (( i++ ))
+              done
+            elif [[ $words[i] == -* ]]; then
+              (( i++ ))
+            else
+              break
+            fi
+          done
+          if (( i < CURRENT )) && [[ $words[i] == init ]]; then
+            shift $(( i - 1 )) words
+            (( CURRENT -= i - 1 ))
+            _arguments \
+              '--bare[Write a blank template (prompt.md + graders/criteria.md) instead of running the interview]' \
+              '--eval-dir[Directory (below the current directory) to write cases into (default: experimental.evals from the plugin.json in the current directory, else evals/)]:dir:_files -/' \
+              '(-h --help)'{-h,--help}'[Display help]' \
+              '(-i --interactive)'{-i,--interactive}'[Run the authoring interview (already the default in a terminal); requires an interactive terminal]' \
+              '::name:'
+          else
+            # The action is in braces because `_arguments` passes compadd
+            # options to a bare action, and `_alternative` rejects them.
             _arguments -s \
               '--ablation[Run a no-plugin baseline arm and report the score delta (none or with-without; default: with-without whenever a plugin resolves by name or target path, none otherwise; with-only graders like tool_used: Skill act as a plugin-fired indicator, not part of the score)]:mode:(none with-without)' \
               '--allow-real-servers[With --mocks record: also start the plugin'\''s real MCP server processes for servers with no mock (runs as you, outside the OS sandbox that confines shell tools; use only on plugins you trust)]' \
@@ -650,31 +692,16 @@ case $subcmd in
               '--threshold[Exit 1 if any case score is below this threshold (default: 1.0)]:threshold:' \
               '--trust-plugin[Assert that you trust this plugin'\''s code and eval suite, and skip the first-run trust prompt (for CI; does not imply --scaffold, --allow-tools, or --mocks off)]' \
               '--verbose[Log per-message trace events to the debug log (use --debug-file to read them)]' \
-              ':command-or-target:(init)'
-          else
-            case $words[$sub2] in
-              init)
-                _arguments \
-                  '--bare[Write a blank template (prompt.md + graders/criteria.md) instead of running the interview]' \
-                  '--eval-dir[Directory (below the current directory) to write cases into (default: experimental.evals from the plugin.json in the current directory, else evals/)]:dir:_files -/' \
-                  '(-h --help)'{-h,--help}'[Display help]' \
-                  '(-i --interactive)'{-i,--interactive}'[Run the authoring interview (already the default in a terminal); requires an interactive terminal]' \
-                  '::name:'
-                ;;
-              *)
-                _arguments \
-                  '(-h --help)'{-h,--help}'[Display help]' \
-                  '::target:_files'
-                ;;
-            esac
+              '::command-or-target:{_alternative "commands:command:(init)" "files:target:_files"}'
           fi
           ;;
         marketplace)
-          local sub2=$(( subcmd_pos + 2 ))
-          if (( CURRENT == sub2 )); then
+          if (( CURRENT == 2 )); then
             _describe 'marketplace command' marketplace_commands
           else
-            case $words[$sub2] in
+            subcmd3=$words[2]
+            shift words; (( CURRENT-- ))
+            case $subcmd3 in
               add)
                 _arguments \
                   '--claudeai[Add the marketplace of this name that claude.ai hosts for you, by its listed name or its local name]' \
@@ -783,7 +810,7 @@ case $subcmd in
     return
     ;;
   project)
-    if (( CURRENT == sub1 )); then
+    if (( CURRENT == 2 )); then
       local -a project_commands
       project_commands=(
         'help:Display help for command'
@@ -791,7 +818,9 @@ case $subcmd in
       )
       _describe 'project command' project_commands
     else
-      case $words[$sub1] in
+      subcmd2=$words[2]
+      shift words; (( CURRENT-- ))
+      case $subcmd2 in
         purge)
           _arguments \
             '--all[Purge state for every project (mutually exclusive with \[path\])]' \
@@ -815,12 +844,11 @@ case $subcmd in
       '(-h --help)'{-h,--help}'[Display help for command]' \
       '(-i --interactive)'{-i,--interactive}'[Prompt for each item before deleting]' \
       '(-y --yes)'{-y,--yes}'[Skip confirmation prompt]' \
-      ':cmd:' \
       '::path:_files -/'
     return
     ;;
   daemon)
-    if (( CURRENT == sub1 )); then
+    if (( CURRENT == 2 )); then
       local -a daemon_commands
       daemon_commands=(
         'run:Run the supervisor in the foreground (default when piped)'
@@ -831,7 +859,9 @@ case $subcmd in
       )
       _describe 'daemon command' daemon_commands
     else
-      case $words[$sub1] in
+      subcmd2=$words[2]
+      shift words; (( CURRENT-- ))
+      case $subcmd2 in
         run)
           _arguments \
             '(-h --help)'{-h,--help}'[Display help]' \
@@ -861,7 +891,7 @@ case $subcmd in
     return
     ;;
   auto-mode)
-    if (( CURRENT == sub1 )); then
+    if (( CURRENT == 2 )); then
       local -a auto_mode_commands
       auto_mode_commands=(
         'config:Print the effective auto mode config as JSON: your settings where set, defaults otherwise'
@@ -872,7 +902,9 @@ case $subcmd in
       )
       _describe 'auto-mode command' auto_mode_commands
     else
-      case $words[$sub1] in
+      subcmd2=$words[2]
+      shift words; (( CURRENT-- ))
+      case $subcmd2 in
         critique)
           _arguments \
             '(-h --help)'{-h,--help}'[Display help]' \
@@ -903,7 +935,6 @@ case $subcmd in
     _arguments \
       '--force[Force installation even if already installed]' \
       '(-h --help)'{-h,--help}'[Display help]' \
-      ':cmd:' \
       ':target:(stable latest)'
     return
     ;;
@@ -912,7 +943,6 @@ case $subcmd in
       '--dry-run[Show what would be imported without writing anything]' \
       '(-h --help)'{-h,--help}'[Display help]' \
       '--yes[Skip the interactive picker. On headless surfaces, pass --yes=<digest> from the /import preview]' \
-      ':cmd:' \
       '::source:(codex gemini cursor)'
     return
     ;;
@@ -931,15 +961,13 @@ case $subcmd in
       '--sandbox[Enable sandboxing for filesystem and network isolation]' \
       '(--session-id -c --continue)--session-id[Resume a specific Remote Control session by ID (cannot be used with spawn flags or --continue)]:id:' \
       '--spawn[Spawn mode for on-demand sessions (default: same-dir)]:mode:(same-dir worktree session)' \
-      '(-v --verbose)'{-v,--verbose}'[Show detailed connection and session logs]' \
-      ':cmd:'
+      '(-v --verbose)'{-v,--verbose}'[Show detailed connection and session logs]'
     return
     ;;
   gateway)
     _arguments \
       '--config[Path to gateway YAML config]:path:_files' \
-      '(-h --help)'{-h,--help}'[Display help]' \
-      ':cmd:'
+      '(-h --help)'{-h,--help}'[Display help]'
     return
     ;;
   ultrareview)
@@ -949,14 +977,12 @@ case $subcmd in
       '(--no-post --post)--no-post[Do not post the findings to the PR (the default; accepted for parity with the /ultrareview and /code-review ultra flags)]' \
       '(--no-post --post)--post[Post the finished review'\''s findings to the PR as you (PR targets only; one plain comment, not a review)]' \
       '--timeout[Maximum minutes to wait for the review to finish (default: 45)]:minutes:' \
-      ':cmd:' \
       '::target:'
     return
     ;;
   setup-token|doctor|update|upgrade)
     _arguments \
-      '(-h --help)'{-h,--help}'[Display help]' \
-      ':cmd:'
+      '(-h --help)'{-h,--help}'[Display help]'
     return
     ;;
 esac
@@ -994,7 +1020,7 @@ _arguments -s \
   '--disable-slash-commands[Disable all skills]' \
   '*--disallowedTools[Comma or space-separated list of tool names to deny (e.g. "Bash(git:*) Edit")]:tools:' \
   '*--disallowed-tools[Comma or space-separated list of tool names to deny (e.g. "Bash(git:*) Edit")]:tools:' \
-  '--effort[Effort level for the current session (low, medium, high, xhigh, max)]:level:(low medium high xhigh max)' \
+  '--effort[Effort level for the current session (low, medium, high, xhigh, max)]:level:(low medium high xhigh max ultracode)' \
   '--environment[Create a new cloud session that runs on the given self-hosted environment (ccpool_...)]:environment_id:' \
   '--exclude-dynamic-system-prompt-sections[Move per-machine sections (cwd, env info, memory paths, git status) from the system prompt into the first user message. Improves cross-user prompt-cache reuse. Only applies with the default system prompt (ignored with --system-prompt)]' \
   '--exec[Run a shell command as a background job instead of a Claude session (requires --bg)]:command:' \
@@ -1035,7 +1061,7 @@ _arguments -s \
   '(-r --resume)'{-r,--resume}'[Resume a conversation by session ID, or open interactive picker with optional search term]:session:_claude_session_ids' \
   '--safe-mode[Start with all customizations disabled — useful for troubleshooting a broken configuration. Admin-managed settings still apply. Sets CLAUDE_CODE_SAFE_MODE=1]' \
   '--session-id[Use a specific session ID for the conversation (must be a valid UUID)]:uuid:' \
-  '--setting-sources[Comma-separated list of setting sources to load (user, project, local)]:sources:' \
+  '--setting-sources[Comma-separated list of setting sources to load (user, project, local)]:sources:_values -s , source user project local' \
   '--settings[Path to a settings JSON file or a JSON string to load additional settings from]:file:_files' \
   '--strict-mcp-config[Only use MCP servers from --mcp-config, ignoring all other MCP configurations]' \
   '--system-prompt[System prompt to use for the session]:prompt:' \
@@ -1050,3 +1076,4 @@ _arguments -s \
   '(-w --worktree)'{-w,--worktree}'[Create a new git worktree for this session (optionally specify a name)]::name:' \
   "1:command:($known_commands)" \
   '*:prompt:'
+
