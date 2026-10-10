@@ -1,12 +1,11 @@
 #!/bin/bash
 #
 # Regression test for `claude agents` completion. The `agents` subcommand
-# accepts only flags (no positional args), so an earlier `_arguments` block
-# omitted the `:cmd:` placeholder that absorbs the subcommand word. When
-# `_arguments` is invoked here as `claude`'s top-level completer, positionals
-# are counted from $words[2] — without `:cmd:` the `agents` word fell through
-# unmatched and `claude agents <TAB>` / `claude agents --<TAB>` produced no
-# completions at all.
+# accepts only flags (no positional args). `_arguments` counts positionals
+# from $words[2], so when it was handed the whole command line the `agents`
+# word itself was an unmatched positional and `claude agents <TAB>` /
+# `claude agents --<TAB>` produced no completions at all. `_claude` now
+# trims $words so the subcommand is $words[1].
 
 set -e
 TEST_NAME=test-agents-subcommand

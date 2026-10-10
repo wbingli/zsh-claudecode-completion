@@ -136,7 +136,11 @@ assert_no_completion_errors() {
     fi
 }
 
+# Both helpers accept an optional leading `--`, as in
+# `assert_contains -- "--flag" "$output"`. Without the shift the needle
+# would be the `--` itself and the check would compare the wrong strings.
 assert_contains() {
+    [[ "$1" == "--" ]] && shift
     local needle="$1" output="$2" desc="${3:-output}"
     if ! grep -q -- "$needle" <<< "$output"; then
         printf '%s\n' "$output" >&2
@@ -145,6 +149,7 @@ assert_contains() {
 }
 
 assert_not_contains() {
+    [[ "$1" == "--" ]] && shift
     local needle="$1" output="$2" desc="${3:-output}"
     if grep -q -- "$needle" <<< "$output"; then
         printf '%s\n' "$output" >&2

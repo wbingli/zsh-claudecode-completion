@@ -58,7 +58,8 @@ For each hidden command:
 2. Also check the official docs at `https://code.claude.com/docs/en/<command-name>.md` for any flags not shown in `--help` (e.g., `remote-control` has `--sandbox`, `--no-sandbox`, `--verbose` documented but not in `--help`)
 3. Include the command in both the `commands` array and the `case` statement, same as visible commands
 4. Include it in the `'1:command:(...)'` list at the bottom
-5. Also add it to the `known_commands` array used by the subcommand-position scanner; otherwise a hidden parent like `daemon` won't be detected and its subcommands (e.g. `daemon stop`) will route to the wrong top-level case
+5. Also add it to the `known_commands` array used by the subcommand-position scanner; otherwise a hidden parent like `daemon` won't be detected and its subcommands (e.g. `daemon stop`) will route to the wrong top-level case. Every name in `known_commands` needs a `case` branch
+6. Do not add a `':cmd:'` placeholder to its `_arguments` call (see Required Structure below)
 
 **Maintaining this list**: When you discover new hidden commands (e.g., a command referenced in docs or changelogs but missing from `--help`), add them to this table so future updates preserve them.
 
@@ -278,7 +279,12 @@ These patterns cause duplicate completions and must NOT be used:
 
 ### Required Structure
 The completion script must use this flat structure:
-- `case $words[2] in` for subcommand detection (not `$words[1]` which is always "claude")
+- A scan over `$words` for the first known command **before the cursor** (`i < CURRENT`). The word being completed is not a command yet, and words after the cursor must not change what is offered
+- `$words` trimmed so the command is `$words[1]`: `shift $(( subcmd_pos - 1 )) words; (( CURRENT -= subcmd_pos - 1 ))`. `_arguments` counts positionals from `$words[2]`, so after the trim a block lists only its own arguments
+- One more `shift words; (( CURRENT-- ))` at each nested level, right before that level's `case` (see `mcp`, `plugin`, `plugin marketplace`)
+- **No `':cmd:'` placeholder specs.** They were needed when the whole command line was passed to `_arguments`; with the trimmed `$words` they shift every positional by one
+- `plugin eval`: a single `_arguments` call holds all eval flags, so they complete before and after the target. `init` is the command when it is the first word before the cursor that is neither an option nor an option's value, because `plugin eval --verbose init --bare` is valid and `plugin eval --case init` is not an `init` call. The `eval_value_opts` list names the eval options that take a value; add any new one to it
+- An action that calls `_alternative` goes in braces: `'::target:{_alternative ...}'`. `_arguments` passes compadd options to a bare action and `_alternative` prints `bad option: -J`
 - Early `return` after each case block to prevent fallthrough
 - Simple `_arguments -s` (not `-C`) for main flags
 - Simple command list: `'1:command:(cmd1 cmd2 cmd3)'`

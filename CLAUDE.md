@@ -34,7 +34,7 @@ To test changes manually:
 
 Automated tests live under `scripts/tests/` and are driven by
 `scripts/verify-completions.sh`. Each `test-*.sh` covers one feature
-(syntax, global flags, mcp subcommand, `_claude_session_ids`). The runner
+(syntax, global flags, mcp subcommand, nested positionals, `_claude_session_ids`). The runner
 also accepts a single test name: `./scripts/verify-completions.sh
 test-session-ids`. Requires `zsh`, `expect`, and `jq`.
 
@@ -42,6 +42,7 @@ test-session-ids`. Requires `zsh`, `expect`, and `jq`.
 
 - Avoid nested helper functions in `_claude`—they caused duplicate completions (see commit ff451fe)
 - Use flat structure with explicit `return` statements after each case block
+- `$words` is trimmed to start at the subcommand, and again at each nested level, so positional specs count from the first real argument. Don't use `':cmd:'` placeholders
 - Plugin copies `_claude` to cache directory instead of adding to fpath—prevents duplicates when plugin dir is symlinked
 
 ## Git Notes

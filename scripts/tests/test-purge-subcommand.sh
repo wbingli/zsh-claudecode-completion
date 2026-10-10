@@ -43,11 +43,9 @@ output=$(run_completion "$home" "$home/work" 'claude plugin \t')
 assert_no_completion_errors "$output"
 assert_contains "Run a mod" "$output" "plugin subcommand list"
 
-# `claude plugin test <TAB>` should also offer a directory, but positionals
-# of nested subcommands do not complete yet (issue #230), so only the
-# absence of errors is checked here.
-log "case 6: 'claude plugin test <TAB>' completes without error"
+log "case 6: 'claude plugin test <TAB>' completes a directory path"
 output=$(run_completion "$home" "$home/work" 'claude plugin test \t')
 assert_no_completion_errors "$output"
+assert_contains "some-project" "$output" "plugin test directory completion"
 
 pass "purge and plugin test completion OK"
