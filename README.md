@@ -72,6 +72,7 @@ claude <TAB>              # Show commands and options
 claude mcp <TAB>          # Show MCP subcommands
 claude --model <TAB>      # Show model names
 claude --output-format <TAB>  # Show output formats
+claude --setting-sources user,<TAB>  # Show the remaining setting sources
 claude --resume <TAB>     # Show recent sessions (newest first)
 ```
 

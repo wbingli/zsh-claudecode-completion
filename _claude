@@ -446,7 +446,7 @@ case $subcmd in
       '--permission-mode[Default permission mode for sessions dispatched from agent view]:mode:(acceptEdits auto bypassPermissions manual dontAsk plan)' \
       '*--plugin-dir[Load plugins from specified directory for the agent view and dispatched sessions (repeatable)]:path:_files -/' \
       '--restricted[Start dispatched sessions in restricted mode]' \
-      '--setting-sources[Comma-separated list of setting sources to load (user, project, local)]:sources:' \
+      '--setting-sources[Comma-separated list of setting sources to load (user, project, local)]:sources:_values -s , source user project local' \
       '--settings[Settings file or JSON string to apply to the agent view and dispatched sessions]:file-or-json:_files' \
       '--strict-mcp-config[Only use MCP servers from --mcp-config in dispatched sessions]'
     return
@@ -1056,7 +1056,7 @@ _arguments -s \
   '(-r --resume)'{-r,--resume}'[Resume a conversation by session ID, or open interactive picker with optional search term]:session:_claude_session_ids' \
   '--safe-mode[Start with all customizations disabled — useful for troubleshooting a broken configuration. Admin-managed settings still apply. Sets CLAUDE_CODE_SAFE_MODE=1]' \
   '--session-id[Use a specific session ID for the conversation (must be a valid UUID)]:uuid:' \
-  '--setting-sources[Comma-separated list of setting sources to load (user, project, local)]:sources:' \
+  '--setting-sources[Comma-separated list of setting sources to load (user, project, local)]:sources:_values -s , source user project local' \
   '--settings[Path to a settings JSON file or a JSON string to load additional settings from]:file:_files' \
   '--strict-mcp-config[Only use MCP servers from --mcp-config, ignoring all other MCP configurations]' \
   '--system-prompt[System prompt to use for the session]:prompt:' \

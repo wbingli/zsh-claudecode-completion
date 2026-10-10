@@ -120,6 +120,7 @@ Key patterns to follow:
 - Repeatable flags: `'*--flag[Description]:value:_files'`
 - File completion: `:file:_files`
 - Directory completion: `:directory:_files -/`
+- Comma-separated value lists: `:sources:_values -s , source user project local`. `_values -s ,` leaves out values already on the line and joins with a comma. `--setting-sources` uses this (top level and `agents`); keep it when regenerating, and cover it with `scripts/tests/test-setting-sources.sh`
 
 ## Step 4: Update Version File
 
