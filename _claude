@@ -315,8 +315,12 @@ _claude_background_session_ids() {
 local curcontext="$curcontext" state line
 typeset -A opt_args
 
-local -a commands
-commands=(
+# Top-level commands. This is the one list to maintain: known_commands and the
+# '1:command:(...)' spec below are derived from it. It must not be named
+# `commands`: that is zsh's special hash of executables, and a local of that
+# name hides it from every completer called from here.
+local -a claude_commands
+claude_commands=(
   'agents:Open agent view (manage background sessions)'
   'attach:Open a background session in this terminal'
   'auth:Manage authentication'
@@ -406,7 +410,8 @@ marketplace_commands=(
 # subcommand yet, and words after it must not change what is offered here.
 local subcmd_pos=0
 local subcmd="" subcmd2="" subcmd3=""
-local -a known_commands=(agents attach auth auto-mode daemon doctor gateway import install kill logs mcp plugin plugins project purge remote-control respawn rm setup-token stop ultrareview update upgrade)
+# Every name in claude_commands must have a branch in the case statement below.
+local -a known_commands=(${claude_commands%%:*})
 local i
 for (( i=2; i < CURRENT; i++ )); do
   # Skip flags and their values
@@ -1069,5 +1074,6 @@ _arguments -s \
   '--verbose[Override verbose mode setting from config]' \
   '(-v --version)'{-v,--version}'[Output the version number]' \
   '(-w --worktree)'{-w,--worktree}'[Create a new git worktree for this session (optionally specify a name)]::name:' \
-  '1:command:(agents attach auth auto-mode daemon doctor gateway import install kill logs mcp plugin plugins project purge remote-control respawn rm setup-token stop ultrareview update upgrade)' \
+  "1:command:($known_commands)" \
   '*:prompt:'
+

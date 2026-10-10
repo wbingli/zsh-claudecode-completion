@@ -56,9 +56,9 @@ Some Claude CLI commands are **hidden** — they work but are not listed in `cla
 For each hidden command:
 1. Run its `--help` to get flags and description
 2. Also check the official docs at `https://code.claude.com/docs/en/<command-name>.md` for any flags not shown in `--help` (e.g., `remote-control` has `--sandbox`, `--no-sandbox`, `--verbose` documented but not in `--help`)
-3. Include the command in both the `commands` array and the `case` statement, same as visible commands
-4. Include it in the `'1:command:(...)'` list at the bottom
-5. Also add it to the `known_commands` array used by the subcommand-position scanner; otherwise a hidden parent like `daemon` won't be detected and its subcommands (e.g. `daemon stop`) will route to the wrong top-level case. Every name in `known_commands` needs a `case` branch
+3. Add a `'name:description'` entry to the `claude_commands` array and a branch to the `case` statement, same as visible commands. Do not rename the array to `commands`: that is zsh's special hash of executables, and a local of that name hides it from every completer `_claude` calls
+4. Do not edit `known_commands` (used by the subcommand-position scanner) or the `'1:command:(...)'` spec at the bottom by hand; both are derived from `claude_commands`
+5. Every entry in `claude_commands` needs a `case` branch: the scanner detects each listed name, and a detected command without a branch falls through to the top-level flags and command list
 6. Do not add a `':cmd:'` placeholder to its `_arguments` call (see Required Structure below)
 
 **Maintaining this list**: When you discover new hidden commands (e.g., a command referenced in docs or changelogs but missing from `--help`), add them to this table so future updates preserve them.
@@ -296,4 +296,5 @@ The completion script must use this flat structure:
 - An action that calls `_alternative` goes in braces: `'::target:{_alternative ...}'`. `_arguments` passes compadd options to a bare action and `_alternative` prints `bad option: -J`
 - Early `return` after each case block to prevent fallthrough
 - Simple `_arguments -s` (not `-C`) for main flags
-- Simple command list: `'1:command:(cmd1 cmd2 cmd3)'`
+- Simple command list: `"1:command:($known_commands)"`, derived from the `claude_commands` array (do not write the names out again as a literal list)
+
