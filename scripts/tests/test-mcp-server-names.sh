@@ -117,4 +117,16 @@ rm -f "$home/.claude.json" "$proj/.mcp.json"
 output=$(run_completion "$home" "$proj" 'claude mcp get \t')
 assert_no_completion_errors "$output"
 
+# `.mcp.json` comes with the repository. A newline in a value must not
+# become a row of its own, which would offer a server that does not exist.
+log "case 11: a newline in a server's command does not add an entry"
+mkdir -p "$home/nlproj"
+printf '%s\n' '{"mcpServers":{"nl-srv":{"command":"run\nINJECTEDROW"}}}' > "$home/nlproj/.mcp.json"
+output=$(run_completion "$home" "$home/nlproj" 'claude mcp get \t')
+assert_no_completion_errors "$output"
+assert_contains "nl-srv" "$output" "mcp get list with a newline in a command"
+output=$(run_completion "$home" "$home/nlproj" 'claude mcp get INJECTED\t')
+assert_no_completion_errors "$output"
+assert_not_contains "get INJECTEDROW" "$output" "completion of a word taken from a command"
+
 pass "MCP server name completion OK"
