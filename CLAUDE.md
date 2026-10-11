@@ -40,9 +40,10 @@ test-session-ids`. Requires `zsh`, `expect`, and `jq`.
 
 ## Known Patterns
 
-- Avoid nested helper functions in `_claude`—they caused duplicate completions (see commit ff451fe). The exception is leaf value completers (`_claude_session_ids`, `_claude_models`, ...): they only add matches, are used as `_arguments` actions, and must pass `"$@"` on to `_describe`/`compadd`
+- Avoid nested helper functions in `_claude`—they caused duplicate completions (see commit ff451fe). The exception is leaf value completers (`_claude_session_ids`, `_claude_models`, `_claude_agents`, `_claude_mcp_servers`, `_claude_installed_plugins`, ...): they only add matches, are used as `_arguments` actions, and must pass `"$@"` on to `_describe`/`compadd`
 - Use flat structure with explicit `return` statements after each case block
 - `$words` is trimmed to start at the subcommand, and again at each nested level, so positional specs count from the first real argument. Don't use `':cmd:'` placeholders
+- Value completers read Claude's own configuration and agent/plugin files, honor `CLAUDE_CONFIG_DIR`, and never call the `claude` binary or the network
 - Plugin copies `_claude` to cache directory instead of adding to fpath—prevents duplicates when plugin dir is symlinked
 
 ## Git Notes
