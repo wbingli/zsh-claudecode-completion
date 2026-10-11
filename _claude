@@ -449,14 +449,16 @@ _claude_mcp_servers() {
   local d cfg="${CLAUDE_CONFIG_DIR:-$HOME}/.claude.json"
   # One `name:scope - type target` row per server. A `:` in the name is
   # escaped for _describe. The query string of a URL is dropped, since it
-  # can hold a token.
+  # can hold a token. Control characters are taken out of the description:
+  # `.mcp.json` comes with the repository, and a newline in it would
+  # otherwise turn into an extra row.
   local rows='def rows($scope):
     objects | to_entries[]
     | select((.value | type) == "object")
     | select(.key | test("[[:cntrl:]]") | not)
     | (.value.url // .value.command // "" | tostring | split("?")[0] // "") as $target
     | (.value.type // (if .value.url then "http" else "stdio" end) | tostring) as $type
-    | "\(.key | gsub(":"; "\\:")):\($scope) - \($type) \($target)";'
+    | "\(.key | gsub(":"; "\\:")):\("\($scope) - \($type) \($target)" | gsub("[[:cntrl:]]"; " ") | .[0:100])";'
 
   _claude_project_dirs
   if [[ -r $cfg ]]; then
@@ -478,7 +480,8 @@ _claude_mcp_servers() {
 
 # The three helpers below complete plugin and marketplace values from the
 # files Claude keeps under `$CLAUDE_CONFIG_DIR/plugins` (`~/.claude/plugins`
-# by default). They need `jq` 1.6 or newer, never run `claude` and never use the
+# by default), or under `$CLAUDE_CODE_PLUGIN_CACHE_DIR` when that is set,
+# as Claude does. They need `jq` 1.6 or newer, never run `claude` and never use the
 # network. A missing or malformed file, or a malformed entry in one,
 # leaves the remaining values in place.
 
@@ -490,7 +493,7 @@ _claude_mcp_servers() {
 # description.
 _claude_installed_plugins() {
   local -a reply plugins
-  local file="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/plugins/installed_plugins.json"
+  local file="${CLAUDE_CODE_PLUGIN_CACHE_DIR:-${CLAUDE_CONFIG_DIR:-$HOME/.claude}/plugins}/installed_plugins.json"
   [[ -r $file ]] || return 1
   _claude_project_dirs
   plugins=("${(@f)$(command jq -r '
@@ -501,7 +504,7 @@ _claude_installed_plugins() {
         | select((.projectPath | type) != "string" or (.projectPath as $p | $dirs | index($p) != null))
        ] | first) as $install
     | select($install != null)
-    | "\(.key | gsub(":"; "\\:")):\($install.version // "unknown" | tostring) (\($install.scope // "user" | tostring) scope)"
+    | "\(.key | gsub(":"; "\\:")):\("\($install.version // "unknown" | tostring) (\($install.scope // "user" | tostring) scope)" | gsub("[[:cntrl:]]"; " ") | .[0:80])"
   ' "$file" --args $reply 2>/dev/null)}")
   plugins=(${plugins:#})
 
@@ -511,7 +514,7 @@ _claude_installed_plugins() {
 # Marketplace names, from known_marketplaces.json.
 _claude_marketplaces() {
   local -a marketplaces
-  local file="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/plugins/known_marketplaces.json"
+  local file="${CLAUDE_CODE_PLUGIN_CACHE_DIR:-${CLAUDE_CONFIG_DIR:-$HOME/.claude}/plugins}/known_marketplaces.json"
   [[ -r $file ]] || return 1
   marketplaces=("${(@f)$(command jq -r '
     objects | to_entries[]
@@ -534,7 +537,7 @@ _claude_marketplaces() {
 _claude_marketplace_plugins() {
   local -a manifests rawfiles plugins
   local manifest
-  manifests=("${CLAUDE_CONFIG_DIR:-$HOME/.claude}"/plugins/marketplaces/*/.claude-plugin/marketplace.json(N-.))
+  manifests=("${CLAUDE_CODE_PLUGIN_CACHE_DIR:-${CLAUDE_CONFIG_DIR:-$HOME/.claude}/plugins}"/marketplaces/*/.claude-plugin/marketplace.json(N-.))
   (( $#manifests )) || return 1
   for manifest in $manifests; do
     rawfiles+=(--rawfile ${manifest:h:h:t} $manifest)
