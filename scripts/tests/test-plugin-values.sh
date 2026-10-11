@@ -171,6 +171,18 @@ output=$(complete 'claude plugin marketplace remove \t' "$alt_env")
 assert_no_completion_errors "$output"
 assert_contains "one-market-alt" "$output" "marketplace list with CLAUDE_CONFIG_DIR"
 
+log "case 10b: CLAUDE_CODE_PLUGIN_CACHE_DIR replaces the plugins directory"
+cache_env="set env(CLAUDE_CODE_PLUGIN_CACHE_DIR) \"$home/altconfig/plugins\""
+output=$(run_completion "$home" "$home" 'claude plugin enable \t' "$cache_env")
+assert_no_completion_errors "$output"
+assert_contains "alpha-alt@one-market" "$output" "installed list with CLAUDE_CODE_PLUGIN_CACHE_DIR"
+output=$(run_completion "$home" "$home" 'claude plugin install \t' "$cache_env")
+assert_no_completion_errors "$output"
+assert_contains "beta-alt@two-market" "$output" "installable list with CLAUDE_CODE_PLUGIN_CACHE_DIR"
+output=$(run_completion "$home" "$home" 'claude plugin marketplace remove \t' "$cache_env")
+assert_no_completion_errors "$output"
+assert_contains "one-market-alt" "$output" "marketplace list with CLAUDE_CODE_PLUGIN_CACHE_DIR"
+
 log "case 11: malformed or missing files are not an error"
 mkdir -p "$home/brokenconfig/plugins" "$home/emptyconfig"
 printf '{ "plugins": {' > "$home/brokenconfig/plugins/installed_plugins.json"
