@@ -1050,7 +1050,7 @@ case $subcmd in
             --eval-dir --judge-model --max-cost-usd --mocks --model --output-dir
             --report --runs --threshold)
           local -a eval_optional_value_opts=(--json)
-          local -a eval_multi_value_opts=(--allow-tools --tag)
+          local -a eval_multi_value_opts=(--allow-tools --disallow-tools --tag)
           i=2
           while (( i < CURRENT )); do
             if (( ${eval_value_opts[(Ie)$words[i]]} )); then
@@ -1086,6 +1086,7 @@ case $subcmd in
               '--allow-real-servers[With --mocks record: also start the plugin'\''s real MCP server processes for servers with no mock (runs as you, outside the OS sandbox that confines shell tools; use only on plugins you trust)]' \
               '*--allow-tools[Operator grant for gated tools (Bash, Write, Edit, WebFetch, mcp__*). Supports Tool(pattern:*) syntax]:tools:' \
               '--case[Filter cases by name glob]:glob:' \
+              '*--disallow-tools[Built-in tools to keep from Claude in every case, even if granted (e.g. Agent TaskStop)]:tools:' \
               '(-j --concurrency)'{-j,--concurrency}'[Run up to n agent runs at once (1-8; default 1); each is a full claude child on your own credential sharing one rate limit, results keep case order]:n:' \
               '--eval-dir[Directory name (below the plugin) that holds the eval cases; results go to <plugin>/<dir>/results/ (default: the manifest'\''s experimental.evals value, else evals/)]:dir:_files -/' \
               '(-h --help)'{-h,--help}'[Display help]' \

@@ -2,6 +2,11 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.299] - 2026-10-14
+
+### Added
+- New `--disallow-tools <tools...>` flag for `plugin eval`: Built-in tools to keep from Claude in every case, even if granted (e.g. Agent TaskStop)
+
 ## [2.1.296] - 2026-10-10
 
 No new commands, subcommands, or flags detected.
