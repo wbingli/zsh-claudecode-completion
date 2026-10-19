@@ -2,6 +2,11 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.303] - 2026-10-19
+
+### Changed
+- Verified every command, subcommand and flag against the 2.1.303 `--help` output (including the hidden commands), the model aliases and the built-in agents; no completion changes were needed
+
 ## [2.1.301] - 2026-10-16
 
 ### Changed
