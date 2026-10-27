@@ -1375,12 +1375,14 @@ case $subcmd in
         '*--git-ssh-rewrite[Rewrite https://<host>/... source URLs to git@<host>\:... (repeatable)]:host:' \
         '--health-port[Port for /healthz HTTP listener (default: 8080). 0 disables]:port:' \
         '(-h --help)'{-h,--help}'[Show this help message]' \
+        '--hold-idle-file[Do not release an idle session (--release-idle-session-min) while this file is a regular file changed in the last 180s]:path:_files' \
         '--hooks-dir[Directory of lifecycle hook scripts (checkout, command, post-session)]:path:_files -/' \
         '--host-config-snapshot[Where the startup snapshot of the host config directory is held (default: disk)]:mode:(disk memory)' \
         '--kill-session-after-min[Cap a session child'\''s wall-clock life at N min (runaway backstop)]:n:' \
         '--lock-to-account[Lock runner to a single account at registration (webhook-driven on-demand spawn)]:id:' \
         '--log-file[Tee runner logs to a file in append mode. Stdout is unchanged]:path:_files' \
         '--log-level[Log level: info or debug (default: info)]:level:(info debug)' \
+        '--max-hold-min[With --hold-idle-file: release the session anyway N min after it went idle. Default: 1440, 0 disables the hold]:n:' \
         '--post-session-hook-timeout-sec[SIGTERM budget for the post-session lifecycle hook, on every session end including runner shutdown. Default: 60]:n:' \
         '--proxy-authorization-command[Shell command whose stdout is the Proxy-Authorization header value, run afresh for each new connection to the egress proxy]:shell command:' \
         '--proxy-authorization-file[Same as --proxy-authorization-command, but the header value is read from a file]:path:_files' \

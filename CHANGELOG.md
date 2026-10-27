@@ -2,6 +2,11 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.311] - 2026-10-27
+
+### Added
+- New `--hold-idle-file` and `--max-hold-min` flags for `self-hosted-runner`: keep an idle session from being released while a host-maintained file stays fresh
+
 ## [2.1.309] - 2026-10-23
 
 ### Added
