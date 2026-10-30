@@ -737,7 +737,7 @@ claude_commands=(
   'agents:Open agent view (manage background sessions)'
   'attach:Open a background session in this terminal'
   'auth:Manage authentication'
-  'auto-mode:Inspect auto mode classifier configuration'
+  'auto-mode:Inspect or reset auto mode configuration'
   'daemon:Manage the background session supervisor'
   'doctor:Check the health of your Claude Code installation'
   'gateway:Run the enterprise auth/telemetry gateway'

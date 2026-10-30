@@ -2,6 +2,11 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.314] - 2026-10-30
+
+### Changed
+- Updated description for `auto-mode` ("Inspect or reset auto mode configuration")
+
 ## [2.1.312] - 2026-10-28
 
 ### Added
