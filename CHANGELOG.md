@@ -2,6 +2,12 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.316] - 2026-10-31
+
+### Changed
+- Updated descriptions for `mcp get` and `mcp list`: unapproved `.mcp.json` servers are shown as pending approval and not connected to
+- Verified every other command, subcommand and flag against the 2.1.316 `--help` output (including the hidden commands); no other completion changes were needed
+
 ## [2.1.314] - 2026-10-30
 
 ### Changed
