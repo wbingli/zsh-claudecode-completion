@@ -11,20 +11,20 @@ _claude_session_ids() {
   # `💩` becomes `--` while `ü`, ` `, `_`, `/` and `.` each become `-`. Zsh
   # substitutes per character, hence the separate first pass for the astral
   # range. Under a non-UTF-8 locale both passes yield extra hyphens, no
-  # folder matches, and the originalPath fallback below applies.
-  local mangled="${PWD//[$'\U00010000'-$'\U0010FFFF']/--}"
+  # folder matches, and the originalPath fallback below applies. Claude
+  # mangles the resolved path, so symlinks in $PWD are resolved first.
+  local mangled="${${PWD:A}//[$'\U00010000'-$'\U0010FFFF']/--}"
   mangled="${mangled//[^a-zA-Z0-9]/-}"
   local project_dir="$HOME/.claude/projects/$mangled"
 
   # Fallback: if the mangled folder isn't found (e.g. unknown future naming
-  # scheme, or the session was created from a different canonical path such
-  # as a resolved symlink), locate the project by matching the authoritative
-  # `originalPath` recorded in each sessions-index.json.
+  # scheme), locate the project by matching the authoritative `originalPath`
+  # recorded in each sessions-index.json.
   if [[ ! -d "$project_dir" ]]; then
     project_dir=""
     local f
     for f in "$HOME/.claude/projects"/*/sessions-index.json(N); do
-      if [[ "$(jq -r '.originalPath // ""' "$f" 2>/dev/null)" == "$PWD" ]]; then
+      if [[ "$(jq -r '.originalPath // ""' "$f" 2>/dev/null)" == "${PWD:A}" ]]; then
         project_dir="${f:h}"
         break
       fi
