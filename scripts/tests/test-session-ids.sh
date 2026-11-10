@@ -8,6 +8,7 @@
 #   3. The originalPath fallback matches when the mangled directory is missing.
 #   4. CLAUDE_COMPLETION_SESSION_LIMIT caps the displayed count.
 #   5. A character beyond U+FFFF mangles to two hyphens (UTF-16 code units).
+#   6. A symlink in $PWD resolves before mangling.
 #
 # The fixture path is intentionally placed under a directory whose name
 # contains a `.` so we also exercise the dot-mangling branch (commit history
@@ -240,5 +241,24 @@ JSONL
     assert_contains "aaaaaaaa" "$output" "session under the two-hyphen key"
     assert_not_contains "bbbbbbbb" "$output" "decoy under the one-hyphen key"
 fi
+
+# ---------------------------------------------------------------------------
+# Test 6: a symlink in $PWD resolves before mangling, since Claude keys the
+# project by the resolved path. No index file, so originalPath cannot rescue
+# a key built from the unresolved path.
+# ---------------------------------------------------------------------------
+rm -rf "$home/.claude"
+work_dir6="$home/real.dir/work"
+proj_dir6=$(build_fixture "$home" "$work_dir6" "matching")
+rm "$proj_dir6/sessions-index.json"
+ln -s "$home/real.dir" "$home/link.dir"
+
+log "case 6: symlinked working directory"
+# Expect's `cd` leaves $PWD unset for zsh, which then reports the resolved
+# path. Only a `cd` inside zsh keeps the symlink in $PWD.
+printf 'cd ~/link.dir/work\n' >> "$home/.zshrc"
+output=$(run_completion "$home" "$home" 'claude -r \t')
+assert_no_completion_errors "$output"
+assert_contains "bbbbbbbb" "$output" "session under the resolved path"
 
 pass "session id auto-suggestion OK"
