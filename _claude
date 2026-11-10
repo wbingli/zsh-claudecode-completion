@@ -800,6 +800,7 @@ plugin_commands=(
   'marketplace:Manage Claude Code marketplaces'
   'prune:Remove auto-installed dependencies that are no longer needed'
   'autoremove:Remove auto-installed dependencies that are no longer needed'
+  'restore-set-aside:Give a plugin id back the options and secrets set aside when a marketplace your organization declares replaced another source'
   'uninstall:Uninstall an installed plugin'
   'remove:Uninstall an installed plugin'
   'tag:Create a {name}--v{version} git tag for a plugin release, validating that plugin.json and any enclosing marketplace entry agree'
@@ -1179,6 +1180,12 @@ case $subcmd in
             '(-h --help)'{-h,--help}'[Display help]' \
             '(-s --scope)'{-s,--scope}'[Prune at scope: user, project, or local (default: user)]:scope:(user project local)' \
             '(-y --yes)'{-y,--yes}'[Skip the confirmation prompt (required when stdin or stdout is not a TTY)]'
+          ;;
+        restore-set-aside)
+          _arguments \
+            '--discard[Delete what is set aside instead of restoring it]' \
+            '(-h --help)'{-h,--help}'[Display help]' \
+            ':plugin:_claude_installed_plugins'
           ;;
         uninstall|remove)
           _arguments \
