@@ -2,6 +2,14 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.322] - 2026-11-11
+
+### Added
+- New `plugin restore-set-aside` subcommand with `--discard` flag: give a plugin id back the options and secrets set aside when an organization-declared marketplace replaced another source
+
+### Changed
+- Verified every other command, subcommand and flag against the 2.1.322 `--help` output (including the hidden commands); no other completion changes were needed
+
 ## [2.1.318] - 2026-11-04
 
 ### Changed

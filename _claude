@@ -802,6 +802,7 @@ plugin_commands=(
   'autoremove:Remove auto-installed dependencies that are no longer needed'
   'uninstall:Uninstall an installed plugin'
   'remove:Uninstall an installed plugin'
+  'restore-set-aside:Give a plugin id back the options and secrets set aside when a marketplace your organization declares replaced another source'
   'tag:Create a {name}--v{version} git tag for a plugin release, validating that plugin.json and any enclosing marketplace entry agree'
   'test:Run a mod'\''s tests'
   'update:Update a plugin to the latest version (restart required to apply)'
@@ -1014,6 +1015,12 @@ case $subcmd in
           _arguments \
             '(-h --help)'{-h,--help}'[Display help]' \
             ':name:_claude_installed_plugins'
+          ;;
+        restore-set-aside)
+          _arguments \
+            '--discard[Delete what is set aside instead of restoring it]' \
+            '(-h --help)'{-h,--help}'[Display help]' \
+            ':plugin:_claude_installed_plugins'
           ;;
         tag)
           _arguments \
