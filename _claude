@@ -1175,7 +1175,6 @@ case $subcmd in
             '(-h --help)'{-h,--help}'[Display help]' \
             '--json[Print one machine-readable result line on stdout instead of the human message (same exit codes; a marketplace-declared command is still shown and must be confirmed - pass -y when not interactive)]' \
             '--marketplace[Install <plugin> (its bare name) from the marketplace at this source: owner/repo, a git or https URL, or a path; added first if not yet added]:source:_files' \
-            '--registry[For a <package>@npm install: resolve and download from this npm registry instead of the one your npm configuration selects]:url:' \
             '(-s --scope)'{-s,--scope}'[Installation scope: user, project, or local (default: user)]:scope:(user project local)' \
             '(-y --yes)'{-y,--yes}'[Accept the displayed marketplace-declared command without the confirmation prompt - a plugin installed by running a command, or one fetched via a headersHelper command (required when stdin or stdout is not a TTY)]' \
             ':plugin:_claude_marketplace_plugins'

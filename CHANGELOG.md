@@ -2,6 +2,14 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.325] - 2026-11-14
+
+### Removed
+- Removed the `--registry` flag from `plugin install`: the 2.1.325 CLI rejects it as an unknown option
+
+### Changed
+- Verified every other command, subcommand and flag against the 2.1.325 `--help` output (including the hidden commands); no other completion changes were needed
+
 ## [2.1.322] - 2026-11-11
 
 ### Added
