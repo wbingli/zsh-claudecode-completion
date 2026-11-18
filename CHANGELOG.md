@@ -2,6 +2,14 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.327] - 2026-11-18
+
+### Added
+- New `self-hosted-runner` flags for nested model access: `--nested-model-access [bool]` (let a command a session runs start its own Claude Code through a private model socket), `--nested-model-allow <models>` (the models those calls may use) and `--nested-model-call-budget <n>` (most model calls per session)
+
+### Changed
+- Verified every other command, subcommand and flag against the 2.1.327 `--help` output (including the hidden commands); no other completion changes were needed
+
 ## [2.1.326] - 2026-11-17
 
 ### Added

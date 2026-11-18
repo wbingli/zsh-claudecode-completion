@@ -1391,6 +1391,9 @@ case $subcmd in
         '--log-file[Tee runner logs to a file in append mode. Stdout is unchanged]:path:_files' \
         '--log-level[Log level: info or debug (default: info)]:level:(info debug)' \
         '--max-hold-min[With --hold-idle-file: release the session anyway N min after it went idle. Default: 1440, 0 disables the hold]:n:' \
+        '--nested-model-access[Let a command a session runs start its own Claude Code (claude -p) through a private model socket; needs --nested-model-allow. Default: false]::bool:(true false)' \
+        '--nested-model-allow[Only models --nested-model-access forwards calls to: comma-separated model ids, an id ending in * matches a prefix (repeatable)]:models:' \
+        '--nested-model-call-budget[Most model calls --nested-model-access forwards for one session; 0 refuses every one (default: 200)]:n:' \
         '--post-session-hook-timeout-sec[SIGTERM budget for the post-session lifecycle hook, on every session end including runner shutdown. Default: 60]:n:' \
         '--proxy-authorization-command[Shell command whose stdout is the Proxy-Authorization header value, run afresh for each new connection to the egress proxy]:shell command:' \
         '--proxy-authorization-file[Same as --proxy-authorization-command, but the header value is read from a file]:path:_files' \
