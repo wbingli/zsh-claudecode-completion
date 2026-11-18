@@ -1367,6 +1367,7 @@ case $subcmd in
         '--capacity[Max concurrent sessions (default: 1)]:n:' \
         '--checkout-hook-timeout-min[Wall-clock budget for each run of the checkout lifecycle hook. Default: 30. 0 disables. Max: 10080]:n:' \
         '--client-label[Observability label sent at registration (default: hostname)]:label:' \
+        '--use-anthropic-gh[Offer the built-in gh api to sessions where no gh is installed (default on)]::bool:(true false)' \
         '--configure-git[Set global git identity to Claude <noreply@anthropic.com> and enable commit signing via Anthropic'\''s signing service, matching 1P sessions]' \
         '--confine-repo-settings[Repo-committed-settings confine guard mode: warn (default), enforce or off]:mode:(warn enforce off)' \
         '--debug-token-dir[DEBUG ONLY — writes live tokens to disk. Do not use in production]:path:_files -/' \

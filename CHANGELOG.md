@@ -2,6 +2,14 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.326] - 2026-11-17
+
+### Added
+- New `self-hosted-runner --use-anthropic-gh [bool]` flag: offer Claude Code's built-in `gh api` to sessions where no gh is installed
+
+### Changed
+- Verified every other command, subcommand and flag against the 2.1.326 `--help` output (including the hidden commands); no other completion changes were needed
+
 ## [2.1.322] - 2026-11-11
 
 ### Added
