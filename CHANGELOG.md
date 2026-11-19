@@ -2,6 +2,14 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.328] - 2026-11-19
+
+### Added
+- New `self-hosted-runner` flags: `--nested-model-access [bool]`, `--nested-model-allow <models>`, `--nested-model-call-budget <n>`, `--repository-folder <owner>/<repo>=<folder>` (repeatable)
+
+### Changed
+- Verified every other command, subcommand and flag against the 2.1.328 `--help` output (including the hidden commands); no other completion changes were needed
+
 ## [2.1.326] - 2026-11-17
 
 ### Added

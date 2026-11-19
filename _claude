@@ -2,7 +2,7 @@
 
 # Zsh completion script for Claude Code CLI
 # https://github.com/anthropics/claude-code
-# Auto-generated for Claude v2.1.296
+# Auto-generated for Claude v2.1.328
 
 _claude_session_ids() {
   # Claude stores each project under ~/.claude/projects/ with a mangled
@@ -1391,12 +1391,16 @@ case $subcmd in
         '--log-file[Tee runner logs to a file in append mode. Stdout is unchanged]:path:_files' \
         '--log-level[Log level: info or debug (default: info)]:level:(info debug)' \
         '--max-hold-min[With --hold-idle-file: release the session anyway N min after it went idle. Default: 1440, 0 disables the hold]:n:' \
+        '--nested-model-access[Let a command a session runs start its own Claude Code (claude -p) that can use the model through a private socket. Needs --nested-model-allow. Default: false]::bool:(true false)' \
+        '--nested-model-allow[The only models that --nested-model-access forwards calls to: comma-separated model ids, a trailing * matches a prefix (repeatable)]:models:' \
+        '--nested-model-call-budget[Most model calls --nested-model-access forwards for one session (default: 200; 0 refuses every one)]:n:' \
         '--post-session-hook-timeout-sec[SIGTERM budget for the post-session lifecycle hook, on every session end including runner shutdown. Default: 60]:n:' \
         '--proxy-authorization-command[Shell command whose stdout is the Proxy-Authorization header value, run afresh for each new connection to the egress proxy]:shell command:' \
         '--proxy-authorization-file[Same as --proxy-authorization-command, but the header value is read from a file]:path:_files' \
         '--push-outcome-on-release[On a runner-initiated non-completed session end, push every tracked outcome branch to origin before deleting it]' \
         '--release-idle-session-min[Release a session slot after N min of no user input]:n:' \
         '--remove-session-state[Remove a session'\''s per-session state under <base-dir>/_sessions/ when it ends on this runner. Default: false]::bool:(true false)' \
+        '*--repository-folder[Folder sessions use for a repository in place of <owner>/<repo> under --base-dir (repeatable; <owner>/*=<folder>/* for each repo of an owner)]:owner/repo=folder:' \
         '--retire-at[Retire the runner at the given wall-clock time (absolute Unix timestamp, in seconds)]:epoch-seconds:' \
         '--server-auto-mode-lists[Which of the server'\''s auto mode classifier lists a session may receive in its launcher settings: all, no-allow (default) or none]:mode:(all no-allow none)' \
         '--session-stop-grace-sec[How long to wait for the Claude process to exit cleanly after a session ends, before force-killing it. Default: 5]:n:' \
