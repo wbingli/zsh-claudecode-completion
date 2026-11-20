@@ -1373,6 +1373,10 @@ case $subcmd in
         '--debug-token-dir[DEBUG ONLY — writes live tokens to disk. Do not use in production]:path:_files -/' \
         '--defer-shutdown-max-min[On the first SIGTERM/SIGINT, stop taking new work and finish shutting down M minutes later instead of draining]:m:' \
         '--diff-finds-nested-repository[Let the web session'\''s Changes pane show the changes in a repository cloned into a sub-folder of a session'\''s working folder. Requires --capacity 1. Default: false]::bool:(true false)' \
+        '--nested-model-access[Let a command a session runs start a Claude Code of its own that can use the model. Needs --nested-model-allow. Default: false]::bool:(true false)' \
+        '--nested-model-call-budget[Most model calls --nested-model-access forwards for one session (default: 200)]:n:' \
+        '*--nested-model-allow[The only models --nested-model-access forwards calls to: comma-separated model ids, a trailing * matches a prefix (repeatable)]:models:' \
+        '*--repository-folder[Folder sessions use for a repository, <owner>/<repo>=<folder> (repeatable)]:mapping:' \
         '--drain-grace-sec[Keep the runner warm and re-poll the locked account'\''s queue for that many seconds before exiting (default: 0)]:n:' \
         '--drain-marker-file[Marker file a host writes to announce a graceful drain before sending SIGTERM (telemetry only)]:path:_files' \
         '--drain-wait-sec[On SIGTERM/SIGINT, wait up to N seconds for each session'\''s in-flight turn and running background tasks to finish]:n:' \
