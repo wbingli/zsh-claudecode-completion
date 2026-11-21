@@ -1404,6 +1404,7 @@ case $subcmd in
         '--retire-at[Retire the runner at the given wall-clock time (absolute Unix timestamp, in seconds)]:epoch-seconds:' \
         '--server-auto-mode-lists[Which of the server'\''s auto mode classifier lists a session may receive in its launcher settings: all, no-allow (default) or none]:mode:(all no-allow none)' \
         '--session-stop-grace-sec[How long to wait for the Claude process to exit cleanly after a session ends, before force-killing it. Default: 5]:n:' \
+        '*--start-dir[Have Claude start its work in this folder of that repository, <owner>/<repo>=<folder>, for example acme/web=services/api (repeatable)]:mapping:' \
         '--startup-timeout-min[Release a session slot if the child has not finished starting up N min after spawn. Default: 15. 0 disables]:n:' \
         '--trust-workspace[Seed persisted trust for each session'\''s repo paths so repo-level .claude/settings.json grants are honored by the child. Default: true]::bool:(true false)' \
         '--use-anthropic-git-proxy[Opt this runner into Anthropic-managed git. WARNING: deletes and replaces the HOME-level git config of the account running the runner]'

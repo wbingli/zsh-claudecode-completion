@@ -2,6 +2,14 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.330] - 2026-11-21
+
+### Added
+- New `self-hosted-runner` flag: `--start-dir <owner>/<repo>=<folder>` (repeatable)
+
+### Changed
+- Verified every other command, subcommand and flag against the 2.1.330 `--help` output (including the hidden commands)
+
 ## [2.1.329] - 2026-11-20
 
 ### Added
