@@ -2,6 +2,14 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.331] - 2026-11-23
+
+### Added
+- New `self-hosted-runner` flag: `--log-file-no-follow`
+
+### Changed
+- Verified every other command, subcommand and flag against the 2.1.331 `--help` output (including the hidden commands); deprecated aliases `--pool-secret-file` and `--drain-wait-bg-tasks-sec` are deliberately not completed
+
 ## [2.1.330] - 2026-11-21
 
 ### Added
