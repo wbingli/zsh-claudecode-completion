@@ -1393,6 +1393,7 @@ case $subcmd in
         '--kill-session-after-min[Cap a session child'\''s wall-clock life at N min (runaway backstop)]:n:' \
         '--lock-to-account[Lock runner to a single account at registration (webhook-driven on-demand spawn)]:id:' \
         '--log-file[Tee runner logs to a file in append mode. Stdout is unchanged]:path:_files' \
+        '--log-file-no-follow[Write no log file, and warn on stderr, where --log-file lies behind a symbolic link or names a hard-linked file]' \
         '--log-level[Log level: info or debug (default: info)]:level:(info debug)' \
         '--max-hold-min[With --hold-idle-file: release the session anyway N min after it went idle. Default: 1440, 0 disables the hold]:n:' \
         '--post-session-hook-timeout-sec[SIGTERM budget for the post-session lifecycle hook, on every session end including runner shutdown. Default: 60]:n:' \
