@@ -2,6 +2,14 @@
 
 All notable changes to the zsh-claudecode-completion plugin are documented here.
 
+## [2.1.332] - 2026-11-25
+
+### Added
+- New `self-hosted-runner` flag: `--log-file-no-follow` (write no log file, and warn, where `--log-file` lies behind a symlink or names a hard-linked file)
+
+### Changed
+- Verified every other command, subcommand and flag against the 2.1.332 `--help` output (including the hidden commands)
+
 ## [2.1.330] - 2026-11-21
 
 ### Added
